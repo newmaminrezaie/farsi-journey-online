@@ -1,5 +1,5 @@
 // Custom brand mark for آموزشگاه گویا — an eight-point Persian star
-// enclosing a stylized "گ". Fully vector, no external assets, RTL-safe.
+// enclosing a bold English "G". Fully vector, no external assets, RTL-safe.
 type Props = { className?: string; showWordmark?: boolean };
 
 export default function BrandMark({ className = "", showWordmark = true }: Props) {
@@ -36,16 +36,16 @@ export default function BrandMark({ className = "", showWordmark = true }: Props
             />
           ))}
         </g>
-        {/* Persian glyph "گ" — bold, centered */}
+        {/* English letter "G" — bold, centered */}
         <text
-          x="32" y="43"
+          x="32" y="44"
           textAnchor="middle"
-          fontFamily="Vazirmatn, Estedad, system-ui, sans-serif"
-          fontSize="30"
-          fontWeight="900"
+          fontFamily="Georgia, 'Times New Roman', serif"
+          fontSize="28"
+          fontWeight="700"
           fill="hsl(var(--primary))"
         >
-          گ
+          G
         </text>
       </svg>
 
@@ -54,8 +54,8 @@ export default function BrandMark({ className = "", showWordmark = true }: Props
           <span className="text-xl font-black text-primary tracking-tight">
             گویا
           </span>
-          <span className="text-[10px] font-bold text-primary/60 tracking-[0.25em] mt-1">
-            آموزشگاه زبان
+          <span className="text-[10px] font-bold text-primary/60 tracking-[0.12em] mt-1">
+            آموزشگاهزبان
           </span>
         </div>
       )}
