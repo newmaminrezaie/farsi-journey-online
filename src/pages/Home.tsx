@@ -29,7 +29,7 @@ export default function Home() {
             </div>
             <h1 className="text-4xl md:text-display lg:text-display-lg leading-[1.05] mb-6">
               زبان انگلیسی را <br />
-              <span className="text-gold gold-underline">با استادان مجرب</span> بیاموزید
+              <span className="text-gold">با استادان مجرب</span> بیاموزید
             </h1>
             <p className="text-lg md:text-xl text-primary-foreground/85 leading-9 max-w-2xl mb-10">
               آموزشگاه زبان‌های گویا، مرجعی معتبر برای آموزش تخصصی زبان‌های خارجی
