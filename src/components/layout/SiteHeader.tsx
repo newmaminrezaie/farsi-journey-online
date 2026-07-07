@@ -1,7 +1,7 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Menu, X, ShoppingBag, Phone } from "lucide-react";
-import logo from "@/assets/logo-fa.png";
+import BrandMark from "@/components/BrandMark";
 import { cartApi } from "@/lib/api";
 
 const nav = [
@@ -30,8 +30,8 @@ export default function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 bg-parchment/85 backdrop-blur-md border-b border-primary/10">
       <div className="container flex items-center justify-between h-20 gap-6">
-        <Link to="/" className="flex items-center gap-3 shrink-0">
-          <img src={logo} alt="آموزشگاه گویا" className="h-14 w-auto" />
+        <Link to="/" className="shrink-0" aria-label="آموزشگاه گویا">
+          <BrandMark />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1">
