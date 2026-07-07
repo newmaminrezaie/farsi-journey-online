@@ -54,8 +54,8 @@ export default function BrandMark({ className = "", showWordmark = true }: Props
           <span className="text-xl font-black text-primary tracking-tight">
             گویا
           </span>
-          <span className="text-[10px] font-bold text-primary/60 tracking-[0.12em] mt-1">
-            آموزشگاهزبان
+          <span className="text-[10px] font-bold text-primary/60 tracking-tight mt-1">
+            آموزشگاه زبان
           </span>
         </div>
       )}
