@@ -1,0 +1,139 @@
+/* Local self-hosted fonts — no external CDNs */
+@import "@fontsource-variable/vazirmatn/index.css";
+@import "@fontsource/estedad/400.css";
+@import "@fontsource/estedad/700.css";
+@import "@fontsource/estedad/900.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Deep Persian palette — navy dominant, saffron secondary, parchment ground */
+    --background: 40 44% 95%;              /* parchment #FBF6EC */
+    --parchment: 40 44% 95%;
+    --foreground: 224 32% 12%;             /* ink */
+
+    --card: 40 40% 97%;
+    --card-foreground: 224 32% 12%;
+
+    --popover: 40 40% 98%;
+    --popover-foreground: 224 32% 12%;
+
+    --primary: 224 68% 19%;                /* deep navy #0F2350 */
+    --primary-foreground: 40 44% 95%;
+    --primary-soft: 224 40% 30%;
+
+    --secondary: 40 38% 90%;
+    --secondary-foreground: 224 68% 19%;
+
+    --muted: 40 25% 88%;
+    --muted-foreground: 224 15% 38%;
+
+    --accent: 43 82% 46%;                  /* saffron gold #D4A017 */
+    --accent-foreground: 224 68% 12%;
+
+    --gold: 43 82% 46%;
+    --gold-foreground: 224 68% 12%;
+
+    --turquoise: 177 59% 41%;              /* #2AA6A0 */
+    --turquoise-foreground: 40 44% 97%;
+
+    --destructive: 0 65% 45%;
+    --destructive-foreground: 40 44% 97%;
+
+    --border: 224 20% 82%;
+    --input: 224 20% 82%;
+    --ring: 43 82% 46%;
+
+    --radius: 0.9rem;
+
+    /* SVG Persian geometric tile patterns — inline, bundled, no external URL */
+    --tile-navy: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><g fill='none' stroke='%23D4A017' stroke-width='0.6' stroke-opacity='0.18'><path d='M40 0 L80 40 L40 80 L0 40 Z'/><path d='M40 12 L68 40 L40 68 L12 40 Z'/><circle cx='40' cy='40' r='6'/><path d='M40 34 L46 40 L40 46 L34 40 Z' fill='%23D4A017' fill-opacity='0.1'/></g></svg>");
+    --tile-gold: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><g fill='none' stroke='%230F2350' stroke-width='0.5' stroke-opacity='0.15'><path d='M30 0 L60 30 L30 60 L0 30 Z'/><path d='M30 10 L50 30 L30 50 L10 30 Z'/><path d='M0 30 L30 0 M30 60 L60 30 M0 30 L30 60 M60 30 L30 0'/></g></svg>");
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html { font-family: 'Vazirmatn Variable', Vazirmatn, system-ui, sans-serif; }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "ss02";
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 { font-family: 'Estedad', 'Vazirmatn Variable', serif; font-weight: 900; }
+  ::selection { background: hsl(var(--gold) / 0.35); color: hsl(var(--primary)); }
+}
+
+@layer components {
+  .tile-bg-navy { background-image: var(--tile-navy); background-repeat: repeat; }
+  .tile-bg-gold { background-image: var(--tile-gold); background-repeat: repeat; }
+
+  .warm-photo {
+    filter: sepia(0.18) saturate(1.05) contrast(1.02);
+    box-shadow: 0 25px 50px -20px hsl(var(--primary) / 0.35),
+                0 0 0 1px hsl(var(--gold) / 0.25),
+                0 0 0 8px hsl(var(--parchment));
+  }
+  .warm-photo-overlay { position: relative; overflow: hidden; }
+  .warm-photo-overlay::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, hsl(var(--gold) / 0.08), hsl(var(--primary) / 0.15));
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+
+  .gold-underline {
+    background-image: linear-gradient(hsl(var(--gold)), hsl(var(--gold)));
+    background-size: 100% 3px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    padding-bottom: 4px;
+  }
+
+  .section-divider {
+    height: 32px;
+    background-image: var(--tile-navy);
+    background-repeat: repeat-x;
+    background-size: 32px 32px;
+    opacity: 0.6;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-primary-foreground font-bold transition-all;
+    @apply hover:shadow-navy hover:-translate-y-0.5;
+  }
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gold px-7 py-3.5 text-gold-foreground font-bold transition-all;
+    @apply hover:shadow-gold hover:-translate-y-0.5;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-primary/30 bg-transparent px-7 py-3.5 text-primary font-bold transition-all;
+    @apply hover:bg-primary hover:text-primary-foreground;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-turquoise;
+    background-color: hsl(var(--turquoise) / 0.12);
+  }
+  .chip-gold {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold;
+    background-color: hsl(var(--gold) / 0.18);
+    color: hsl(var(--primary));
+  }
+}
+
+/* react-multi-date-picker theme override to match design */
+.rmdp-container { width: 100%; }
+.rmdp-input {
+  @apply w-full h-11 rounded-md border border-input bg-background px-3 py-2 text-sm;
+}
+.rmdp-week-day { color: hsl(var(--primary)) !important; }
+.rmdp-day.rmdp-selected span:not(.highlight) {
+  background-color: hsl(var(--primary)) !important;
+}
+.rmdp-day.rmdp-today span { background-color: hsl(var(--gold) / 0.3) !important; color: hsl(var(--primary)) !important; }
+.rmdp-arrow { border-color: hsl(var(--primary)) !important; }
