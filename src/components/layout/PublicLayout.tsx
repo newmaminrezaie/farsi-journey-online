@@ -1,4 +1,4 @@
-import { Outlet, ScrollRestoration } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import SiteHeader from "./SiteHeader";
 import SiteFooter from "./SiteFooter";
 
@@ -10,7 +10,6 @@ export default function PublicLayout() {
         <Outlet />
       </main>
       <SiteFooter />
-      <ScrollRestoration />
     </div>
   );
 }
