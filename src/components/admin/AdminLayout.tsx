@@ -37,7 +37,7 @@ export default function AdminLayout() {
               </NavLink>
             ))}
           </nav>
-          <button onClick={() => { authApi.logout(); nav("/admin/login"); }}
+          <button onClick={async () => { await authApi.logout(); nav("/admin/login"); }}
                   className="mt-8 flex items-center gap-2 px-4 py-2.5 text-sm text-primary-foreground/70 hover:text-gold">
             <LogOut className="h-4 w-4" /> خروج
           </button>
