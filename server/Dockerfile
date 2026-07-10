@@ -17,5 +17,9 @@ COPY --from=build /app/prisma ./prisma
 COPY package.json ./
 RUN mkdir -p /app/uploads
 EXPOSE 3000
-# Apply pending migrations, then start.
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
+# Sync schema to DB (no migration history — single-server deploy), then start.
+# `prisma db push` is idempotent: it creates missing tables/columns/enums on
+# a fresh DB and is a no-op when the schema already matches. If you later
+# want a migration history, switch to `prisma migrate deploy` and commit
+# the generated prisma/migrations/ folder.
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss --skip-generate && node dist/index.js"]
