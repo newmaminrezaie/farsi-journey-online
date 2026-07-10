@@ -10,9 +10,10 @@ export default function AdminLogin() {
   const [u, setU] = useState("admin");
   const [p, setP] = useState("");
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (authApi.login(u, p)) { toast.success("خوش آمدید"); nav("/admin/dashboard"); }
+    const ok = await authApi.login(u, p);
+    if (ok) { toast.success("خوش آمدید"); nav("/admin/dashboard"); }
     else toast.error("نام کاربری یا رمز عبور اشتباه است");
   }
 
