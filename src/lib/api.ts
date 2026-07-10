@@ -164,17 +164,42 @@ export const ordersApi = {
   },
 };
 
-// ---------- Admin auth (mock) ----------
+// ---------- Admin auth ----------
+// Calls the real Fastify backend at /api/admin/auth/*. The JWT lives in an
+// httpOnly cookie set by the server; we mirror a boolean flag in localStorage
+// so `isLoggedIn()` stays synchronous for route guards.
 export const authApi = {
-  DEFAULT_USER: "admin",
-  DEFAULT_PASS: "higooya1403",
   isLoggedIn(): boolean { return storage.get<boolean>(KEYS.adminSession, false); },
-  login(user: string, pass: string): boolean {
-    const ok = user === this.DEFAULT_USER && pass === this.DEFAULT_PASS;
-    if (ok) storage.set(KEYS.adminSession, true);
-    return ok;
+  async login(user: string, pass: string): Promise<boolean> {
+    try {
+      const res = await fetch("/api/admin/auth/login", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user, password: pass }),
+      });
+      if (!res.ok) return false;
+      storage.set(KEYS.adminSession, true);
+      return true;
+    } catch {
+      return false;
+    }
   },
-  logout() { storage.remove(KEYS.adminSession); },
+  async logout() {
+    try { await fetch("/api/admin/auth/logout", { method: "POST", credentials: "include" }); } catch {}
+    storage.remove(KEYS.adminSession);
+  },
+  async verify(): Promise<boolean> {
+    try {
+      const res = await fetch("/api/admin/auth/me", { credentials: "include" });
+      const ok = res.ok;
+      if (ok) storage.set(KEYS.adminSession, true);
+      else storage.remove(KEYS.adminSession);
+      return ok;
+    } catch {
+      return false;
+    }
+  },
 };
 
 // Helper: money formatting (Toman, Persian digits)
