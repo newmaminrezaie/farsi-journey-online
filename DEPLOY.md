@@ -42,8 +42,18 @@ Zarinpal (Phase 2): `ZARINPAL_MERCHANT_ID`.
 ```bash
 cd /var/www/higooya
 docker compose up -d
+# The api container runs `prisma db push` on start, so tables exist
+# by the time it's listening. Verify:
+docker compose exec db psql -U higooya -d higooya -c "\dt"
 docker compose exec api npm run seed:admin
 ```
+
+Schema changes: edit `server/prisma/schema.prisma`, rebuild the api image
+(`docker compose build api && docker compose up -d api`) and `db push` will
+sync the new schema on boot. For destructive changes (dropped columns,
+narrowed types), take a backup first — the CMD passes `--accept-data-loss`
+so it won't refuse.
+
 
 ## Build & upload the SPA
 
