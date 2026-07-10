@@ -140,11 +140,3 @@ docker compose exec -T db pg_restore -U higooya -d higooya --clean --if-exists <
 For off-site copies, `rclone config` a remote (Arvan Object Storage, S3, etc.)
 and set `RCLONE_REMOTE=<name>:higooya-backups` in `.env`.
 
-## Update procedure
-
-```bash
-git pull
-docker compose build api
-docker compose up -d api        # applies pending Prisma migrations on start
-npm run build && scp -r dist/ user@vps:/var/www/higooya/
-```
