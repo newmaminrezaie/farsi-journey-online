@@ -39,30 +39,53 @@ Zarinpal (Phase 2): `ZARINPAL_MERCHANT_ID`.
 
 ## Bring the stack up
 
+The api container **volume-mounts** `server/dist/`, `server/node_modules/`, and
+`server/prisma/` from the host. That means:
+
+- You must have a built `server/dist/` and a populated `server/node_modules/`
+  on the host before starting the api container.
+- Day-to-day code updates are `git pull && docker-compose restart api` — no
+  image rebuild needed. Rebuild only if you bump Node or change the Dockerfile.
+
+First-time bring-up:
+
 ```bash
+cd /var/www/higooya/server
+# Build node_modules on the host (needs npm registry access — do this through
+# your proxy/tunnel once). The Prisma musl engine for Alpine ships automatically
+# because schema.prisma declares binaryTargets = ["native", "linux-musl-openssl-3.0.x"].
+npm install --no-audit --no-fund
+npm run build     # compiles TS → dist/
+
 cd /var/www/higooya
-docker compose up -d
-# The api container runs `prisma db push` on start, so tables exist
-# by the time it's listening. Verify:
-docker compose exec db psql -U higooya -d higooya -c "\dt"
-docker compose exec api npm run seed:admin
+docker-compose up -d
+docker-compose exec db psql -U higooya -d higooya -c "\dt"
+docker-compose exec api npm run seed:admin
 ```
 
-Schema changes: edit `server/prisma/schema.prisma`, rebuild the api image
-(`docker compose build api && docker compose up -d api`) and `db push` will
-sync the new schema on boot. For destructive changes (dropped columns,
-narrowed types), take a backup first — the CMD passes `--accept-data-loss`
-so it won't refuse.
-
-
-## Build & upload the SPA
-
-On your machine:
+`seed:admin` reads `BOOTSTRAP_ADMIN_USERNAME` / `BOOTSTRAP_ADMIN_PASSWORD` from
+`.env` and creates the first admin. It's idempotent — if the user already
+exists it skips (so **changing the password in .env and re-running does NOT
+update it**). To reset the password, delete the row and re-seed:
 
 ```bash
-npm install --legacy-peer-deps
-npm run build
-scp -r dist/ user@vps:/var/www/higooya/
+docker-compose exec db psql -U higooya -d higooya \
+  -c 'DELETE FROM "StaffUser" WHERE username = '"'"'admin'"'"';'
+docker-compose exec api npm run seed:admin
+```
+
+Schema changes: edit `server/prisma/schema.prisma`, then
+`docker-compose restart api` — `db push` on boot syncs the new schema.
+
+## Update procedure
+
+```bash
+cd /var/www/higooya
+git pull
+# If server/src changed:
+cd server && npm run build && cd ..
+docker-compose restart api
+# If SPA changed: build locally and scp dist/ to /var/www/higooya/dist/
 ```
 
 ## Nginx
@@ -117,11 +140,3 @@ docker compose exec -T db pg_restore -U higooya -d higooya --clean --if-exists <
 For off-site copies, `rclone config` a remote (Arvan Object Storage, S3, etc.)
 and set `RCLONE_REMOTE=<name>:higooya-backups` in `.env`.
 
-## Update procedure
-
-```bash
-git pull
-docker compose build api
-docker compose up -d api        # applies pending Prisma migrations on start
-npm run build && scp -r dist/ user@vps:/var/www/higooya/
-```
