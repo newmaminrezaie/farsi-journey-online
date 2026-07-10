@@ -2,7 +2,8 @@
 // All prices are integer Toman. Dates stored as ISO (Postgres timestamptz / date).
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
