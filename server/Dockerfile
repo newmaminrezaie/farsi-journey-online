@@ -1,25 +1,26 @@
-FROM node:20-alpine AS build
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm install --no-audit --no-fund
-COPY prisma ./prisma
-RUN npx prisma generate
-COPY tsconfig.json ./
-COPY src ./src
-RUN npm run build
+# HiGooya API image — minimal.
+# node_modules, dist, and prisma are volume-mounted from the host at runtime
+# (see docker-compose.yml). This image only provides the Node runtime plus
+# the openssl shared library that Prisma's query engine needs on Alpine.
+#
+# Rebuild only when the Node major version needs to change. Day-to-day code
+# updates are `git pull && docker-compose restart api`.
 
-FROM node:20-alpine AS run
+FROM node:20-alpine
+
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/prisma ./prisma
-COPY package.json ./
+# Point Prisma at the musl engine we ship in node_modules.
+ENV PRISMA_QUERY_ENGINE_LIBRARY=/app/node_modules/.prisma/client/libquery_engine-linux-musl-openssl-3.0.x.so.node
+
+# ParsVDS can't reach dl-cdn.alpinelinux.org; use an Iranian mirror for apk.
+RUN sed -i 's|https://dl-cdn.alpinelinux.org|https://mirror.aminidc.com|g' /etc/apk/repositories \
+ && apk add --no-cache openssl
+
 RUN mkdir -p /app/uploads
 EXPOSE 3000
-# Sync schema to DB (no migration history — single-server deploy), then start.
-# `prisma db push` is idempotent: it creates missing tables/columns/enums on
-# a fresh DB and is a no-op when the schema already matches. If you later
-# want a migration history, switch to `prisma migrate deploy` and commit
-# the generated prisma/migrations/ folder.
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss --skip-generate && node dist/index.js"]
+
+# Compile TS if dist/ is missing (first boot after a fresh checkout), then
+# sync schema and start. `db push` is idempotent; the TS build is skipped
+# when dist/index.js already exists so restarts stay fast.
+CMD ["sh", "-c", "[ -f dist/index.js ] || npx tsc -p tsconfig.json && npx prisma db push --accept-data-loss --skip-generate && node dist/index.js"]
