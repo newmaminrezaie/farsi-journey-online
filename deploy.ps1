@@ -1,58 +1,24 @@
-param(
-  [string]$HostName = "87.107.12.53",
-  [string]$User = "root",
-  [int]$Port = 9011,
-  [string]$RemotePath = "/var/www/higooya/dist",
-  [string]$IdentityFile = "$env:USERPROFILE\.ssh\higooya_ed25519"
-)
-
-# Deploy HiGooya frontend to the VPS.
-#
-# One-time setup (no more password prompts after this):
-#   .\setup-ssh-key.ps1
-#
-# Then just run:
-#   .\deploy.ps1
+# Simple HiGooya deploy: build, upload, fix perms, reload nginx.
+# You will be prompted for the VPS password 3 times. That is fine.
 
 $ErrorActionPreference = "Stop"
 
-$sshArgs = "-p $Port"
-$scpArgs = "-P $Port"
-if (Test-Path $IdentityFile) {
-  $sshArgs = "-i `"$IdentityFile`" -o BatchMode=yes -o StrictHostKeyChecking=accept-new -p $Port"
-  $scpArgs = "-i `"$IdentityFile`" -o BatchMode=yes -o StrictHostKeyChecking=accept-new -P $Port"
-} else {
-  Write-Host "No SSH key at $IdentityFile - you will be prompted for the password." -ForegroundColor Yellow
-  Write-Host "Run .\setup-ssh-key.ps1 once to enable passwordless deploys." -ForegroundColor Yellow
-}
+$HostName   = "87.107.12.53"
+$User       = "root"
+$Port       = 9011
+$RemotePath = "/var/www/higooya/dist"
 
-function Run-Local($Command) {
-  Write-Host "`n> $Command" -ForegroundColor Cyan
-  Invoke-Expression $Command
-  if ($LASTEXITCODE -ne 0) { throw "Command failed: $Command" }
-}
+Write-Host "Building..." -ForegroundColor Green
+npm run build
+if ($LASTEXITCODE -ne 0) { throw "Build failed." }
 
-function Run-Remote($Command) {
-  Run-Local "ssh $sshArgs $User@$HostName `"$Command`""
-}
+Write-Host "Clearing remote dist..." -ForegroundColor Green
+ssh -p $Port "$User@$HostName" "mkdir -p $RemotePath && rm -rf $RemotePath/*"
 
-Write-Host "Building frontend..." -ForegroundColor Green
-Run-Local "npm run build"
+Write-Host "Uploading..." -ForegroundColor Green
+scp -P $Port -r .\dist\* "${User}@${HostName}:$RemotePath/"
 
-if (!(Test-Path ".\dist\index.html")) {
-  throw "Build failed: .\dist\index.html was not created."
-}
+Write-Host "Fixing perms and reloading nginx..." -ForegroundColor Green
+ssh -p $Port "$User@$HostName" "chown -R root:www-data $RemotePath && find $RemotePath -type d -exec chmod 755 {} \; && find $RemotePath -type f -exec chmod 644 {} \; && systemctl reload nginx"
 
-Write-Host "Preparing remote directory..." -ForegroundColor Green
-Run-Remote "mkdir -p '$RemotePath' && rm -rf '$RemotePath'/*"
-
-Write-Host "Uploading fresh build..." -ForegroundColor Green
-Run-Local "scp $scpArgs -r .\dist\* $User@$HostName`:$RemotePath/"
-
-Write-Host "Fixing ownership and permissions..." -ForegroundColor Green
-Run-Remote "chown -R root:www-data '$RemotePath' && find '$RemotePath' -type d -exec chmod 755 {} \; && find '$RemotePath' -type f -exec chmod 644 {} \; && nginx -t && systemctl reload nginx"
-
-Write-Host "Verifying remote index.html..." -ForegroundColor Green
-Run-Remote "test -f '$RemotePath/index.html' && ls -la '$RemotePath/index.html'"
-
-Write-Host "`nDeploy complete. Open https://higooya.ir and hard-refresh with Ctrl+F5." -ForegroundColor Green
+Write-Host "`nDone. Hard-refresh https://higooya.ir with Ctrl+F5." -ForegroundColor Green
