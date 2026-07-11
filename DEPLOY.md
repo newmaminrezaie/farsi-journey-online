@@ -96,7 +96,16 @@ cd server && npm run build && cd ..
 # If server/prisma/schema.prisma changed:
 npx --prefix server prisma db push --schema server/prisma/schema.prisma --accept-data-loss
 docker-compose restart api
-# If SPA changed: build locally and scp dist/ to /var/www/higooya/dist/
+# If SPA changed: build locally, ship dist/, then fix perms — scp preserves
+# the client-side umask and often lands as 700, which nginx (www-data) can't read.
+# Preferred: rsync with explicit perms (from Git Bash / WSL on the client):
+#   rsync -e "ssh -p 9011" -rlt --delete --chmod=D755,F644 \
+#     ./dist/ root@<vps>:/var/www/higooya/dist.new/
+# Or after `scp -r ./dist root@<vps>:/var/www/higooya/dist.new` and the atomic
+# `mv dist.new dist`, always run on the VPS:
+#   sudo chown -R root:www-data /var/www/higooya/dist
+#   sudo find /var/www/higooya/dist -type d -exec chmod 755 {} \;
+#   sudo find /var/www/higooya/dist -type f -exec chmod 644 {} \;
 ```
 
 ## Nginx
