@@ -46,12 +46,15 @@ export interface Registration {
   birthCertNo?: string;       // شماره شناسنامه
   issuedFrom?: string;        // صادره از
   birthPlace?: string;        // متولد
-  education?: string;         // مدرک تحصیلی (مدرسه/دانشگاه)
+  schoolDegree?: string;      // مدرک تحصیلی — مدرسه
+  universityDegree?: string;  // مدرک تحصیلی — دانشگاه
+  education?: string;         // legacy — kept for backward compat
   address?: string;
   phone: string;              // همراه
   landline?: string;          // تلفن ثابت
   nationalId?: string;
-  levelInterest?: SemesterLevel;
+  termInterest?: string;      // ترم مورد نظر (متن آزاد)
+  levelInterest?: string;     // سطح (متن آزاد)
   note?: string;
   agreedToTerms?: boolean;
   status: "new" | "contacted" | "enrolled" | "rejected";
