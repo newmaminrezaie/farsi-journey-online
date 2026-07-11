@@ -20,7 +20,7 @@ export default function Teachers() {
         {teachers.map(t => (
           <article key={t.id} className="bg-card rounded-3xl overflow-hidden border border-primary/10 hover:border-gold/40 hover:shadow-navy transition-all">
             <div className="warm-photo-overlay">
-              <img src={t.photoUrl} alt={t.nameFa} className="w-full h-80 object-cover warm-photo" />
+              <img src={t.photoUrl} alt={t.nameFa} className="w-full h-80 object-cover object-top warm-photo" />
             </div>
             <div className="p-6">
               <div className="flex gap-2 mb-3 flex-wrap">

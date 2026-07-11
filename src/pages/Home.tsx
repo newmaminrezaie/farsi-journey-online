@@ -83,8 +83,9 @@ export default function Home() {
       <section className="container py-20">
         <SectionHeader eyebrow="ترم‌های جاری" title="در حال ثبت‌نام" note="از میان دوره‌های زیر مناسب‌ترین را انتخاب کنید" />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {semesters.slice(0, 6).map((s, i) => {
-            const teacher = teachers.find(t => t.id === s.teacherId);
+            {semesters.slice(0, 6).map((s, i) => {
+            const teacherIds = s.teacherIds?.length ? s.teacherIds : ((s as any).teacherId ? [(s as any).teacherId] : []);
+            const teacherNames = teacherIds.map(id => teachers.find(t => t.id === id)?.nameFa).filter(Boolean).join("، ");
             return (
               <motion.article
                 key={s.id}
@@ -103,7 +104,7 @@ export default function Home() {
                 <div className="flex items-center justify-between pt-4 border-t border-primary/10">
                   <div>
                     <div className="text-lg font-black text-primary">{formatToman(s.priceToman)}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">{teacher?.nameFa}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">{teacherNames}</div>
                   </div>
                   <Link to={`/semesters/${s.id}`} className="p-3 rounded-full bg-primary text-primary-foreground group-hover:bg-gold group-hover:text-gold-foreground transition-colors">
                     <ArrowLeft className="h-4 w-4" />
@@ -163,7 +164,7 @@ export default function Home() {
           {teachers.slice(0, 4).map(t => (
             <div key={t.id} className="group text-center">
               <div className="relative mb-4 overflow-hidden rounded-3xl warm-photo-overlay">
-                <img src={t.photoUrl} alt={t.nameFa} className="w-full h-72 object-cover warm-photo" />
+                <img src={t.photoUrl} alt={t.nameFa} className="w-full h-72 object-cover object-top warm-photo" />
                 <div className="absolute bottom-3 right-3 chip-gold">{t.specialties[0]}</div>
               </div>
               <h4 className="text-lg text-primary mb-1">{t.nameFa}</h4>

@@ -15,8 +15,8 @@ Write-Host "Building..." -ForegroundColor Green
 npm run build
 if ($LASTEXITCODE -ne 0) { throw "Build failed." }
 
-Write-Host "Clearing remote frontend dist..." -ForegroundColor Green
-ssh -p $Port "$User@$HostName" "mkdir -p $RemoteDist $RemoteServer/src $RemoteServer/prisma && rm -rf $RemoteDist/*"
+Write-Host "Clearing remote frontend/backend build folders..." -ForegroundColor Green
+ssh -p $Port "$User@$HostName" "mkdir -p $RemoteDist $RemoteServer/src $RemoteServer/prisma $RemoteServer/dist && rm -rf $RemoteDist/* $RemoteServer/src/* $RemoteServer/prisma/* $RemoteServer/dist/*"
 
 Write-Host "Uploading frontend..." -ForegroundColor Green
 scp -P $Port -r .\dist\* "${User}@${HostName}:$RemoteDist/"
@@ -32,7 +32,7 @@ if (Test-Path .\server\package-lock.json) {
   scp -P $Port .\server\package-lock.json "${User}@${HostName}:$RemoteServer/"
 }
 
-Write-Host "Rebuilding backend, syncing database, regenerating Prisma client, restarting api, and reloading nginx..." -ForegroundColor Green
-ssh -p $Port "$User@$HostName" "cd $RemoteServer && npm run build && cd $RemoteRoot && docker-compose exec -T api npx prisma db push --accept-data-loss && docker-compose exec -T api npx prisma generate && docker-compose restart api && sleep 3 && docker-compose logs --tail=20 api && $FixWebPermissions && systemctl reload nginx"
+Write-Host "Regenerating Prisma client, syncing database, rebuilding backend, restarting api, and reloading nginx..." -ForegroundColor Green
+ssh -p $Port "$User@$HostName" "cd $RemoteRoot && docker-compose exec -T api sh -lc 'cd /app && npx prisma generate --schema=prisma/schema.prisma && npx prisma db push --schema=prisma/schema.prisma --accept-data-loss && rm -rf dist && npm run build' && docker-compose restart api && sleep 3 && docker-compose logs --tail=20 api && $FixWebPermissions && systemctl reload nginx"
 
 Write-Host "`nDone. Hard-refresh https://higooya.ir with Ctrl+F5." -ForegroundColor Green
