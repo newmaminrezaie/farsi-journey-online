@@ -35,12 +35,25 @@ export default function SemestersAdmin() {
   }
   async function save() {
     if (!form.titleFa || !form.startsOn || !form.endsOn) return toast.error("عنوان و تاریخ‌ها الزامی است");
-    const payload = { ...form, teacherId: form.teacherIds?.[0] || form.teacherId || "", bookIds: form.bookIds || [] };
-    if (editing) await semestersApi.update(editing.id, payload);
-    else await semestersApi.create(payload);
-    qc.invalidateQueries({ queryKey: ["semesters"] });
-    setOpen(false);
-    toast.success("ذخیره شد");
+    const { id, createdAt, seatsTaken, ...rest } = form as any;
+    const payload = {
+      ...rest,
+      teacherId: form.teacherIds?.[0] || form.teacherId || "",
+      teacherIds: form.teacherIds || [],
+      bookIds: form.bookIds || [],
+      capacity: Number(form.capacity) || 0,
+      priceToman: Number(form.priceToman) || 0,
+    };
+    try {
+      if (editing) await semestersApi.update(editing.id, payload);
+      else await semestersApi.create(payload);
+      qc.invalidateQueries({ queryKey: ["semesters"] });
+      setOpen(false);
+      toast.success("ذخیره شد");
+    } catch (e: any) {
+      console.error("save semester failed", e);
+      toast.error(e?.message || "ذخیره ناموفق بود");
+    }
   }
   async function del(id: string) {
     if (!confirm("حذف شود؟")) return;
