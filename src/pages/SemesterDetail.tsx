@@ -5,7 +5,14 @@ import { toast } from "sonner";
 import { semestersApi, teachersApi, registrationsApi, formatToman } from "@/lib/api";
 import { formatJalali } from "@/lib/jalali";
 import { levelFa, modeFa } from "./Home";
-import { Calendar, Clock, Users, GraduationCap, ArrowRight } from "lucide-react";
+import { Calendar, Clock, Users, GraduationCap, ArrowRight, ScrollText } from "lucide-react";
+
+const TERMS = [
+  "این مرکز تابع مقررات پوششی و رفتاری آموزش و پرورش است، لذا از نظر رفتار و پوشش و حجاب کاملاً همانند مدارس می‌باشد.",
+  "تکمیل فرم ثبت‌نام و واریز شهریه به منزله ثبت‌نام قطعی تلقی شده و در صورت انصراف مبلغ شهریه استرداد نخواهد شد، مگر در مواردی که از طرف آموزشگاه تعطیل یا منحل گردد.",
+  "غیبت بیش از ۴ جلسه موجه یا غیر موجه در طول ترم باعث محرومیت از امتحان و در نتیجه عدم دریافت گواهینامه می‌شود.",
+  "آموزشگاه در خصوص رفت و برگشت شما به کلاس هیچ‌گونه مسئولیتی ندارد.",
+];
 
 export default function SemesterDetail() {
   const { id } = useParams();
@@ -13,7 +20,13 @@ export default function SemesterDetail() {
   const { data: sem } = useQuery({ queryKey: ["semester", id], queryFn: () => semestersApi.get(id!), enabled: !!id });
   const { data: teachers = [] } = useQuery({ queryKey: ["teachers"], queryFn: () => teachersApi.list() });
 
-  const [form, setForm] = useState({ fullName: "", phone: "", nationalId: "", note: "" });
+  const [form, setForm] = useState({
+    fullName: "", fatherName: "", birthCertNo: "",
+    issuedFrom: "", birthPlace: "",
+    schoolDegree: "", universityDegree: "",
+    address: "", landline: "", phone: "", nationalId: "",
+    termInterest: "", levelInterest: "", note: "", agreedToTerms: false,
+  });
   const [submitting, setSubmitting] = useState(false);
 
   if (!sem) return <div className="container py-40 text-center text-muted-foreground">در حال بارگذاری…</div>;
@@ -21,12 +34,26 @@ export default function SemesterDetail() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.fullName || !form.phone) return toast.error("نام و شماره تماس الزامی است");
+    if (!form.fullName || !form.phone) return toast.error("نام زبان‌آموز و شماره همراه الزامی است");
+    if (!form.agreedToTerms) return toast.error("لطفاً مقررات ثبت‌نام را تأیید کنید");
     setSubmitting(true);
     await registrationsApi.create({
       semesterId: sem!.id,
-      fullName: form.fullName, phone: form.phone, nationalId: form.nationalId,
-      levelInterest: sem!.level, note: form.note,
+      fullName: form.fullName,
+      fatherName: form.fatherName,
+      birthCertNo: form.birthCertNo,
+      nationalId: form.nationalId,
+      issuedFrom: form.issuedFrom,
+      birthPlace: form.birthPlace,
+      schoolDegree: form.schoolDegree,
+      universityDegree: form.universityDegree,
+      address: form.address,
+      phone: form.phone,
+      landline: form.landline,
+      termInterest: form.termInterest || sem!.titleFa,
+      levelInterest: form.levelInterest || levelFa(sem!.level),
+      note: form.note,
+      agreedToTerms: form.agreedToTerms,
     });
     setSubmitting(false);
     toast.success("ثبت‌نام شما با موفقیت ثبت شد. به‌زودی با شما تماس می‌گیریم.");
@@ -71,18 +98,61 @@ export default function SemesterDetail() {
           )}
         </div>
 
-        <aside className="bg-primary text-primary-foreground rounded-3xl p-8 h-fit sticky top-24 relative overflow-hidden">
+        <aside className="bg-primary text-primary-foreground rounded-3xl p-6 h-fit sticky top-24 relative overflow-hidden">
           <div className="absolute inset-0 tile-bg-navy opacity-40" />
           <div className="relative">
             <div className="text-sm text-primary-foreground/70 mb-1">شهریه دوره</div>
-            <div className="text-4xl font-black text-gold mb-6">{formatToman(sem.priceToman)}</div>
-            <form onSubmit={submit} className="space-y-3">
-              <Input placeholder="نام و نام خانوادگی" value={form.fullName} onChange={v => setForm({ ...form, fullName: v })} />
-              <Input placeholder="شماره تماس" value={form.phone} onChange={v => setForm({ ...form, phone: v })} />
-              <Input placeholder="کد ملی (اختیاری)" value={form.nationalId} onChange={v => setForm({ ...form, nationalId: v })} />
-              <textarea placeholder="توضیحات (اختیاری)" value={form.note} onChange={e => setForm({ ...form, note: e.target.value })}
-                        className="w-full rounded-xl bg-parchment/10 border border-gold/25 px-4 py-3 text-sm text-primary-foreground placeholder:text-primary-foreground/50 min-h-24" />
-              <button type="submit" disabled={submitting} className="btn-gold w-full mt-2">
+            <div className="text-4xl font-black text-gold mb-5">{formatToman(sem.priceToman)}</div>
+            <div className="chip-gold mb-4 inline-flex">فرم ثبت‌نام کامل</div>
+            <form onSubmit={submit} className="space-y-5">
+              <p className="text-sm text-primary-foreground/85 leading-7">
+                احتراماً اینجانب اطلاعات زیر را جهت ثبت‌نام در این ترم اعلام می‌نمایم.
+              </p>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-1 gap-3">
+                <Input label="نام و نام خانوادگی *" value={form.fullName} onChange={v => setForm({ ...form, fullName: v })} />
+                <Input label="نام پدر" value={form.fatherName} onChange={v => setForm({ ...form, fatherName: v })} />
+                <Input label="شماره شناسنامه" value={form.birthCertNo} onChange={v => setForm({ ...form, birthCertNo: v })} />
+                <Input label="کد ملی" value={form.nationalId} onChange={v => setForm({ ...form, nationalId: v })} />
+                <Input label="صادره از" value={form.issuedFrom} onChange={v => setForm({ ...form, issuedFrom: v })} />
+                <Input label="متولد" value={form.birthPlace} onChange={v => setForm({ ...form, birthPlace: v })} placeholder="محل و سال تولد" />
+                <Input label="مدرک تحصیلی — مدرسه" value={form.schoolDegree} onChange={v => setForm({ ...form, schoolDegree: v })} />
+                <Input label="مدرک تحصیلی — دانشگاه" value={form.universityDegree} onChange={v => setForm({ ...form, universityDegree: v })} />
+                <Input label="تلفن ثابت" value={form.landline} onChange={v => setForm({ ...form, landline: v })} dir="ltr" />
+                <Input label="همراه *" value={form.phone} onChange={v => setForm({ ...form, phone: v })} dir="ltr" />
+              </div>
+
+              <label className="block">
+                <span className="block text-xs font-bold text-gold mb-1.5">آدرس</span>
+                <textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className={fieldCls + " min-h-20"} />
+              </label>
+
+              <div className="bg-parchment/10 border border-gold/25 rounded-2xl p-4 space-y-3">
+                <p className="text-sm leading-8 text-primary-foreground/90">
+                  مایل به شرکت در ترم
+                  <input value={form.termInterest} onChange={e => setForm({ ...form, termInterest: e.target.value })} className={inlineCls} placeholder={sem.titleFa} />
+                  سطح
+                  <input value={form.levelInterest} onChange={e => setForm({ ...form, levelInterest: e.target.value })} className={inlineCls} placeholder={levelFa(sem.level)} />
+                  می‌باشم.
+                </p>
+                <label className="block">
+                  <span className="block text-xs font-bold text-gold mb-1.5">توضیحات</span>
+                  <textarea value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} className={fieldCls + " min-h-16"} />
+                </label>
+              </div>
+
+              <div className="bg-parchment/10 border border-gold/25 rounded-2xl p-4">
+                <div className="flex items-center gap-2 text-gold font-black mb-3"><ScrollText className="h-5 w-5" /> مقررات ثبت‌نام</div>
+                <ol className="list-decimal pr-5 space-y-2 text-xs leading-6 text-primary-foreground/85">
+                  {TERMS.map((term, i) => <li key={i}>{term}</li>)}
+                </ol>
+                <label className="flex items-start gap-3 mt-4 cursor-pointer">
+                  <input type="checkbox" checked={form.agreedToTerms} onChange={e => setForm({ ...form, agreedToTerms: e.target.checked })} className="mt-1 h-5 w-5 accent-[hsl(var(--gold))]" />
+                  <span className="text-sm font-bold text-primary-foreground">مقررات فوق را مطالعه کرده و می‌پذیرم.</span>
+                </label>
+              </div>
+
+              <button type="submit" disabled={submitting} className="btn-gold w-full">
                 <GraduationCap className="h-5 w-5" /> {submitting ? "در حال ثبت…" : "ثبت‌نام در این ترم"}
               </button>
             </form>
@@ -103,9 +173,14 @@ function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string
   );
 }
 
-function Input({ placeholder, value, onChange }: { placeholder: string; value: string; onChange: (v: string) => void }) {
+const fieldCls = "w-full rounded-xl bg-parchment/10 border border-gold/25 px-4 py-3 text-sm text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:border-gold";
+const inlineCls = "inline-block mx-2 my-1 rounded-lg bg-parchment/10 border border-gold/25 px-3 py-1 text-sm text-primary-foreground placeholder:text-primary-foreground/45 focus:outline-none focus:border-gold min-w-28 max-w-full";
+
+function Input({ label, placeholder, value, onChange, dir }: { label: string; placeholder?: string; value: string; onChange: (v: string) => void; dir?: "rtl" | "ltr" }) {
   return (
-    <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-      className="w-full rounded-xl bg-parchment/10 border border-gold/25 px-4 py-3 text-sm text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:border-gold" />
+    <label className="block">
+      <span className="block text-xs font-bold text-gold mb-1.5">{label}</span>
+      <input dir={dir} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={fieldCls} />
+    </label>
   );
 }

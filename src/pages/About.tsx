@@ -1,5 +1,6 @@
 import { TileHex } from "@/components/PersianPattern";
 import { CheckCircle2 } from "lucide-react";
+import { localImages } from "@/assets/local";
 
 export default function About() {
   return (
@@ -21,7 +22,7 @@ export default function About() {
       </section>
 
       <section className="container py-20 grid md:grid-cols-2 gap-12">
-        <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80"
+        <img src={localImages.aboutClassroom}
              className="warm-photo rounded-3xl h-[500px] object-cover w-full" alt="" />
         <div>
           <h2 className="text-4xl mb-6 text-primary">فلسفه آموزشی</h2>
