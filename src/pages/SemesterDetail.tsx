@@ -31,7 +31,9 @@ export default function SemesterDetail() {
   const [submitting, setSubmitting] = useState(false);
 
   if (!sem) return <div className="container py-40 text-center text-muted-foreground">در حال بارگذاری…</div>;
-  const t = teachers.find(x => x.id === sem.teacherId);
+  const assignedIds = (sem.teacherIds && sem.teacherIds.length ? sem.teacherIds : (sem.teacherId ? [sem.teacherId] : []));
+  const assignedTeachers = teachers.filter(x => assignedIds.includes(x.id));
+  const t = assignedTeachers[0] ?? teachers.find(x => x.id === sem.teacherId);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
