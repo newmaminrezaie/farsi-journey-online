@@ -55,10 +55,12 @@ cd /var/www/higooya/server
 # your proxy/tunnel once). The Prisma musl engine for Alpine ships automatically
 # because schema.prisma declares binaryTargets = ["native", "linux-musl-openssl-3.0.x"].
 npm install --no-audit --no-fund
+npx prisma generate
 npm run build     # compiles TS → dist/
 
 cd /var/www/higooya
 docker-compose up -d
+npx --prefix server prisma db push --schema server/prisma/schema.prisma --accept-data-loss
 docker-compose exec db psql -U higooya -d higooya -c "\dt"
 docker-compose exec api npm run seed:admin
 ```
@@ -74,8 +76,15 @@ docker-compose exec db psql -U higooya -d higooya \
 docker-compose exec api npm run seed:admin
 ```
 
-Schema changes: edit `server/prisma/schema.prisma`, then
-`docker-compose restart api` — `db push` on boot syncs the new schema.
+Schema changes: edit `server/prisma/schema.prisma`, then run the schema sync on
+the VPS host and restart the api. Do not run Prisma schema sync from container
+startup on restricted networks:
+
+```bash
+cd /var/www/higooya
+npx --prefix server prisma db push --schema server/prisma/schema.prisma --accept-data-loss
+docker-compose restart api
+```
 
 ## Update procedure
 
@@ -84,6 +93,8 @@ cd /var/www/higooya
 git pull
 # If server/src changed:
 cd server && npm run build && cd ..
+# If server/prisma/schema.prisma changed:
+npx --prefix server prisma db push --schema server/prisma/schema.prisma --accept-data-loss
 docker-compose restart api
 # If SPA changed: build locally and scp dist/ to /var/www/higooya/dist/
 ```
