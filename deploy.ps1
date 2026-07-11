@@ -23,7 +23,10 @@ scp -P $Port -r .\dist\* "${User}@${HostName}:$RemoteDist/"
 Write-Host "Uploading backend source..." -ForegroundColor Green
 scp -P $Port -r .\server\src\* "${User}@${HostName}:$RemoteServer/src/"
 scp -P $Port -r .\server\prisma\* "${User}@${HostName}:$RemoteServer/prisma/"
-scp -P $Port .\server\package.json .\server\package-lock.json .\server\tsconfig.json "${User}@${HostName}:$RemoteServer/"
+scp -P $Port .\server\package.json .\server\tsconfig.json "${User}@${HostName}:$RemoteServer/"
+if (Test-Path .\server\package-lock.json) {
+  scp -P $Port .\server\package-lock.json "${User}@${HostName}:$RemoteServer/"
+}
 
 Write-Host "Rebuilding backend, syncing database, restarting api, and reloading nginx..." -ForegroundColor Green
 ssh -p $Port "$User@$HostName" "cd $RemoteServer && npm run build && cd $RemoteRoot && docker-compose exec -T api npx prisma db push --accept-data-loss && docker-compose restart api && chown -R root:www-data $RemoteDist && find $RemoteDist -type d -exec chmod 755 {} \; && find $RemoteDist -type f -exec chmod 644 {} \; && systemctl reload nginx"
