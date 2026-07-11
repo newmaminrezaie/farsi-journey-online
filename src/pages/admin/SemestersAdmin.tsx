@@ -10,7 +10,7 @@ import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 const empty = {
-  titleFa: "", level: "beginner" as any, teacherId: "",
+  titleFa: "", level: "beginner" as any, teacherId: "", teacherIds: [] as string[],
   scheduleFa: "", startsOn: "", endsOn: "",
   capacity: 12, priceToman: 0, mode: "in-person" as any, status: "open" as any,
 };
@@ -24,13 +24,18 @@ export default function SemestersAdmin() {
   const [open, setOpen] = useState(false);
 
   function openModal(s?: Semester) {
-    if (s) { setEditing(s); setForm({ ...s }); } else { setEditing(null); setForm(empty); }
+    if (s) {
+      setEditing(s);
+      const ids = s.teacherIds && s.teacherIds.length ? s.teacherIds : (s.teacherId ? [s.teacherId] : []);
+      setForm({ ...s, teacherIds: ids });
+    } else { setEditing(null); setForm(empty); }
     setOpen(true);
   }
   async function save() {
     if (!form.titleFa || !form.startsOn || !form.endsOn) return toast.error("عنوان و تاریخ‌ها الزامی است");
-    if (editing) await semestersApi.update(editing.id, form);
-    else await semestersApi.create(form);
+    const payload = { ...form, teacherId: form.teacherIds?.[0] || form.teacherId || "" };
+    if (editing) await semestersApi.update(editing.id, payload);
+    else await semestersApi.create(payload);
     qc.invalidateQueries({ queryKey: ["semesters"] });
     setOpen(false);
     toast.success("ذخیره شد");
@@ -93,12 +98,27 @@ export default function SemestersAdmin() {
                   {["beginner","elementary","pre-intermediate","intermediate","upper-intermediate","advanced","ielts"].map(l => <option key={l}>{l}</option>)}
                 </select>
               </F>
-              <F label="استاد">
-                <select value={form.teacherId} onChange={e => setForm({ ...form, teacherId: e.target.value })} className={ic}>
-                  <option value="">— انتخاب —</option>
-                  {teachers.map(t => <option key={t.id} value={t.id}>{t.nameFa}</option>)}
-                </select>
-              </F>
+              <div className="sm:col-span-2">
+                <F label="اساتید (چند انتخابی)">
+                  <div className="rounded-lg bg-parchment border border-primary/15 p-3 grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                    {teachers.length === 0 && <span className="text-xs text-muted-foreground">ابتدا استاد اضافه کنید</span>}
+                    {teachers.map(t => {
+                      const checked = (form.teacherIds || []).includes(t.id);
+                      return (
+                        <label key={t.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                          <input type="checkbox" checked={checked} className="accent-[hsl(var(--gold))]"
+                            onChange={e => {
+                              const cur: string[] = form.teacherIds || [];
+                              const next = e.target.checked ? [...cur, t.id] : cur.filter(x => x !== t.id);
+                              setForm({ ...form, teacherIds: next });
+                            }} />
+                          <span>{t.nameFa}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </F>
+              </div>
               <F label="تاریخ شروع (شمسی)">
                 <DatePicker calendar={persian} locale={persian_fa} calendarPosition="bottom-right"
                   value={form.startsOn ? new Date(form.startsOn) : undefined}
