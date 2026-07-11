@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import ScrollToTop from "@/components/ScrollToTop";
 import PublicLayout from "@/components/layout/PublicLayout";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
@@ -24,6 +25,8 @@ import RegistrationsAdmin from "@/pages/admin/RegistrationsAdmin";
 
 export default function App() {
   return (
+    <>
+    <ScrollToTop />
     <Routes>
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
@@ -53,5 +56,6 @@ export default function App() {
 
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </>
   );
 }
