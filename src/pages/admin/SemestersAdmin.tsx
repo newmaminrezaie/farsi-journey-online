@@ -35,10 +35,9 @@ export default function SemestersAdmin() {
   }
   async function save() {
     if (!form.titleFa || !form.startsOn || !form.endsOn) return toast.error("عنوان و تاریخ‌ها الزامی است");
-    const { id, createdAt, seatsTaken, ...rest } = form as any;
+    const { id, createdAt, seatsTaken, jalaliYear, season, ...rest } = form as any;
     const payload = {
       ...rest,
-      ...semesterMetaFromStart(form.startsOn),
       teacherId: form.teacherIds?.[0] || form.teacherId || "",
       teacherIds: form.teacherIds || [],
       bookIds: form.bookIds || [],
