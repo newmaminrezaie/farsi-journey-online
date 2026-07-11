@@ -48,7 +48,7 @@ export const baleChannel: NotifyChannelImpl = {
 
 const TG_BASE = "https://api.telegram.org";
 
-function buildTelegramDispatcher(): Agent | ProxyAgent | SocksProxyAgent | null {
+function buildTelegramDispatcher(): Agent | ProxyAgent | null {
   const url = process.env.TELEGRAM_PROXY_URL?.trim();
   if (!url) {
     // No proxy configured — direct connect will fail from Iran but is fine
