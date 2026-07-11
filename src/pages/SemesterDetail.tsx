@@ -33,13 +33,18 @@ export default function SemesterDetail() {
 
   if (!sem) return <div className="container py-40 text-center text-muted-foreground">در حال بارگذاری…</div>;
   const assignedIds = (sem.teacherIds && sem.teacherIds.length ? sem.teacherIds : (sem.teacherId ? [sem.teacherId] : []));
-  const assignedTeachers = teachers.filter(x => assignedIds.includes(x.id));
-  const assignedBooks = books.filter(b => (sem.bookIds ?? []).includes(b.id));
+  const assignedTeachersRaw = teachers.filter(x => assignedIds.includes(x.id));
+  // If admin didn't attach any teachers to this semester, fall back to the whole roster so the student can still pick.
+  const teacherChoices = assignedTeachersRaw.length > 0 ? assignedTeachersRaw : teachers;
+  const assignedTeachers = assignedTeachersRaw; // for the sidebar/hero display
+  const assignedBooksRaw = books.filter(b => (sem.bookIds ?? []).includes(b.id));
+  const bookChoices = assignedBooksRaw.length > 0 ? assignedBooksRaw : books.filter(b => b.active);
   const t = assignedTeachers[0] ?? teachers.find(x => x.id === sem.teacherId);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.fullName || !form.phone) return toast.error("نام زبان‌آموز و شماره همراه الزامی است");
+    if (teacherChoices.length > 0 && !form.selectedTeacherId) return toast.error("لطفاً استاد مورد نظر خود را انتخاب کنید");
     if (!form.agreedToTerms) return toast.error("لطفاً مقررات ثبت‌نام را تأیید کنید");
     setSubmitting(true);
     await registrationsApi.create({
@@ -112,25 +117,26 @@ export default function SemesterDetail() {
                   <textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className={fieldCls + " min-h-20"} />
                 </label>
 
-                {assignedTeachers.length > 0 && (
+                {teacherChoices.length > 0 && (
                   <label className="block">
                     <span className="block text-xs font-bold text-gold mb-1.5">
-                      انتخاب استاد {assignedTeachers.length > 1 ? "(چند استاد این ترم را ارائه می‌دهند)" : ""}
+                      انتخاب استاد * {assignedTeachersRaw.length > 1 ? "(چند استاد این ترم را ارائه می‌دهند)" : ""}
                     </span>
                     <select
                       value={form.selectedTeacherId}
                       onChange={e => setForm({ ...form, selectedTeacherId: e.target.value })}
                       className={fieldCls}
+                      required
                     >
-                      <option value="">— بدون ترجیح —</option>
-                      {assignedTeachers.map(x => (
+                      <option value="">— انتخاب کنید —</option>
+                      {teacherChoices.map(x => (
                         <option key={x.id} value={x.id} className="text-primary">{x.nameFa}</option>
                       ))}
                     </select>
                   </label>
                 )}
 
-                {assignedBooks.length > 0 && (
+                {bookChoices.length > 0 && (
                   <div className="bg-gradient-to-l from-gold/20 to-parchment/10 border border-gold/40 rounded-2xl p-5 space-y-4">
                     <div className="flex items-start gap-3">
                       <div className="w-11 h-11 shrink-0 rounded-xl bg-gold text-primary flex items-center justify-center shadow-gold">
@@ -156,7 +162,7 @@ export default function SemesterDetail() {
                         className={fieldCls}
                       >
                         <option value="">— بدون انتخاب —</option>
-                        {assignedBooks.map(b => (
+                        {bookChoices.map(b => (
                           <option key={b.id} value={b.id} className="text-primary">
                             {b.titleFa} — {formatToman(b.priceToman)}
                           </option>
@@ -165,7 +171,7 @@ export default function SemesterDetail() {
                     </label>
 
                     <div className="grid sm:grid-cols-2 gap-3">
-                      {assignedBooks.map(b => (
+                      {bookChoices.map(b => (
                         <div key={b.id} className="flex gap-3 items-center bg-parchment/10 rounded-xl p-3 border border-gold/20">
                           <img src={b.coverUrl} alt={b.titleFa} className="w-14 h-20 object-cover rounded-md warm-photo" />
                           <div className="min-w-0 flex-1">
