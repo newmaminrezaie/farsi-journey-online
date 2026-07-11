@@ -2,10 +2,10 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { semestersApi, teachersApi, registrationsApi, formatToman } from "@/lib/api";
+import { semestersApi, teachersApi, booksApi, registrationsApi, cartApi, formatToman } from "@/lib/api";
 import { formatJalali } from "@/lib/jalali";
 import { levelFa, modeFa } from "./Home";
-import { Calendar, Clock, Users, GraduationCap, ArrowRight, ScrollText } from "lucide-react";
+import { Calendar, Clock, Users, GraduationCap, ArrowRight, ScrollText, BookOpen, ShoppingCart, BadgePercent } from "lucide-react";
 
 const TERMS = [
   "این مرکز تابع مقررات پوششی و رفتاری آموزش و پرورش است، لذا از نظر رفتار و پوشش و حجاب کاملاً همانند مدارس می‌باشد.",
@@ -19,13 +19,14 @@ export default function SemesterDetail() {
   const nav = useNavigate();
   const { data: sem } = useQuery({ queryKey: ["semester", id], queryFn: () => semestersApi.get(id!), enabled: !!id });
   const { data: teachers = [] } = useQuery({ queryKey: ["teachers"], queryFn: () => teachersApi.list() });
+  const { data: books = [] } = useQuery({ queryKey: ["books"], queryFn: () => booksApi.list() });
 
   const [form, setForm] = useState({
     fullName: "", fatherName: "", birthCertNo: "",
     issuedFrom: "", birthPlace: "",
     schoolDegree: "", universityDegree: "",
     address: "", landline: "", phone: "", nationalId: "",
-    termInterest: "", levelInterest: "", selectedTeacherId: "",
+    termInterest: "", levelInterest: "", selectedTeacherId: "", selectedBookId: "",
     note: "", agreedToTerms: false,
   });
   const [submitting, setSubmitting] = useState(false);
@@ -33,6 +34,7 @@ export default function SemesterDetail() {
   if (!sem) return <div className="container py-40 text-center text-muted-foreground">در حال بارگذاری…</div>;
   const assignedIds = (sem.teacherIds && sem.teacherIds.length ? sem.teacherIds : (sem.teacherId ? [sem.teacherId] : []));
   const assignedTeachers = teachers.filter(x => assignedIds.includes(x.id));
+  const assignedBooks = books.filter(b => (sem.bookIds ?? []).includes(b.id));
   const t = assignedTeachers[0] ?? teachers.find(x => x.id === sem.teacherId);
 
   async function submit(e: React.FormEvent) {
@@ -56,6 +58,7 @@ export default function SemesterDetail() {
       termInterest: form.termInterest || sem!.titleFa,
       levelInterest: form.levelInterest || levelFa(sem!.level),
       selectedTeacherId: form.selectedTeacherId || undefined,
+      selectedBookId: form.selectedBookId || undefined,
       note: form.note,
       agreedToTerms: form.agreedToTerms,
     });
@@ -125,6 +128,65 @@ export default function SemesterDetail() {
                       ))}
                     </select>
                   </label>
+                )}
+
+                {assignedBooks.length > 0 && (
+                  <div className="bg-gradient-to-l from-gold/20 to-parchment/10 border border-gold/40 rounded-2xl p-5 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-11 h-11 shrink-0 rounded-xl bg-gold text-primary flex items-center justify-center shadow-gold">
+                        <BadgePercent className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <div className="text-gold font-black text-lg leading-6">۵٪ تخفیف ویژه خرید آنلاین کتاب</div>
+                        <p className="text-sm leading-7 text-primary-foreground/90 mt-1">
+                          کتاب درسی این دوره در فروشگاه آموزشگاه موجود است. با ثبت سفارش آنلاین از همین سایت،
+                          نسبت به خرید حضوری <strong className="text-gold">۵٪ ارزان‌تر</strong> دریافت می‌کنید و کتاب پیش از شروع کلاس به دست شما می‌رسد.
+                          توصیه می‌کنیم همین حالا کتاب را انتخاب و به سبد خرید اضافه کنید.
+                        </p>
+                      </div>
+                    </div>
+
+                    <label className="block">
+                      <span className="block text-xs font-bold text-gold mb-1.5">
+                        کتاب پیشنهادی دوره (اختیاری)
+                      </span>
+                      <select
+                        value={form.selectedBookId}
+                        onChange={e => setForm({ ...form, selectedBookId: e.target.value })}
+                        className={fieldCls}
+                      >
+                        <option value="">— بدون انتخاب —</option>
+                        {assignedBooks.map(b => (
+                          <option key={b.id} value={b.id} className="text-primary">
+                            {b.titleFa} — {formatToman(b.priceToman)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      {assignedBooks.map(b => (
+                        <div key={b.id} className="flex gap-3 items-center bg-parchment/10 rounded-xl p-3 border border-gold/20">
+                          <img src={b.coverUrl} alt={b.titleFa} className="w-14 h-20 object-cover rounded-md warm-photo" />
+                          <div className="min-w-0 flex-1">
+                            <div className="font-bold text-primary-foreground truncate flex items-center gap-1.5">
+                              <BookOpen className="h-3.5 w-3.5 text-gold shrink-0" /> {b.titleFa}
+                            </div>
+                            <div className="text-xs text-primary-foreground/70 truncate">{b.author}</div>
+                            <div className="text-sm text-gold font-black mt-1">{formatToman(b.priceToman)}</div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => { cartApi.add(b.id, 1); toast.success("کتاب به سبد خرید اضافه شد"); }}
+                            className="shrink-0 rounded-lg bg-gold text-primary p-2 hover:bg-gold-deep transition"
+                            title="افزودن به سبد خرید"
+                          >
+                            <ShoppingCart className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 <div className="bg-parchment/10 border border-gold/25 rounded-2xl p-4 space-y-3">

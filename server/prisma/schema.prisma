@@ -57,6 +57,7 @@ model Semester {
   level       String   @default("beginner")
   teacherId   String   @default("")     // legacy primary teacher (kept for back-compat)
   teacherIds  String[] @default([])
+  bookIds     String[] @default([])
   scheduleFa  String   @default("")
   startsOn    DateTime @db.Date
   endsOn      DateTime @db.Date
@@ -87,6 +88,7 @@ model Registration {
   termInterest       String    @default("")
   levelInterest      String    @default("")
   selectedTeacherId  String    @default("")
+  selectedBookId     String    @default("")
   note               String    @default("")
   agreedToTerms      Boolean   @default(false)
   status             String    @default("new")   // new | contacted | enrolled | rejected

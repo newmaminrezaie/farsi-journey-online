@@ -19,6 +19,7 @@ const Create = z.object({
   termInterest: z.string().max(200).default(""),
   levelInterest: z.string().max(200).default(""),
   selectedTeacherId: z.string().max(50).default(""),
+  selectedBookId: z.string().max(50).default(""),
   note: z.string().max(2000).default(""),
   agreedToTerms: z.boolean().default(false),
 });

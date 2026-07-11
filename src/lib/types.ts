@@ -28,6 +28,7 @@ export interface Semester {
   level: SemesterLevel;
   teacherId: ID;              // legacy — primary teacher (kept for back-compat)
   teacherIds?: ID[];          // full set of teachers offering this semester
+  bookIds?: ID[];             // books attached to this semester (optional at registration)
   scheduleFa: string;         // free text schedule ("شنبه و دوشنبه ۱۶-۱۸")
   startsOn: string;           // ISO yyyy-mm-dd
   endsOn: string;             // ISO yyyy-mm-dd
@@ -57,6 +58,7 @@ export interface Registration {
   termInterest?: string;      // ترم مورد نظر (متن آزاد)
   levelInterest?: string;     // سطح (متن آزاد)
   selectedTeacherId?: ID;     // استاد انتخاب‌شده هنگام ثبت‌نام
+  selectedBookId?: ID;        // کتاب انتخاب‌شده هنگام ثبت‌نام (اختیاری)
   note?: string;
   agreedToTerms?: boolean;
   status: "new" | "contacted" | "enrolled" | "rejected";
