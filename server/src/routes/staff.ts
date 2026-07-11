@@ -4,7 +4,7 @@ import argon2 from "argon2";
 import { prisma } from "../lib/prisma.js";
 import { requireStaff, requireRole } from "../middleware/auth.js";
 
-const NOTIFY_EVENTS = ["enrollment_paid", "registration_new", "book_order_paid", "book_order_new"] as const;
+const NOTIFY_EVENTS = ["registration_new", "book_order_paid", "book_order_new"] as const;
 
 const CreateBody = z.object({
   username: z.string().min(3).max(64),

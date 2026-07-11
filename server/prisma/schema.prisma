@@ -1,4 +1,4 @@
-// HiGooya Prisma schema — matches the approved plan (section 3).
+// HiGooya Prisma schema — flat model matching the frontend.
 // All prices are integer Toman. Dates stored as ISO (Postgres timestamptz / date).
 
 generator client {
@@ -19,10 +19,9 @@ enum StaffRole {
 }
 
 enum NotifyEvent {
-  enrollment_paid
   registration_new
-  book_order_paid
   book_order_new
+  book_order_paid
 }
 
 model StaffUser {
@@ -42,212 +41,79 @@ model StaffUser {
 // -------------------- Catalog --------------------
 
 model Teacher {
-  id           String         @id @default(cuid())
+  id           String   @id @default(cuid())
   nameFa       String
-  nameEn       String
-  bioFa        String         @default("")
-  photoUrl     String         @default("")
-  specialties  String[]       @default([])
-  active       Boolean        @default(true)
-  createdAt    DateTime       @default(now())
-  sessions     ClassSession[]
-}
-
-model Course {
-  id             String         @id @default(cuid())
-  code           String         @unique
-  titleFa        String
-  level          String
-  category       String
-  descriptionFa  String         @default("")
-  active         Boolean        @default(true)
-  createdAt      DateTime       @default(now())
-  sessions       ClassSession[]
-}
-
-enum SemesterSeason {
-  spring
-  summer
-  fall
-  winter
-}
-
-enum RegistrationStatus {
-  draft
-  open
-  closed
-  archived
+  nameEn       String   @default("")
+  bioFa        String   @default("")
+  photoUrl     String   @default("")
+  specialties  String[] @default([])
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
 }
 
 model Semester {
-  id                 String             @id @default(cuid())
-  titleFa            String
-  jalaliYear         Int
-  season             SemesterSeason
-  startsOn           DateTime           @db.Date
-  endsOn             DateTime           @db.Date
-  registrationStatus RegistrationStatus @default(draft)
-  createdAt          DateTime           @default(now())
-  sessions           ClassSession[]
-  enrollments        Enrollment[]
+  id          String   @id @default(cuid())
+  titleFa     String
+  level       String   @default("beginner")
+  teacherId   String   @default("")     // legacy primary teacher (kept for back-compat)
+  teacherIds  String[] @default([])
+  scheduleFa  String   @default("")
+  startsOn    DateTime @db.Date
+  endsOn      DateTime @db.Date
+  capacity    Int      @default(0)
+  seatsTaken  Int      @default(0)
+  priceToman  Int      @default(0)
+  mode        String   @default("in-person")   // in-person | online | hybrid
+  status      String   @default("open")        // open | closed | archived
+  createdAt   DateTime @default(now())
 }
 
-enum ClassMode {
-  in_person
-  online
-  hybrid
-}
+// -------------------- Registrations (public form) --------------------
 
-enum ClassStatus {
-  open
-  full
-  closed
-}
+model Registration {
+  id                 String    @id @default(cuid())
+  semesterId         String?
+  fullName           String
+  fatherName         String    @default("")
+  birthCertNo        String    @default("")
+  nationalId         String    @default("")
+  issuedFrom         String    @default("")
+  birthPlace         String    @default("")
+  schoolDegree       String    @default("")
+  universityDegree   String    @default("")
+  address            String    @default("")
+  phone              String
+  landline           String    @default("")
+  termInterest       String    @default("")
+  levelInterest      String    @default("")
+  selectedTeacherId  String    @default("")
+  note               String    @default("")
+  agreedToTerms      Boolean   @default(false)
+  status             String    @default("new")   // new | contacted | enrolled | rejected
+  createdAt          DateTime  @default(now())
 
-model ClassSession {
-  id           String       @id @default(cuid())
-  courseId     String
-  teacherId    String
-  semesterId   String
-  scheduleFa   String
-  mode         ClassMode    @default(in_person)
-  capacity     Int
-  seatsTaken   Int          @default(0)
-  priceToman   Int
-  status       ClassStatus  @default(open)
-  notes        String       @default("")
-  createdAt    DateTime     @default(now())
-
-  course       Course       @relation(fields: [courseId], references: [id])
-  teacher      Teacher      @relation(fields: [teacherId], references: [id])
-  semester     Semester     @relation(fields: [semesterId], references: [id])
-  enrollments  Enrollment[]
-
-  @@unique([courseId, teacherId, semesterId])
   @@index([semesterId])
-}
-
-// -------------------- Students --------------------
-
-model Student {
-  id            String       @id @default(cuid())
-  studentNumber String       @unique
-  firstName     String
-  lastName      String
-  fatherName    String       @default("")
-  phone         String
-  nationalId    String?      @unique
-  birthDate     DateTime?    @db.Date
-  address       String       @default("")
-  note          String       @default("")
-  createdAt     DateTime     @default(now())
-  enrollments   Enrollment[]
-
   @@index([phone])
-}
-
-enum EnrollmentStatus {
-  pending
-  active
-  completed
-  cancelled
-  refunded
-}
-
-enum PaymentMethod {
-  zarinpal
-  cash
-  card_to_card
-  admin_manual
-}
-
-model Enrollment {
-  id               String           @id @default(cuid())
-  studentId        String
-  classSessionId   String
-  semesterId       String
-  status           EnrollmentStatus @default(pending)
-  priceToman       Int
-  amountPaidToman  Int              @default(0)
-  paymentMethod    PaymentMethod
-  paymentRef       String?
-  enrolledAt       DateTime         @default(now())
-
-  student          Student          @relation(fields: [studentId], references: [id])
-  classSession     ClassSession     @relation(fields: [classSessionId], references: [id])
-  semester         Semester         @relation(fields: [semesterId], references: [id])
-
-  @@unique([studentId, classSessionId])
-  @@index([semesterId, status])
 }
 
 // -------------------- Book shop --------------------
 
 model Book {
-  id             String          @id @default(cuid())
+  id             String   @id @default(cuid())
   titleFa        String
-  author         String          @default("")
-  level          String          @default("")
-  category       String          @default("")
-  descriptionFa  String          @default("")
-  coverUrl       String          @default("")
+  titleEn        String   @default("")
+  author         String   @default("")
+  level          String   @default("")
+  category       String   @default("")
+  descriptionFa  String   @default("")
+  coverUrl       String   @default("")
   priceToman     Int
-  stock          Int             @default(0)
-  active         Boolean         @default(true)
-  createdAt      DateTime        @default(now())
-  orderItems     BookOrderItem[]
+  stock          Int      @default(0)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
 }
 
-enum BookOrderStatus {
-  pending
-  paid
-  shipped
-  completed
-  cancelled
-}
-
-model BookOrder {
-  id                 String           @id @default(cuid())
-  refCode            String           @unique
-  customerName       String
-  phone              String
-  address            String
-  note               String           @default("")
-  subtotalToman      Int
-  status             BookOrderStatus  @default(pending)
-  paymentMethod      PaymentMethod
-  zarinpalAuthority  String?
-  zarinpalRefId      String?
-  createdAt          DateTime         @default(now())
-  items              BookOrderItem[]
-}
-
-model BookOrderItem {
-  id              String    @id @default(cuid())
-  orderId         String
-  bookId          String
-  titleFa         String
-  qty             Int
-  unitPriceToman  Int
-
-  order           BookOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  book            Book      @relation(fields: [bookId], references: [id])
-}
-
-// -------------------- Payments & notifications & audit --------------------
-
-model Payment {
-  id           String   @id @default(cuid())
-  kind         String   // 'enrollment' | 'book_order'
-  targetId     String
-  amountToman  Int
-  provider     String   // 'zarinpal' | 'manual'
-  authority    String?
-  refId        String?
-  status       String   // 'pending' | 'ok' | 'failed'
-  rawResponse  Json?
-  createdAt    DateTime @default(now())
-}
+// -------------------- Notifications & audit --------------------
 
 enum NotifyChannel {
   bale

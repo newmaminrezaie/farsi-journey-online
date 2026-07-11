@@ -4,6 +4,7 @@ import { registerCrud } from "./_crud.js";
 
 const Create = z.object({
   titleFa: z.string().min(1).max(200),
+  titleEn: z.string().max(200).default(""),
   author: z.string().max(120).default(""),
   level: z.string().max(60).default(""),
   category: z.string().max(60).default(""),

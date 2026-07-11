@@ -11,10 +11,8 @@ import { prisma } from "./lib/prisma.js";
 import { registerAuthRoutes } from "./routes/auth.js";
 import { registerStaffRoutes } from "./routes/staff.js";
 import { registerTeachersRoutes } from "./routes/teachers.js";
-import { registerCoursesRoutes } from "./routes/courses.js";
 import { registerSemestersRoutes } from "./routes/semesters.js";
-import { registerClassSessionsRoutes } from "./routes/classSessions.js";
-import { registerStudentsRoutes } from "./routes/students.js";
+import { registerRegistrationsRoutes } from "./routes/registrations.js";
 import { registerBooksRoutes } from "./routes/books.js";
 import { registerNotifyRoutes } from "./routes/notify.js";
 import { startNotifyWorker } from "./notify/worker.js";
@@ -45,10 +43,8 @@ app.get("/api/health", async () => ({ ok: true, ts: new Date().toISOString() }))
 await app.register(registerAuthRoutes, { prefix: "/api/admin/auth" });
 await app.register(registerStaffRoutes, { prefix: "/api/admin/staff" });
 await app.register(registerTeachersRoutes, { prefix: "/api" });
-await app.register(registerCoursesRoutes, { prefix: "/api" });
 await app.register(registerSemestersRoutes, { prefix: "/api" });
-await app.register(registerClassSessionsRoutes, { prefix: "/api" });
-await app.register(registerStudentsRoutes, { prefix: "/api" });
+await app.register(registerRegistrationsRoutes, { prefix: "/api" });
 await app.register(registerBooksRoutes, { prefix: "/api" });
 await app.register(registerNotifyRoutes, { prefix: "/api/admin/notify" });
 

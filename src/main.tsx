@@ -5,9 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import App from "./App";
 import "./index.css";
-import { seedIfEmpty } from "./lib/seed";
-
-seedIfEmpty();
+// Data now lives in the Fastify + Postgres backend; no client-side seeding.
 
 const qc = new QueryClient();
 
