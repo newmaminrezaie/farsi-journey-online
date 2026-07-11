@@ -29,6 +29,7 @@ Write-Host "Fixing frontend permissions..." -ForegroundColor Green
 ssh -p $Port "$User@$HostName" $FixWebPermissions
 
 Write-Host "Uploading backend source..." -ForegroundColor Green
+scp -P $Port .\docker-compose.yml "${User}@${HostName}:$RemoteRoot/"
 scp -P $Port -r .\server\src\* "${User}@${HostName}:$RemoteServer/src/"
 scp -P $Port -r .\server\prisma\* "${User}@${HostName}:$RemoteServer/prisma/"
 scp -P $Port .\server\package.json .\server\tsconfig.json "${User}@${HostName}:$RemoteServer/"
@@ -44,6 +45,6 @@ Write-Host "Regenerating Prisma client, syncing database, rebuilding backend, re
 # PRISMA_SCHEMA_ENGINE_BINARY + PRISMA_QUERY_ENGINE_LIBRARY are set in docker-compose.yml,
 # so `prisma generate` / `db push` use the pre-downloaded engines instead of binaries.prisma.sh.
 # We must `docker-compose up -d` (not just restart) so the new volume mount and env vars apply.
-ssh -p $Port "$User@$HostName" "cd $RemoteRoot && docker-compose up -d && sleep 3 && docker-compose exec -T api sh -lc 'cd /app && npx prisma generate --schema=prisma/schema.prisma && npx prisma db push --schema=prisma/schema.prisma --accept-data-loss && rm -rf dist/* && npm run build' && docker-compose restart api && sleep 3 && docker-compose logs --tail=20 api && $FixWebPermissions && systemctl reload nginx"
+ssh -p $Port "$User@$HostName" "cd $RemoteRoot && docker-compose up -d --force-recreate api && sleep 3 && docker-compose exec -T api sh -lc 'export PRISMA_SCHEMA_ENGINE_BINARY=/app/prisma-engines/schema-engine-linux-musl-openssl-3.0.x PRISMA_QUERY_ENGINE_LIBRARY=/app/prisma-engines/libquery_engine-linux-musl-openssl-3.0.x.so.node PRISMA_CLI_BINARY_TARGETS=linux-musl-openssl-3.0.x; cd /app && test -x \"`$PRISMA_SCHEMA_ENGINE_BINARY\" && test -f \"`$PRISMA_QUERY_ENGINE_LIBRARY\" && npx prisma generate --schema=prisma/schema.prisma && npx prisma db push --schema=prisma/schema.prisma --accept-data-loss && rm -rf dist/* && npm run build' && docker-compose restart api && sleep 3 && docker-compose logs --tail=20 api && $FixWebPermissions && systemctl reload nginx"
 
 Write-Host "`nDone. Hard-refresh https://higooya.ir with Ctrl+F5." -ForegroundColor Green
