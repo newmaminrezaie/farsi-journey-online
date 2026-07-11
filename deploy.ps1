@@ -57,16 +57,33 @@ $RemoteDeployCommand = @"
 #!/usr/bin/env bash
 set -e
 cd $RemoteRoot
+
+# Exit code 137 means SIGKILL, almost always the Linux OOM killer on small VPSes.
+# Give Prisma/schema-engine enough breathing room during `db push` without needing
+# provider support or a larger plan.
+if ! swapon --show | grep -q '/swapfile'; then
+  if [ ! -f /swapfile ]; then
+    fallocate -l 1G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=1024
+    chmod 600 /swapfile
+    mkswap /swapfile
+  fi
+  swapon /swapfile
+fi
+grep -q '^/swapfile ' /etc/fstab 2>/dev/null || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+
 DC='docker-compose'
 if docker compose version >/dev/null 2>&1; then
   DC='docker compose'
 fi
 `$DC up -d db
+
+# Stop RAM consumers before Prisma. Do NOT start api before build, because its
+# startup command may run TypeScript compilation at the same time as this deploy.
+`$DC stop api backup >/dev/null 2>&1 || true
+`$DC run --rm --no-deps api sh -lc '$ContainerBuildCommand'
 `$DC rm -sf api >/dev/null 2>&1 || true
 `$DC up -d --no-deps api
-sleep 3
-`$DC exec -T api sh -lc '$ContainerBuildCommand'
-`$DC restart api
+`$DC up -d backup >/dev/null 2>&1 || true
 sleep 3
 `$DC logs --tail=20 api
 $FixWebPermissions
