@@ -6,6 +6,7 @@ import { semestersApi, teachersApi, booksApi, formatToman } from "@/lib/api";
 import { formatJalali } from "@/lib/jalali";
 import { TileStar, TileHex } from "@/components/PersianPattern";
 import logoFa from "@/assets/logo-fa.png";
+import { localImages } from "@/assets/local";
 
 export default function Home() {
   const { data: semesters = [] } = useQuery({ queryKey: ["semesters", "open"], queryFn: () => semestersApi.listOpen() });
@@ -62,7 +63,7 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.9, delay: 0.15 }}
             className="md:col-span-2 relative">
             <div className="warm-photo-overlay warm-photo rounded-3xl">
-              <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=80"
+              <img src={localImages.heroClass}
                    alt="کلاس زبان" className="w-full h-[420px] object-cover" />
             </div>
             <div className="absolute -bottom-6 -left-6 bg-parchment text-primary rounded-2xl p-4 shadow-navy flex items-center gap-3">
@@ -143,13 +144,13 @@ export default function Home() {
             </ul>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <img src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=500&q=80"
+            <img src={localImages.classReading}
                  className="warm-photo rounded-2xl h-64 object-cover" alt="" />
-            <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=500&q=80"
+            <img src={localImages.classTeacher}
                  className="warm-photo rounded-2xl h-64 object-cover mt-10" alt="" />
-            <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=500&q=80"
+            <img src={localImages.classKids}
                  className="warm-photo rounded-2xl h-64 object-cover -mt-6" alt="" />
-            <img src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=500&q=80"
+            <img src={localImages.library}
                  className="warm-photo rounded-2xl h-64 object-cover" alt="" />
           </div>
         </div>
