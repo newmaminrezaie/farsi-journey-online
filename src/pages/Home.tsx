@@ -40,7 +40,7 @@ export default function Home() {
                 <GraduationCap className="h-5 w-5" /> ثبت‌نام در ترم جدید
               </Link>
               <Link to="/shop" className="inline-flex items-center gap-2 rounded-full border-2 border-gold/60 px-7 py-3.5 font-bold text-gold hover:bg-gold hover:text-primary transition-colors">
-                <BookOpen className="h-5 w-5" /> کتاب فروشی
+                <BookOpen className="h-5 w-5" /> فروشگاه کتاب
               </Link>
             </div>
 
@@ -179,7 +179,7 @@ export default function Home() {
       <section className="relative bg-parchment">
         <div className="absolute inset-0 tile-bg-gold opacity-50" />
         <div className="container relative py-20">
-          <SectionHeader eyebrow="کتاب فروشی" title="منابع منتخب" note="کتاب‌های اصلی و کاربردی برای هر سطح" />
+          <SectionHeader eyebrow="فروشگاه کتاب" title="منابع منتخب" note="کتاب‌های اصلی و کاربردی برای هر سطح" />
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {books.slice(0, 6).map(b => (
               <Link key={b.id} to={`/shop/${b.id}`} className="group">
@@ -192,7 +192,7 @@ export default function Home() {
             ))}
           </div>
           <div className="text-center mt-10">
-            <Link to="/shop" className="btn-primary">مشاهده کتاب فروشی <ArrowLeft className="h-4 w-4" /></Link>
+            <Link to="/shop" className="btn-primary">مشاهده فروشگاه کتاب <ArrowLeft className="h-4 w-4" /></Link>
           </div>
         </div>
       </section>
