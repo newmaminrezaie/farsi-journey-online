@@ -143,12 +143,14 @@ export default function SemestersAdmin() {
                 </F>
               </div>
               <F label="تاریخ شروع (شمسی)">
-                <DatePicker calendar={persian} locale={persian_fa} calendarPosition="bottom-right"
+                <DatePicker calendar={persian} locale={persian_fa} calendarPosition="bottom-right" portal
+                  zIndex={1000} className="rmdp-mobile"
                   value={form.startsOn ? new Date(form.startsOn) : undefined}
                   onChange={(v: any) => pickDate("startsOn", v)} inputClass={ic} />
               </F>
               <F label="تاریخ پایان (شمسی)">
-                <DatePicker calendar={persian} locale={persian_fa} calendarPosition="bottom-right"
+                <DatePicker calendar={persian} locale={persian_fa} calendarPosition="bottom-right" portal
+                  zIndex={1000} className="rmdp-mobile"
                   value={form.endsOn ? new Date(form.endsOn) : undefined}
                   onChange={(v: any) => pickDate("endsOn", v)} inputClass={ic} />
               </F>
