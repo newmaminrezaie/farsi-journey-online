@@ -25,7 +25,8 @@ export default function SemesterDetail() {
     issuedFrom: "", birthPlace: "",
     schoolDegree: "", universityDegree: "",
     address: "", landline: "", phone: "", nationalId: "",
-    termInterest: "", levelInterest: "", note: "", agreedToTerms: false,
+    termInterest: "", levelInterest: "", selectedTeacherId: "",
+    note: "", agreedToTerms: false,
   });
   const [submitting, setSubmitting] = useState(false);
 
