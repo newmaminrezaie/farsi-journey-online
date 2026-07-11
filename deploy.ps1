@@ -52,6 +52,26 @@ Invoke-Checked "Marking Prisma schema engine executable..." { ssh -p $Port "$Use
 # so `prisma generate` / `db push` use the pre-downloaded engines instead of binaries.prisma.sh.
 # Remove only the API container first to avoid docker-compose v1's KeyError: ContainerConfig
 # recreate bug, and use --no-deps so the database container is never recreated during deploy.
-Invoke-Checked "Regenerating Prisma client, syncing database, rebuilding backend, restarting api, and reloading nginx..." { ssh -p $Port "$User@$HostName" "cd $RemoteRoot && DC='docker-compose'; if docker compose version >/dev/null 2>&1; then DC='docker compose'; fi; `$DC up -d db && `$DC rm -sf api >/dev/null 2>&1 || true && `$DC up -d --no-deps api && sleep 3 && `$DC exec -T api sh -lc 'export PRISMA_SCHEMA_ENGINE_BINARY=/app/prisma-engines/schema-engine-linux-musl-openssl-3.0.x PRISMA_QUERY_ENGINE_LIBRARY=/app/prisma-engines/libquery_engine-linux-musl-openssl-3.0.x.so.node PRISMA_CLI_BINARY_TARGETS=linux-musl-openssl-3.0.x; cd /app && test -x \"`$PRISMA_SCHEMA_ENGINE_BINARY\" && test -f \"`$PRISMA_QUERY_ENGINE_LIBRARY\" && npx prisma generate --schema=prisma/schema.prisma && npx prisma db push --schema=prisma/schema.prisma --accept-data-loss && rm -rf dist/* && npm run build' && `$DC restart api && sleep 3 && `$DC logs --tail=20 api && $FixWebPermissions && systemctl reload nginx" }
+$ContainerBuildCommand = "export PRISMA_SCHEMA_ENGINE_BINARY=/app/prisma-engines/schema-engine-linux-musl-openssl-3.0.x PRISMA_QUERY_ENGINE_LIBRARY=/app/prisma-engines/libquery_engine-linux-musl-openssl-3.0.x.so.node PRISMA_CLI_BINARY_TARGETS=linux-musl-openssl-3.0.x; cd /app && test -x `$PRISMA_SCHEMA_ENGINE_BINARY && test -f `$PRISMA_QUERY_ENGINE_LIBRARY && npx prisma generate --schema=prisma/schema.prisma && npx prisma db push --schema=prisma/schema.prisma --accept-data-loss && rm -rf dist/* && npm run build"
+$RemoteDeployCommand = @"
+set -e
+cd $RemoteRoot
+DC='docker-compose'
+if docker compose version >/dev/null 2>&1; then
+  DC='docker compose'
+fi
+`$DC up -d db
+`$DC rm -sf api >/dev/null 2>&1 || true
+`$DC up -d --no-deps api
+sleep 3
+`$DC exec -T api sh -lc '$ContainerBuildCommand'
+`$DC restart api
+sleep 3
+`$DC logs --tail=20 api
+$FixWebPermissions
+systemctl reload nginx
+"@
+
+Invoke-Checked "Regenerating Prisma client, syncing database, rebuilding backend, restarting api, and reloading nginx..." { ssh -p $Port "$User@$HostName" $RemoteDeployCommand }
 
 Write-Host "`nDone. Hard-refresh https://higooya.ir with Ctrl+F5." -ForegroundColor Green
