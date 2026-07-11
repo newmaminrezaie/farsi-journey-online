@@ -14,7 +14,7 @@ export default function ShopDetail() {
 
   return (
     <section className="container py-16">
-      <Link to="/shop" className="inline-flex items-center gap-2 text-primary mb-8"><ArrowRight className="h-4 w-4" /> بازگشت به کتاب فروشی</Link>
+      <Link to="/shop" className="inline-flex items-center gap-2 text-primary mb-8"><ArrowRight className="h-4 w-4" /> بازگشت به فروشگاه کتاب</Link>
       <div className="grid md:grid-cols-2 gap-12">
         <div className="warm-photo-overlay rounded-3xl overflow-hidden">
           <img src={book.coverUrl} alt={book.titleFa} className="w-full h-[560px] object-cover warm-photo" />

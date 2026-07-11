@@ -4,16 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { registrationsApi } from "@/lib/api";
 import { GraduationCap, ScrollText } from "lucide-react";
 
-const LEVELS = [
-  { v: "beginner", l: "مقدماتی" },
-  { v: "elementary", l: "پایه" },
-  { v: "pre-intermediate", l: "پیش‌متوسط" },
-  { v: "intermediate", l: "متوسط" },
-  { v: "upper-intermediate", l: "فوق متوسط" },
-  { v: "advanced", l: "پیشرفته" },
-  { v: "ielts", l: "آیلتس" },
-];
-
 const TERMS = [
   "این مرکز تابع مقررات پوششی و رفتاری آموزش و پرورش است، لذا از نظر رفتار و پوشش و حجاب کاملاً همانند مدارس می‌باشد.",
   "تکمیل فرم ثبت‌نام و واریز شهریه به منزله ثبت‌نام قطعی تلقی شده و در صورت انصراف مبلغ شهریه استرداد نخواهد شد، مگر در مواردی که از طرف آموزشگاه تعطیل یا منحل گردد.",
@@ -24,16 +14,18 @@ const TERMS = [
 export default function Register() {
   const nav = useNavigate();
   const [form, setForm] = useState({
-    fullName: "", fatherName: "", birthCertNo: "", nationalId: "",
-    issuedFrom: "", birthPlace: "", education: "",
-    address: "", phone: "", landline: "",
-    levelInterest: "beginner", note: "", agreedToTerms: false,
+    fullName: "", fatherName: "", birthCertNo: "",
+    issuedFrom: "", birthPlace: "",
+    schoolDegree: "", universityDegree: "",
+    address: "", landline: "", phone: "", nationalId: "",
+    termInterest: "", levelInterest: "",
+    note: "", agreedToTerms: false,
   });
   const [submitting, setSubmitting] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.fullName || !form.phone) return toast.error("نام و شماره همراه الزامی است");
+    if (!form.fullName || !form.phone) return toast.error("نام زبان‌آموز و شماره همراه الزامی است");
     if (!form.agreedToTerms) return toast.error("لطفاً مقررات ثبت‌نام را تأیید کنید");
     setSubmitting(true);
     await registrationsApi.create({
@@ -44,11 +36,13 @@ export default function Register() {
       nationalId: form.nationalId,
       issuedFrom: form.issuedFrom,
       birthPlace: form.birthPlace,
-      education: form.education,
+      schoolDegree: form.schoolDegree,
+      universityDegree: form.universityDegree,
       address: form.address,
       phone: form.phone,
       landline: form.landline,
-      levelInterest: form.levelInterest as any,
+      termInterest: form.termInterest,
+      levelInterest: form.levelInterest,
       note: form.note,
       agreedToTerms: form.agreedToTerms,
     });
@@ -62,12 +56,17 @@ export default function Register() {
       <div className="absolute inset-0 tile-bg-gold opacity-40" />
       <div className="container relative max-w-3xl">
         <div className="text-center mb-10">
-          <div className="chip-gold inline-flex mb-4">فرم ثبت‌نام</div>
+          <div className="chip-gold inline-flex mb-4">باسمه تعالی</div>
           <h1 className="text-4xl md:text-5xl mb-3 text-primary">فرم ثبت‌نام آموزشگاه زبان گویا</h1>
-          <p className="text-muted-foreground">اطلاعات زیر را با دقت تکمیل کنید.</p>
+          <p className="text-muted-foreground text-sm">کد زبان‌آموز پس از ثبت‌نام به شما تخصیص داده خواهد شد.</p>
         </div>
 
-        <form onSubmit={submit} className="bg-card p-8 md:p-10 rounded-3xl border border-primary/10 shadow-soft space-y-6">
+        <form onSubmit={submit} className="bg-card p-8 md:p-10 rounded-3xl border border-primary/10 shadow-soft space-y-8">
+          {/* Preamble matching the paper form */}
+          <p className="text-primary leading-8 text-sm md:text-base">
+            احتراماً اینجانب <b>(زبان‌آموز)</b> اطلاعات زیر را جهت ثبت‌نام در آموزشگاه زبان گویا اعلام می‌نمایم.
+          </p>
+
           {/* مشخصات فردی */}
           <fieldset className="space-y-4">
             <legend className="text-lg font-black text-primary mb-2">مشخصات زبان‌آموز</legend>
@@ -77,10 +76,16 @@ export default function Register() {
               <F label="شماره شناسنامه"><input value={form.birthCertNo} onChange={e => setForm({ ...form, birthCertNo: e.target.value })} className={inputCls} /></F>
               <F label="کد ملی"><input value={form.nationalId} onChange={e => setForm({ ...form, nationalId: e.target.value })} className={inputCls} /></F>
               <F label="صادره از"><input value={form.issuedFrom} onChange={e => setForm({ ...form, issuedFrom: e.target.value })} className={inputCls} /></F>
-              <F label="متولد"><input value={form.birthPlace} onChange={e => setForm({ ...form, birthPlace: e.target.value })} className={inputCls} placeholder="محل تولد / سال تولد" /></F>
-              <div className="sm:col-span-2">
-                <F label="دارای مدرک تحصیلی (مدرسه / دانشگاه)"><input value={form.education} onChange={e => setForm({ ...form, education: e.target.value })} className={inputCls} /></F>
-              </div>
+              <F label="متولد"><input value={form.birthPlace} onChange={e => setForm({ ...form, birthPlace: e.target.value })} className={inputCls} placeholder="محل و سال تولد" /></F>
+            </div>
+          </fieldset>
+
+          {/* مدرک تحصیلی */}
+          <fieldset className="space-y-4 pt-2 border-t border-primary/10">
+            <legend className="text-lg font-black text-primary mb-2 pt-4">دارای مدرک تحصیلی</legend>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <F label="مدرسه"><input value={form.schoolDegree} onChange={e => setForm({ ...form, schoolDegree: e.target.value })} className={inputCls} placeholder="مثلاً دیپلم / سوم متوسطه" /></F>
+              <F label="دانشگاه"><input value={form.universityDegree} onChange={e => setForm({ ...form, universityDegree: e.target.value })} className={inputCls} placeholder="مثلاً کارشناسی / دکتری" /></F>
             </div>
           </fieldset>
 
@@ -96,17 +101,29 @@ export default function Register() {
             </div>
           </fieldset>
 
-          {/* سطح مورد نظر */}
-          <fieldset className="space-y-4 pt-2 border-t border-primary/10">
-            <legend className="text-lg font-black text-primary mb-2 pt-4">دوره مورد نظر</legend>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <F label="سطح مورد نظر">
-                <select value={form.levelInterest} onChange={e => setForm({ ...form, levelInterest: e.target.value })} className={inputCls}>
-                  {LEVELS.map(l => <option key={l.v} value={l.v}>{l.l}</option>)}
-                </select>
-              </F>
-              <F label="توضیحات">
-                <textarea value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} className={inputCls + " min-h-12"} />
+          {/* ترم و سطح — به‌شکل روایتی فرم کاغذی */}
+          <fieldset className="pt-2 border-t border-primary/10">
+            <legend className="text-lg font-black text-primary mb-3 pt-4">ترم و سطح مورد نظر</legend>
+            <div className="bg-parchment/60 border border-primary/10 rounded-2xl p-5 space-y-4">
+              <p className="text-sm text-primary leading-8">
+                که نسبت به اهداف و کلاس‌های آموزشگاه زبان آشنایی کامل داشته و مایل به شرکت در ترم
+                <input
+                  value={form.termInterest}
+                  onChange={e => setForm({ ...form, termInterest: e.target.value })}
+                  className="inline-block mx-2 rounded-lg bg-card border border-primary/20 px-3 py-1 text-sm text-primary focus:outline-none focus:border-gold min-w-32"
+                  placeholder="مثلاً پاییز ۱۴۰۴"
+                />
+                سطح
+                <input
+                  value={form.levelInterest}
+                  onChange={e => setForm({ ...form, levelInterest: e.target.value })}
+                  className="inline-block mx-2 rounded-lg bg-card border border-primary/20 px-3 py-1 text-sm text-primary focus:outline-none focus:border-gold min-w-32"
+                  placeholder="مثلاً Elementary یا A2"
+                />
+                می‌باشم.
+              </p>
+              <F label="توضیحات (اختیاری)">
+                <textarea value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} className={inputCls + " min-h-16"} />
               </F>
             </div>
           </fieldset>

@@ -29,7 +29,7 @@ export default function Shop() {
       <section className="bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 tile-bg-navy opacity-70" />
         <div className="container relative py-20 text-center max-w-3xl">
-          <div className="chip-gold inline-flex mb-5">کتاب فروشی</div>
+          <div className="chip-gold inline-flex mb-5">فروشگاه کتاب</div>
           <h1 className="text-4xl md:text-display leading-tight mb-4">
             منابع <span className="text-gold gold-underline">آموزشی</span>
           </h1>

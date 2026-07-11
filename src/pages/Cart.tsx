@@ -23,7 +23,7 @@ export default function Cart() {
         <div className="text-center py-20 bg-card rounded-3xl border border-primary/10">
           <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
           <p className="text-muted-foreground mb-6">سبد خرید شما خالی است.</p>
-          <Link to="/shop" className="btn-primary">رفتن به کتاب فروشی</Link>
+          <Link to="/shop" className="btn-primary">رفتن به فروشگاه کتاب</Link>
         </div>
       ) : (
         <div className="grid lg:grid-cols-[1fr_360px] gap-6">

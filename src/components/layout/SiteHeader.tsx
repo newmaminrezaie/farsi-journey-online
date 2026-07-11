@@ -8,7 +8,7 @@ const nav = [
   { to: "/", label: "خانه" },
   { to: "/semesters", label: "ترم‌ها" },
   { to: "/teachers", label: "اساتید" },
-  { to: "/shop", label: "کتاب فروشی" },
+  { to: "/shop", label: "فروشگاه کتاب" },
   { to: "/about", label: "درباره" },
   { to: "/contact", label: "تماس" },
 ];
