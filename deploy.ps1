@@ -88,6 +88,13 @@ sleep 3
 `$DC logs --tail=20 api
 $FixWebPermissions
 systemctl reload nginx
+
+# Reclaim disk: drop dangling images and cap docker build cache at 512MB
+# so repeat deploys don't slowly fill the VPS with unreferenced layers.
+docker image prune -f >/dev/null 2>&1 || true
+docker builder prune -f --keep-storage 512MB >/dev/null 2>&1 || true
+echo '--- disk usage ---'
+df -h / | tail -n 1
 "@
 
 # Windows PowerShell here-strings are CRLF by default. Sending CRLF directly to
