@@ -26,10 +26,10 @@ async function main() {
     if (sCount === 0) {
       await prisma.semester.createMany({
         data: [
-          { titleFa: "دوره فشرده آیلتس - پاییز ۱۴۰۳", level: "ielts", teacherId: teachers[0].id, teacherIds: [teachers[0].id, teachers[3].id], scheduleFa: "شنبه، دوشنبه و چهارشنبه — ساعت ۱۷ تا ۱۹", startsOn: new Date("2024-10-05"), endsOn: new Date("2025-01-15"), capacity: 15, seatsTaken: 0, priceToman: 3_800_000, mode: "hybrid", status: "open" },
-          { titleFa: "مکالمه انگلیسی - سطح متوسط", level: "intermediate", teacherId: teachers[3].id, teacherIds: [teachers[3].id], scheduleFa: "یکشنبه و سه‌شنبه — ساعت ۱۸ تا ۲۰", startsOn: new Date("2024-10-12"), endsOn: new Date("2024-12-20"), capacity: 12, seatsTaken: 0, priceToman: 2_400_000, mode: "in-person", status: "open" },
-          { titleFa: "کلاس زبان کودکان (۷ تا ۱۰ سال)", level: "beginner", teacherId: teachers[2].id, teacherIds: [teachers[2].id], scheduleFa: "پنج‌شنبه‌ها — ساعت ۱۰ تا ۱۲", startsOn: new Date("2024-10-10"), endsOn: new Date("2025-02-10"), capacity: 10, seatsTaken: 0, priceToman: 1_800_000, mode: "in-person", status: "open" },
-          { titleFa: "کارگاه گرامر پیشرفته", level: "advanced", teacherId: teachers[1].id, teacherIds: [teachers[1].id], scheduleFa: "جمعه‌ها — ساعت ۹ تا ۱۲", startsOn: new Date("2024-11-01"), endsOn: new Date("2025-01-30"), capacity: 8, seatsTaken: 0, priceToman: 2_900_000, mode: "online", status: "open" },
+          { titleFa: "دوره فشرده آیلتس - پاییز ۱۴۰۳", level: "ielts", teacherIds: [teachers[0].id, teachers[3].id], scheduleFa: "شنبه، دوشنبه و چهارشنبه — ساعت ۱۷ تا ۱۹", startsOn: new Date("2024-10-05"), endsOn: new Date("2025-01-15"), capacity: 15, seatsTaken: 0, priceToman: 3_800_000, mode: "hybrid", status: "open" },
+          { titleFa: "مکالمه انگلیسی - سطح متوسط", level: "intermediate", teacherIds: [teachers[3].id], scheduleFa: "یکشنبه و سه‌شنبه — ساعت ۱۸ تا ۲۰", startsOn: new Date("2024-10-12"), endsOn: new Date("2024-12-20"), capacity: 12, seatsTaken: 0, priceToman: 2_400_000, mode: "in-person", status: "open" },
+          { titleFa: "کلاس زبان کودکان (۷ تا ۱۰ سال)", level: "beginner", teacherIds: [teachers[2].id], scheduleFa: "پنج‌شنبه‌ها — ساعت ۱۰ تا ۱۲", startsOn: new Date("2024-10-10"), endsOn: new Date("2025-02-10"), capacity: 10, seatsTaken: 0, priceToman: 1_800_000, mode: "in-person", status: "open" },
+          { titleFa: "کارگاه گرامر پیشرفته", level: "advanced", teacherIds: [teachers[1].id], scheduleFa: "جمعه‌ها — ساعت ۹ تا ۱۲", startsOn: new Date("2024-11-01"), endsOn: new Date("2025-01-30"), capacity: 8, seatsTaken: 0, priceToman: 2_900_000, mode: "online", status: "open" },
         ],
       });
       console.log("semesters seeded");

@@ -38,7 +38,7 @@ export default function SemestersAdmin() {
     const { id, createdAt, seatsTaken, jalaliYear, season, ...rest } = form as any;
     const payload = {
       ...rest,
-      teacherId: form.teacherIds?.[0] || form.teacherId || "",
+      
       teacherIds: form.teacherIds || [],
       bookIds: form.bookIds || [],
       capacity: Number(form.capacity) || 0,
