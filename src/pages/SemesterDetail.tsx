@@ -55,6 +55,7 @@ export default function SemesterDetail() {
       landline: form.landline,
       termInterest: form.termInterest || sem!.titleFa,
       levelInterest: form.levelInterest || levelFa(sem!.level),
+      selectedTeacherId: form.selectedTeacherId || undefined,
       note: form.note,
       agreedToTerms: form.agreedToTerms,
     });
