@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { semestersApi, teachersApi, booksApi, formatToman } from "@/lib/api";
 import type { Semester } from "@/lib/types";
-import { formatJalali, jalaliTupleToIso, toJalali } from "@/lib/jalali";
+import { formatJalali, jalaliTupleToIso } from "@/lib/jalali";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
