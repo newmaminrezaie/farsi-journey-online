@@ -44,7 +44,7 @@ export const teachersApi = {
 // ---------- Semesters ----------
 export const semestersApi = {
   list: (): Promise<Semester[]> => http("/semesters"),
-  listOpen: async (): Promise<Semester[]> => (await http<Semester[]>("/semesters")).filter(s => s.status === "open"),
+  listOpen: async (): Promise<Semester[]> => (await http<Semester[]>("/semesters")).filter(s => !s.status || s.status === "open"),
   get: (id: string): Promise<Semester> => http(`/semesters/${id}`),
   create: (input: Omit<Semester, "id" | "createdAt" | "seatsTaken"> & { seatsTaken?: number }): Promise<Semester> =>
     http("/semesters", { method: "POST", body: JSON.stringify({ seatsTaken: 0, ...input }) }),
