@@ -33,6 +33,6 @@ if (Test-Path .\server\package-lock.json) {
 }
 
 Write-Host "Regenerating Prisma client, syncing database, rebuilding backend, restarting api, and reloading nginx..." -ForegroundColor Green
-ssh -p $Port "$User@$HostName" "cd $RemoteRoot && docker-compose exec -T api sh -lc 'cd /app && npx prisma generate --schema=prisma/schema.prisma && npx prisma db push --schema=prisma/schema.prisma --accept-data-loss && rm -rf dist && npm run build' && docker-compose restart api && sleep 3 && docker-compose logs --tail=20 api && $FixWebPermissions && systemctl reload nginx"
+ssh -p $Port "$User@$HostName" "cd $RemoteRoot && docker-compose exec -T api sh -lc 'cd /app && npx prisma generate --schema=prisma/schema.prisma && npx prisma db push --schema=prisma/schema.prisma --accept-data-loss && rm -rf dist/* && npm run build' && docker-compose restart api && sleep 3 && docker-compose logs --tail=20 api && $FixWebPermissions && systemctl reload nginx"
 
 Write-Host "`nDone. Hard-refresh https://higooya.ir with Ctrl+F5." -ForegroundColor Green
