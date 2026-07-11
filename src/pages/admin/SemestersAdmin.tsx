@@ -8,7 +8,7 @@ import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 const empty = {
-  titleFa: "", level: "beginner" as any, teacherId: "", teacherIds: [] as string[],
+  titleFa: "", level: "beginner" as any, teacherIds: [] as string[],
   bookIds: [] as string[],
   scheduleFa: "", startsOn: "", endsOn: "",
   capacity: 12, priceToman: 0, mode: "in-person" as any, status: "open" as any,
@@ -26,14 +26,15 @@ export default function SemestersAdmin() {
   function openModal(s?: Semester) {
     if (s) {
       setEditing(s);
-      const ids = s.teacherIds && s.teacherIds.length ? s.teacherIds : (s.teacherId ? [s.teacherId] : []);
+      const legacyTeacherId = (s as any).teacherId;
+      const ids = s.teacherIds && s.teacherIds.length ? s.teacherIds : (legacyTeacherId ? [legacyTeacherId] : []);
       setForm({ ...s, teacherIds: ids, bookIds: s.bookIds ?? [] });
     } else { setEditing(null); setForm(empty); }
     setOpen(true);
   }
   async function save() {
     if (!form.titleFa || !form.startsOn || !form.endsOn) return toast.error("عنوان و تاریخ‌ها الزامی است");
-    const { id, createdAt, seatsTaken, jalaliYear, season, ...rest } = form as any;
+    const { id, createdAt, seatsTaken, jalaliYear, season, teacherId, ...rest } = form as any;
     const payload = {
       ...rest,
       
@@ -75,10 +76,13 @@ export default function SemestersAdmin() {
             </tr>
           </thead>
           <tbody>
-            {semesters.map(s => (
+            {semesters.map(s => {
+              const teacherIds = s.teacherIds?.length ? s.teacherIds : ((s as any).teacherId ? [(s as any).teacherId] : []);
+              const teacherNames = teacherIds.map(id => teachers.find(t => t.id === id)?.nameFa).filter(Boolean).join("، ");
+              return (
               <tr key={s.id} className="border-t border-primary/5">
                 <td className="p-3 font-bold text-primary">{s.titleFa}</td>
-                <td className="p-3 text-muted-foreground">{teachers.find(t => t.id === s.teacherId)?.nameFa ?? "—"}</td>
+                <td className="p-3 text-muted-foreground">{teacherNames || "—"}</td>
                 <td className="p-3">{formatJalali(s.startsOn)}</td>
                 <td className="p-3">{formatToman(s.priceToman ?? 0)}</td>
                 <td className="p-3">{(s.seatsTaken ?? 0).toLocaleString("fa-IR")}/{(s.capacity ?? 0).toLocaleString("fa-IR")}</td>
@@ -88,7 +92,7 @@ export default function SemestersAdmin() {
                   <button onClick={() => del(s.id)} className="p-2 hover:bg-destructive/10 rounded-lg text-destructive"><Trash2 className="h-4 w-4" /></button>
                 </td>
               </tr>
-            ))}
+            );})}
           </tbody>
         </table>
       </div>
