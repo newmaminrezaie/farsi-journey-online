@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { semestersApi, teachersApi, formatToman } from "@/lib/api";
+import { semestersApi, teachersApi, booksApi, formatToman } from "@/lib/api";
 import type { Semester } from "@/lib/types";
 import { formatJalali, jalaliTupleToIso } from "@/lib/jalali";
 import DatePicker, { DateObject } from "react-multi-date-picker";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 const empty = {
   titleFa: "", level: "beginner" as any, teacherId: "", teacherIds: [] as string[],
+  bookIds: [] as string[],
   scheduleFa: "", startsOn: "", endsOn: "",
   capacity: 12, priceToman: 0, mode: "in-person" as any, status: "open" as any,
 };
@@ -19,6 +20,7 @@ export default function SemestersAdmin() {
   const qc = useQueryClient();
   const { data: semesters = [] } = useQuery({ queryKey: ["semesters"], queryFn: () => semestersApi.list() });
   const { data: teachers = [] } = useQuery({ queryKey: ["teachers"], queryFn: () => teachersApi.list() });
+  const { data: books = [] } = useQuery({ queryKey: ["books"], queryFn: () => booksApi.list() });
   const [editing, setEditing] = useState<Semester | null>(null);
   const [form, setForm] = useState<any>(empty);
   const [open, setOpen] = useState(false);
@@ -27,13 +29,13 @@ export default function SemestersAdmin() {
     if (s) {
       setEditing(s);
       const ids = s.teacherIds && s.teacherIds.length ? s.teacherIds : (s.teacherId ? [s.teacherId] : []);
-      setForm({ ...s, teacherIds: ids });
+      setForm({ ...s, teacherIds: ids, bookIds: s.bookIds ?? [] });
     } else { setEditing(null); setForm(empty); }
     setOpen(true);
   }
   async function save() {
     if (!form.titleFa || !form.startsOn || !form.endsOn) return toast.error("عنوان و تاریخ‌ها الزامی است");
-    const payload = { ...form, teacherId: form.teacherIds?.[0] || form.teacherId || "" };
+    const payload = { ...form, teacherId: form.teacherIds?.[0] || form.teacherId || "", bookIds: form.bookIds || [] };
     if (editing) await semestersApi.update(editing.id, payload);
     else await semestersApi.create(payload);
     qc.invalidateQueries({ queryKey: ["semesters"] });
@@ -113,6 +115,27 @@ export default function SemestersAdmin() {
                               setForm({ ...form, teacherIds: next });
                             }} />
                           <span>{t.nameFa}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </F>
+              </div>
+              <div className="sm:col-span-2">
+                <F label="کتاب‌های این ترم (اختیاری — به دانش‌آموز پیشنهاد داده می‌شود)">
+                  <div className="rounded-lg bg-parchment border border-primary/15 p-3 grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                    {books.length === 0 && <span className="text-xs text-muted-foreground">هنوز کتابی ثبت نشده است</span>}
+                    {books.map(b => {
+                      const checked = (form.bookIds || []).includes(b.id);
+                      return (
+                        <label key={b.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                          <input type="checkbox" checked={checked} className="accent-[hsl(var(--gold))]"
+                            onChange={e => {
+                              const cur: string[] = form.bookIds || [];
+                              const next = e.target.checked ? [...cur, b.id] : cur.filter(x => x !== b.id);
+                              setForm({ ...form, bookIds: next });
+                            }} />
+                          <span className="truncate">{b.titleFa}</span>
                         </label>
                       );
                     })}
