@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { semestersApi, teachersApi, booksApi, formatToman } from "@/lib/api";
 import type { Semester } from "@/lib/types";
-import { formatJalali, jalaliTupleToIso } from "@/lib/jalali";
+import { formatJalali, jalaliTupleToIso, toJalali } from "@/lib/jalali";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
@@ -15,6 +15,14 @@ const empty = {
   scheduleFa: "", startsOn: "", endsOn: "",
   capacity: 12, priceToman: 0, mode: "in-person" as any, status: "open" as any,
 };
+
+function semesterMetaFromStart(startsOn: string) {
+  const [gy, gm, gd] = startsOn.split("-").map(Number);
+  if (!gy || !gm || !gd) return { jalaliYear: new Date().getFullYear(), season: "spring" };
+  const [jalaliYear, jalaliMonth] = toJalali(gy, gm, gd);
+  const season = jalaliMonth <= 3 ? "spring" : jalaliMonth <= 6 ? "summer" : jalaliMonth <= 9 ? "autumn" : "winter";
+  return { jalaliYear, season };
+}
 
 export default function SemestersAdmin() {
   const qc = useQueryClient();
@@ -38,6 +46,7 @@ export default function SemestersAdmin() {
     const { id, createdAt, seatsTaken, ...rest } = form as any;
     const payload = {
       ...rest,
+      ...semesterMetaFromStart(form.startsOn),
       teacherId: form.teacherIds?.[0] || form.teacherId || "",
       teacherIds: form.teacherIds || [],
       bookIds: form.bookIds || [],
