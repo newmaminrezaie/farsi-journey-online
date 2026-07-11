@@ -33,13 +33,18 @@ export default function SemesterDetail() {
 
   if (!sem) return <div className="container py-40 text-center text-muted-foreground">در حال بارگذاری…</div>;
   const assignedIds = (sem.teacherIds && sem.teacherIds.length ? sem.teacherIds : (sem.teacherId ? [sem.teacherId] : []));
-  const assignedTeachers = teachers.filter(x => assignedIds.includes(x.id));
-  const assignedBooks = books.filter(b => (sem.bookIds ?? []).includes(b.id));
+  const assignedTeachersRaw = teachers.filter(x => assignedIds.includes(x.id));
+  // If admin didn't attach any teachers to this semester, fall back to the whole roster so the student can still pick.
+  const teacherChoices = assignedTeachersRaw.length > 0 ? assignedTeachersRaw : teachers;
+  const assignedTeachers = assignedTeachersRaw; // for the sidebar/hero display
+  const assignedBooksRaw = books.filter(b => (sem.bookIds ?? []).includes(b.id));
+  const bookChoices = assignedBooksRaw.length > 0 ? assignedBooksRaw : books.filter(b => b.active);
   const t = assignedTeachers[0] ?? teachers.find(x => x.id === sem.teacherId);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.fullName || !form.phone) return toast.error("نام زبان‌آموز و شماره همراه الزامی است");
+    if (teacherChoices.length > 0 && !form.selectedTeacherId) return toast.error("لطفاً استاد مورد نظر خود را انتخاب کنید");
     if (!form.agreedToTerms) return toast.error("لطفاً مقررات ثبت‌نام را تأیید کنید");
     setSubmitting(true);
     await registrationsApi.create({
