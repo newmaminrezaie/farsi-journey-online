@@ -16,14 +16,6 @@ const empty = {
   capacity: 12, priceToman: 0, mode: "in-person" as any, status: "open" as any,
 };
 
-function semesterMetaFromStart(startsOn: string) {
-  const [gy, gm, gd] = startsOn.split("-").map(Number);
-  if (!gy || !gm || !gd) return { jalaliYear: new Date().getFullYear(), season: "spring" };
-  const [jalaliYear, jalaliMonth] = toJalali(gy, gm, gd);
-  const season = jalaliMonth <= 3 ? "spring" : jalaliMonth <= 6 ? "summer" : jalaliMonth <= 9 ? "autumn" : "winter";
-  return { jalaliYear, season };
-}
-
 export default function SemestersAdmin() {
   const qc = useQueryClient();
   const { data: semesters = [] } = useQuery({ queryKey: ["semesters"], queryFn: () => semestersApi.list() });
