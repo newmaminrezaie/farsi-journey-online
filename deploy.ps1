@@ -9,6 +9,7 @@ $Port       = 9011
 $RemoteRoot = "/var/www/higooya"
 $RemoteDist = "$RemoteRoot/dist"
 $RemoteServer = "$RemoteRoot/server"
+$FixWebPermissions = "chmod 755 /var /var/www $RemoteRoot $RemoteDist && chown -R root:www-data $RemoteDist && find $RemoteDist -type d -exec chmod 755 {} \\; && find $RemoteDist -type f -exec chmod 644 {} \\;"
 
 Write-Host "Building..." -ForegroundColor Green
 npm run build
@@ -20,6 +21,9 @@ ssh -p $Port "$User@$HostName" "mkdir -p $RemoteDist $RemoteServer/src $RemoteSe
 Write-Host "Uploading frontend..." -ForegroundColor Green
 scp -P $Port -r .\dist\* "${User}@${HostName}:$RemoteDist/"
 
+Write-Host "Fixing frontend permissions..." -ForegroundColor Green
+ssh -p $Port "$User@$HostName" $FixWebPermissions
+
 Write-Host "Uploading backend source..." -ForegroundColor Green
 scp -P $Port -r .\server\src\* "${User}@${HostName}:$RemoteServer/src/"
 scp -P $Port -r .\server\prisma\* "${User}@${HostName}:$RemoteServer/prisma/"
@@ -29,6 +33,6 @@ if (Test-Path .\server\package-lock.json) {
 }
 
 Write-Host "Rebuilding backend, syncing database, restarting api, and reloading nginx..." -ForegroundColor Green
-ssh -p $Port "$User@$HostName" "cd $RemoteServer && npm run build && cd $RemoteRoot && docker-compose exec -T api npx prisma db push --accept-data-loss && docker-compose restart api && chown -R root:www-data $RemoteDist && find $RemoteDist -type d -exec chmod 755 {} \; && find $RemoteDist -type f -exec chmod 644 {} \; && systemctl reload nginx"
+ssh -p $Port "$User@$HostName" "cd $RemoteServer && npm run build && cd $RemoteRoot && docker-compose exec -T api npx prisma db push --accept-data-loss && docker-compose restart api && $FixWebPermissions && systemctl reload nginx"
 
 Write-Host "`nDone. Hard-refresh https://higooya.ir with Ctrl+F5." -ForegroundColor Green
