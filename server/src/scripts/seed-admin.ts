@@ -1,4 +1,4 @@
-// Bootstrap the first admin user from env vars. Idempotent — safe to re-run.
+// Bootstrap or reset the first admin user from env vars. Safe to re-run.
 import argon2 from "argon2";
 import { prisma } from "../lib/prisma.js";
 
@@ -10,7 +10,12 @@ async function main() {
 
   const existing = await prisma.staffUser.findUnique({ where: { username } });
   if (existing) {
-    console.log(`admin '${username}' already exists — skipping`);
+    const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
+    await prisma.staffUser.update({
+      where: { username },
+      data: { passwordHash, fullName, role: "admin", active: true },
+    });
+    console.log(`reset admin '${username}' password and activated account`);
     return;
   }
 
