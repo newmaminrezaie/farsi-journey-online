@@ -9,7 +9,7 @@ $Port       = 9011
 $RemoteRoot = "/var/www/higooya"
 $RemoteDist = "$RemoteRoot/dist"
 $RemoteServer = "$RemoteRoot/server"
-$FixWebPermissions = "chmod 755 /var /var/www $RemoteRoot $RemoteDist && chown -R root:www-data $RemoteDist && find $RemoteDist -type d -exec chmod 755 {} \\; && find $RemoteDist -type f -exec chmod 644 {} \\;"
+$FixWebPermissions = "chmod 755 /var /var/www $RemoteRoot $RemoteDist && chown -R root:www-data $RemoteDist && find $RemoteDist -type d -exec chmod 755 {} \; && find $RemoteDist -type f -exec chmod 644 {} \;"
 
 Write-Host "Building..." -ForegroundColor Green
 npm run build
