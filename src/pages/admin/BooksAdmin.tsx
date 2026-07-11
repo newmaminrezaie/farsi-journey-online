@@ -75,13 +75,12 @@ export default function BooksAdmin() {
         </table>
       </div>
 
-      {(editing !== null || form !== empty) && (form.titleFa || editing) && null}
-      {(form !== empty || editing) && (
-        <div className="fixed inset-0 bg-primary/40 flex items-center justify-center p-4 z-50" onClick={() => { setEditing(null); setForm(empty); }}>
+      {isOpen && (
+        <div className="fixed inset-0 bg-primary/40 flex items-center justify-center p-4 z-50" onClick={close}>
           <div className="bg-card rounded-3xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl text-primary">{editing ? "ویرایش کتاب" : "کتاب جدید"}</h2>
-              <button onClick={() => { setEditing(null); setForm(empty); }} className="p-2"><X className="h-5 w-5" /></button>
+              <button onClick={close} className="p-2"><X className="h-5 w-5" /></button>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <Field label="عنوان (فارسی)"><input value={form.titleFa} onChange={e => setForm({ ...form, titleFa: e.target.value })} className={ic} /></Field>
@@ -109,7 +108,7 @@ export default function BooksAdmin() {
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={save} className="btn-primary flex-1">ذخیره</button>
-              <button onClick={() => { setEditing(null); setForm(empty); }} className="btn-ghost">انصراف</button>
+              <button onClick={close} className="btn-ghost">انصراف</button>
             </div>
           </div>
         </div>
