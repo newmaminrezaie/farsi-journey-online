@@ -14,18 +14,23 @@ export default function BooksAdmin() {
   const qc = useQueryClient();
   const { data: books = [] } = useQuery({ queryKey: ["books"], queryFn: () => booksApi.list() });
   const [editing, setEditing] = useState<Book | null>(null);
-  const [form, setForm] = useState(empty);
+  const [form, setForm] = useState({ ...empty });
+  const [isOpen, setIsOpen] = useState(false);
 
   function open(b?: Book) {
     if (b) { setEditing(b); setForm({ ...b }); }
-    else { setEditing(null); setForm(empty); }
+    else { setEditing(null); setForm({ ...empty }); }
+    setIsOpen(true);
+  }
+  function close() {
+    setIsOpen(false); setEditing(null); setForm({ ...empty });
   }
   async function save() {
     if (!form.titleFa || !form.priceToman) return toast.error("عنوان و قیمت الزامی است");
     if (editing) await booksApi.update(editing.id, form);
     else await booksApi.create(form);
     qc.invalidateQueries({ queryKey: ["books"] });
-    setEditing(null); setForm(empty);
+    close();
     toast.success("ذخیره شد");
   }
   async function del(id: string) {
