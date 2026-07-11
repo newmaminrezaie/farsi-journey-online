@@ -36,7 +36,14 @@ if (Test-Path .\server\package-lock.json) {
   scp -P $Port .\server\package-lock.json "${User}@${HostName}:$RemoteServer/"
 }
 
+Write-Host "Uploading Prisma engines..." -ForegroundColor Green
+scp -P $Port -r .\server\prisma-engines\* "${User}@${HostName}:$RemoteServer/prisma-engines/"
+ssh -p $Port "$User@$HostName" "chmod +x $RemoteServer/prisma-engines/schema-engine-linux-musl-openssl-3.0.x"
+
 Write-Host "Regenerating Prisma client, syncing database, rebuilding backend, restarting api, and reloading nginx..." -ForegroundColor Green
-ssh -p $Port "$User@$HostName" "cd $RemoteRoot && docker-compose exec -T api sh -lc 'cd /app && npx prisma generate --schema=prisma/schema.prisma && npx prisma db push --schema=prisma/schema.prisma --accept-data-loss && rm -rf dist/* && npm run build' && docker-compose restart api && sleep 3 && docker-compose logs --tail=20 api && $FixWebPermissions && systemctl reload nginx"
+# PRISMA_SCHEMA_ENGINE_BINARY + PRISMA_QUERY_ENGINE_LIBRARY are set in docker-compose.yml,
+# so `prisma generate` / `db push` use the pre-downloaded engines instead of binaries.prisma.sh.
+# We must `docker-compose up -d` (not just restart) so the new volume mount and env vars apply.
+ssh -p $Port "$User@$HostName" "cd $RemoteRoot && docker-compose up -d && sleep 3 && docker-compose exec -T api sh -lc 'cd /app && npx prisma generate --schema=prisma/schema.prisma && npx prisma db push --schema=prisma/schema.prisma --accept-data-loss && rm -rf dist/* && npm run build' && docker-compose restart api && sleep 3 && docker-compose logs --tail=20 api && $FixWebPermissions && systemctl reload nginx"
 
 Write-Host "`nDone. Hard-refresh https://higooya.ir with Ctrl+F5." -ForegroundColor Green
