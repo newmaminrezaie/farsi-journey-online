@@ -26,7 +26,8 @@ export interface Semester {
   id: ID;
   titleFa: string;
   level: SemesterLevel;
-  teacherId: ID;
+  teacherId: ID;              // legacy — primary teacher (kept for back-compat)
+  teacherIds?: ID[];          // full set of teachers offering this semester
   scheduleFa: string;         // free text schedule ("شنبه و دوشنبه ۱۶-۱۸")
   startsOn: string;           // ISO yyyy-mm-dd
   endsOn: string;             // ISO yyyy-mm-dd
