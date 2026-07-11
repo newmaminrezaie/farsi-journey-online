@@ -2,10 +2,8 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { semestersApi, teachersApi, booksApi, formatToman } from "@/lib/api";
 import type { Semester } from "@/lib/types";
-import { formatJalali, jalaliTupleToIso } from "@/lib/jalali";
-import DatePicker, { DateObject } from "react-multi-date-picker";
-import persian from "react-date-object/calendars/persian";
-import persian_fa from "react-date-object/locales/persian_fa";
+import { formatJalali } from "@/lib/jalali";
+import JalaliDateInput from "@/components/JalaliDateInput";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -59,10 +57,6 @@ export default function SemestersAdmin() {
     if (!confirm("حذف شود؟")) return;
     await semestersApi.remove(id);
     qc.invalidateQueries({ queryKey: ["semesters"] });
-  }
-  function pickDate(field: "startsOn" | "endsOn", v: DateObject | null) {
-    if (!v) return setForm({ ...form, [field]: "" });
-    setForm({ ...form, [field]: jalaliTupleToIso(v.year, v.month.number, v.day) });
   }
 
   return (
@@ -156,16 +150,10 @@ export default function SemestersAdmin() {
                 </F>
               </div>
               <F label="تاریخ شروع (شمسی)">
-                <DatePicker calendar={persian} locale={persian_fa} calendarPosition="bottom-right" portal
-                  zIndex={1000} className="rmdp-mobile"
-                  value={form.startsOn ? new Date(form.startsOn) : undefined}
-                  onChange={(v: any) => pickDate("startsOn", v)} inputClass={ic} />
+                <JalaliDateInput value={form.startsOn} onChange={iso => setForm({ ...form, startsOn: iso })} />
               </F>
               <F label="تاریخ پایان (شمسی)">
-                <DatePicker calendar={persian} locale={persian_fa} calendarPosition="bottom-right" portal
-                  zIndex={1000} className="rmdp-mobile"
-                  value={form.endsOn ? new Date(form.endsOn) : undefined}
-                  onChange={(v: any) => pickDate("endsOn", v)} inputClass={ic} />
+                <JalaliDateInput value={form.endsOn} onChange={iso => setForm({ ...form, endsOn: iso })} />
               </F>
               <F label="ظرفیت"><input type="number" value={form.capacity} onChange={e => setForm({ ...form, capacity: +e.target.value })} className={ic} /></F>
               <F label="شهریه (تومان)"><input type="number" value={form.priceToman} onChange={e => setForm({ ...form, priceToman: +e.target.value })} className={ic} /></F>
