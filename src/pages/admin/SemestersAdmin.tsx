@@ -95,9 +95,9 @@ export default function SemestersAdmin() {
                 <td className="p-3 font-bold text-primary">{s.titleFa}</td>
                 <td className="p-3 text-muted-foreground">{teachers.find(t => t.id === s.teacherId)?.nameFa ?? "—"}</td>
                 <td className="p-3">{formatJalali(s.startsOn)}</td>
-                <td className="p-3">{formatToman(s.priceToman)}</td>
-                <td className="p-3">{s.seatsTaken.toLocaleString("fa-IR")}/{s.capacity.toLocaleString("fa-IR")}</td>
-                <td className="p-3"><span className="chip">{s.status}</span></td>
+                <td className="p-3">{formatToman(s.priceToman ?? 0)}</td>
+                <td className="p-3">{(s.seatsTaken ?? 0).toLocaleString("fa-IR")}/{(s.capacity ?? 0).toLocaleString("fa-IR")}</td>
+                <td className="p-3"><span className="chip">{s.status ?? "—"}</span></td>
                 <td className="p-3 text-left">
                   <button onClick={() => openModal(s)} className="p-2 hover:bg-gold/15 rounded-lg text-primary"><Pencil className="h-4 w-4" /></button>
                   <button onClick={() => del(s.id)} className="p-2 hover:bg-destructive/10 rounded-lg text-destructive"><Trash2 className="h-4 w-4" /></button>
