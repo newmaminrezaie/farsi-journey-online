@@ -26,8 +26,11 @@ export default function Semesters() {
 
       <section className="container py-16 grid gap-6">
         {semesters.map(s => {
-          const t = teachers.find(x => x.id === s.teacherId);
-          const full = s.seatsTaken >= s.capacity;
+          const ids = (s.teacherIds && s.teacherIds.length ? s.teacherIds : (s.teacherId ? [s.teacherId] : []));
+          const names = ids.map(id => teachers.find(x => x.id === id)?.nameFa).filter(Boolean).join("، ");
+          const capacity = s.capacity ?? 0;
+          const taken = s.seatsTaken ?? 0;
+          const full = taken >= capacity && capacity > 0;
           return (
             <article key={s.id} className="bg-card rounded-3xl p-6 md:p-8 border border-primary/10 hover:shadow-navy transition-shadow grid md:grid-cols-[1fr_auto] gap-6 items-center">
               <div>
@@ -38,15 +41,15 @@ export default function Semesters() {
                   {full && <span className="chip" style={{ background: "hsl(var(--destructive)/0.15)", color: "hsl(var(--destructive))" }}>تکمیل ظرفیت</span>}
                 </div>
                 <h3 className="text-2xl mb-2 text-primary">{s.titleFa}</h3>
-                <p className="text-muted-foreground mb-4">استاد: {t?.nameFa ?? "—"}</p>
+                <p className="text-muted-foreground mb-4">استاد: {names || "—"}</p>
                 <div className="grid sm:grid-cols-3 gap-4 text-sm text-primary/80">
                   <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-gold" /> {formatJalali(s.startsOn)}</div>
-                  <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-gold" /> {s.scheduleFa}</div>
-                  <div className="flex items-center gap-2"><Users className="h-4 w-4 text-gold" /> {(s.capacity - s.seatsTaken).toLocaleString("fa-IR")} صندلی خالی</div>
+                  <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-gold" /> {s.scheduleFa || "—"}</div>
+                  <div className="flex items-center gap-2"><Users className="h-4 w-4 text-gold" /> {Math.max(0, capacity - taken).toLocaleString("fa-IR")} صندلی خالی</div>
                 </div>
               </div>
               <div className="text-center md:text-left border-t md:border-t-0 md:border-r md:pr-8 border-primary/10 pt-4 md:pt-0">
-                <div className="text-3xl font-black text-primary mb-3">{formatToman(s.priceToman)}</div>
+                <div className="text-3xl font-black text-primary mb-3">{formatToman(s.priceToman ?? 0)}</div>
                 <Link to={`/semesters/${s.id}`} className="btn-primary">
                   جزئیات و ثبت‌نام <ArrowLeft className="h-4 w-4" />
                 </Link>

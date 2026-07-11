@@ -51,9 +51,11 @@ const FA_MONTHS = ["فروردین", "اردیبهشت", "خرداد", "تیر",
 const toFaDigits = (s: string) => s.replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[+d]);
 
 /** Format an ISO date "yyyy-mm-dd" as e.g. "۱۵ مهر ۱۴۰۳" */
-export function formatJalali(iso: string): string {
+export function formatJalali(iso: string | null | undefined): string {
   if (!iso) return "";
-  const [gy, gm, gd] = iso.split("-").map(Number);
+  const clean = String(iso).slice(0, 10);
+  const [gy, gm, gd] = clean.split("-").map(Number);
+  if (!gy || !gm || !gd) return "";
   const [jy, jm, jd] = toJalali(gy, gm, gd);
   return toFaDigits(`${jd} ${FA_MONTHS[jm - 1]} ${jy}`);
 }

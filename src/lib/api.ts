@@ -167,6 +167,6 @@ export const authApi = {
 };
 
 // Helper: money formatting (Toman, Persian digits)
-export function formatToman(n: number): string {
-  return n.toLocaleString("fa-IR") + " تومان";
+export function formatToman(n: number | null | undefined): string {
+  return (Number(n) || 0).toLocaleString("fa-IR") + " تومان";
 }
