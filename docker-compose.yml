@@ -40,10 +40,11 @@ services:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_PROXY_URL: ${TELEGRAM_PROXY_URL:-}
       TELEGRAM_ADMIN_CHAT_IDS: ${TELEGRAM_ADMIN_CHAT_IDS:-}
-      # Prisma engines are generated on the host and mounted through node_modules.
-      # Keep this here so the existing image does not need to be rebuilt just to
-      # pick up Dockerfile ENV changes.
-      PRISMA_QUERY_ENGINE_LIBRARY: /app/node_modules/.prisma/client/libquery_engine-linux-musl-openssl-3.0.x.so.node
+      # Pre-downloaded Prisma engines (see scripts/fetch-prisma-engines.ps1)
+      # so `prisma generate` / `db push` never hit binaries.prisma.sh at deploy time.
+      PRISMA_QUERY_ENGINE_LIBRARY: /app/prisma-engines/libquery_engine-linux-musl-openssl-3.0.x.so.node
+      PRISMA_SCHEMA_ENGINE_BINARY: /app/prisma-engines/schema-engine-linux-musl-openssl-3.0.x
+      PRISMA_CLI_BINARY_TARGETS: linux-musl-openssl-3.0.x
       # Payments (Phase 2)
       ZARINPAL_MERCHANT_ID: ${ZARINPAL_MERCHANT_ID:-}
       ZARINPAL_SANDBOX: ${ZARINPAL_SANDBOX:-true}
@@ -63,6 +64,7 @@ services:
       - ./server/package.json:/app/package.json:ro
       - ./server/package-lock.json:/app/package-lock.json:ro
       - ./server/tsconfig.json:/app/tsconfig.json:ro
+      - ./server/prisma-engines:/app/prisma-engines:ro
       - ./uploads:/app/uploads
     ports:
       - "127.0.0.1:3000:3000"

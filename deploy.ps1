@@ -15,8 +15,12 @@ Write-Host "Building..." -ForegroundColor Green
 npm run build
 if ($LASTEXITCODE -ne 0) { throw "Build failed." }
 
+Write-Host "Fetching Prisma engines locally (for offline VPS install)..." -ForegroundColor Green
+& (Join-Path $PSScriptRoot "scripts\fetch-prisma-engines.ps1")
+if ($LASTEXITCODE -ne 0) { throw "Prisma engine fetch failed." }
+
 Write-Host "Clearing remote frontend/backend build folders..." -ForegroundColor Green
-ssh -p $Port "$User@$HostName" "mkdir -p $RemoteDist $RemoteServer/src $RemoteServer/prisma $RemoteServer/dist && rm -rf $RemoteDist/* $RemoteServer/src/* $RemoteServer/prisma/* $RemoteServer/dist/*"
+ssh -p $Port "$User@$HostName" "mkdir -p $RemoteDist $RemoteServer/src $RemoteServer/prisma $RemoteServer/prisma-engines $RemoteServer/dist && rm -rf $RemoteDist/* $RemoteServer/src/* $RemoteServer/prisma/* $RemoteServer/dist/*"
 
 Write-Host "Uploading frontend..." -ForegroundColor Green
 scp -P $Port -r .\dist\* "${User}@${HostName}:$RemoteDist/"
