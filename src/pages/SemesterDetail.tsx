@@ -117,25 +117,26 @@ export default function SemesterDetail() {
                   <textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className={fieldCls + " min-h-20"} />
                 </label>
 
-                {assignedTeachers.length > 0 && (
+                {teacherChoices.length > 0 && (
                   <label className="block">
                     <span className="block text-xs font-bold text-gold mb-1.5">
-                      انتخاب استاد {assignedTeachers.length > 1 ? "(چند استاد این ترم را ارائه می‌دهند)" : ""}
+                      انتخاب استاد * {assignedTeachersRaw.length > 1 ? "(چند استاد این ترم را ارائه می‌دهند)" : ""}
                     </span>
                     <select
                       value={form.selectedTeacherId}
                       onChange={e => setForm({ ...form, selectedTeacherId: e.target.value })}
                       className={fieldCls}
+                      required
                     >
-                      <option value="">— بدون ترجیح —</option>
-                      {assignedTeachers.map(x => (
+                      <option value="">— انتخاب کنید —</option>
+                      {teacherChoices.map(x => (
                         <option key={x.id} value={x.id} className="text-primary">{x.nameFa}</option>
                       ))}
                     </select>
                   </label>
                 )}
 
-                {assignedBooks.length > 0 && (
+                {bookChoices.length > 0 && (
                   <div className="bg-gradient-to-l from-gold/20 to-parchment/10 border border-gold/40 rounded-2xl p-5 space-y-4">
                     <div className="flex items-start gap-3">
                       <div className="w-11 h-11 shrink-0 rounded-xl bg-gold text-primary flex items-center justify-center shadow-gold">
@@ -161,7 +162,7 @@ export default function SemesterDetail() {
                         className={fieldCls}
                       >
                         <option value="">— بدون انتخاب —</option>
-                        {assignedBooks.map(b => (
+                        {bookChoices.map(b => (
                           <option key={b.id} value={b.id} className="text-primary">
                             {b.titleFa} — {formatToman(b.priceToman)}
                           </option>
@@ -170,7 +171,7 @@ export default function SemesterDetail() {
                     </label>
 
                     <div className="grid sm:grid-cols-2 gap-3">
-                      {assignedBooks.map(b => (
+                      {bookChoices.map(b => (
                         <div key={b.id} className="flex gap-3 items-center bg-parchment/10 rounded-xl p-3 border border-gold/20">
                           <img src={b.coverUrl} alt={b.titleFa} className="w-14 h-20 object-cover rounded-md warm-photo" />
                           <div className="min-w-0 flex-1">
