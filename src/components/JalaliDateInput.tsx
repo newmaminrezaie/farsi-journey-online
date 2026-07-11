@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { toJalali, jalaliTupleToIso } from "@/lib/jalali";
 
 const FA_MONTHS = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
@@ -23,6 +24,14 @@ interface Props {
 
 export default function JalaliDateInput({ value, onChange }: Props) {
   const parts = isoToParts(value);
+
+  // Auto-initialize ISO value on mount if empty, so form has a valid date even without interaction.
+  useEffect(() => {
+    if (!value) {
+      try { onChange(jalaliTupleToIso(parts.jy, parts.jm, parts.jd)); } catch {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function set(next: { jy?: number; jm?: number; jd?: number }) {
     const jy = next.jy ?? parts.jy;
