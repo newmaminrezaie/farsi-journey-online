@@ -42,10 +42,18 @@ export interface Registration {
   id: ID;
   semesterId: ID | null;      // null = general interest form
   fullName: string;
-  phone: string;
+  fatherName?: string;
+  birthCertNo?: string;       // شماره شناسنامه
+  issuedFrom?: string;        // صادره از
+  birthPlace?: string;        // متولد
+  education?: string;         // مدرک تحصیلی (مدرسه/دانشگاه)
+  address?: string;
+  phone: string;              // همراه
+  landline?: string;          // تلفن ثابت
   nationalId?: string;
   levelInterest?: SemesterLevel;
   note?: string;
+  agreedToTerms?: boolean;
   status: "new" | "contacted" | "enrolled" | "rejected";
   createdAt: string;
 }
