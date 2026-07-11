@@ -1,6 +1,6 @@
-// Async CRUD API over localStorage. Signatures mimic a REST client so you can
-// swap the implementations to `fetch('/api/...')` later without changing any
-// component that calls these functions.
+// HTTP API client — talks to the Fastify backend at /api/*.
+// Same function signatures as before so components need no change.
+// Cart + Orders remain local (Zarinpal integration is a later phase).
 
 import { storage, uid, refCode } from "./storage";
 import type {
@@ -8,103 +8,74 @@ import type {
 } from "./types";
 
 const KEYS = {
-  teachers: "teachers",
-  semesters: "semesters",
-  registrations: "registrations",
-  books: "books",
   orders: "orders",
   cart: "cart",
   adminSession: "admin:session",
 };
 
-const delay = <T>(v: T, ms = 120) => new Promise<T>((r) => setTimeout(() => r(v), ms));
+// ---------- fetch helper ----------
+async function http<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`/api${path}`, {
+    credentials: "include",
+    headers: init?.body ? { "Content-Type": "application/json", ...(init?.headers || {}) } : init?.headers,
+    ...init,
+  });
+  if (!res.ok) {
+    let msg = res.statusText;
+    try { const j = await res.json(); msg = (j as any)?.error?.formErrors?.join?.(", ") || JSON.stringify(j); } catch {}
+    throw new Error(`API ${res.status}: ${msg}`);
+  }
+  if (res.status === 204) return undefined as T;
+  return res.json() as Promise<T>;
+}
 
 // ---------- Teachers ----------
 export const teachersApi = {
-  async list(): Promise<Teacher[]> { return delay(storage.get<Teacher[]>(KEYS.teachers, [])); },
-  async get(id: string): Promise<Teacher | undefined> { return (await this.list()).find(t => t.id === id); },
-  async create(input: Omit<Teacher, "id" | "createdAt">): Promise<Teacher> {
-    const all = await this.list();
-    const t: Teacher = { ...input, id: uid("tch"), createdAt: new Date().toISOString() };
-    storage.set(KEYS.teachers, [t, ...all]);
-    return t;
-  },
-  async update(id: string, patch: Partial<Teacher>): Promise<Teacher | undefined> {
-    const all = await this.list();
-    const next = all.map(t => t.id === id ? { ...t, ...patch } : t);
-    storage.set(KEYS.teachers, next);
-    return next.find(t => t.id === id);
-  },
-  async remove(id: string): Promise<void> {
-    storage.set(KEYS.teachers, (await this.list()).filter(t => t.id !== id));
-  },
+  list: (): Promise<Teacher[]> => http("/teachers"),
+  get: (id: string): Promise<Teacher> => http(`/teachers/${id}`),
+  create: (input: Omit<Teacher, "id" | "createdAt">): Promise<Teacher> =>
+    http("/teachers", { method: "POST", body: JSON.stringify(input) }),
+  update: (id: string, patch: Partial<Teacher>): Promise<Teacher> =>
+    http(`/teachers/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
+  remove: (id: string): Promise<void> =>
+    http(`/teachers/${id}`, { method: "DELETE" }).then(() => undefined),
 };
 
 // ---------- Semesters ----------
 export const semestersApi = {
-  async list(): Promise<Semester[]> { return delay(storage.get<Semester[]>(KEYS.semesters, [])); },
-  async listOpen(): Promise<Semester[]> { return (await this.list()).filter(s => s.status === "open"); },
-  async get(id: string): Promise<Semester | undefined> { return (await this.list()).find(s => s.id === id); },
-  async create(input: Omit<Semester, "id" | "createdAt" | "seatsTaken">): Promise<Semester> {
-    const all = await this.list();
-    const s: Semester = { ...input, id: uid("sem"), seatsTaken: 0, createdAt: new Date().toISOString() };
-    storage.set(KEYS.semesters, [s, ...all]);
-    return s;
-  },
-  async update(id: string, patch: Partial<Semester>): Promise<Semester | undefined> {
-    const all = await this.list();
-    const next = all.map(s => s.id === id ? { ...s, ...patch } : s);
-    storage.set(KEYS.semesters, next);
-    return next.find(s => s.id === id);
-  },
-  async remove(id: string): Promise<void> {
-    storage.set(KEYS.semesters, (await this.list()).filter(s => s.id !== id));
-  },
+  list: (): Promise<Semester[]> => http("/semesters"),
+  listOpen: async (): Promise<Semester[]> => (await http<Semester[]>("/semesters")).filter(s => s.status === "open"),
+  get: (id: string): Promise<Semester> => http(`/semesters/${id}`),
+  create: (input: Omit<Semester, "id" | "createdAt" | "seatsTaken"> & { seatsTaken?: number }): Promise<Semester> =>
+    http("/semesters", { method: "POST", body: JSON.stringify({ seatsTaken: 0, ...input }) }),
+  update: (id: string, patch: Partial<Semester>): Promise<Semester> =>
+    http(`/semesters/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
+  remove: (id: string): Promise<void> =>
+    http(`/semesters/${id}`, { method: "DELETE" }).then(() => undefined),
 };
 
 // ---------- Registrations ----------
 export const registrationsApi = {
-  async list(): Promise<Registration[]> { return delay(storage.get<Registration[]>(KEYS.registrations, [])); },
-  async create(input: Omit<Registration, "id" | "createdAt" | "status">): Promise<Registration> {
-    const all = await this.list();
-    const r: Registration = { ...input, id: uid("reg"), status: "new", createdAt: new Date().toISOString() };
-    storage.set(KEYS.registrations, [r, ...all]);
-    // increment seatsTaken if bound to a semester
-    if (r.semesterId) {
-      const sem = await semestersApi.get(r.semesterId);
-      if (sem) await semestersApi.update(sem.id, { seatsTaken: sem.seatsTaken + 1 });
-    }
-    return r;
-  },
-  async updateStatus(id: string, status: Registration["status"]): Promise<void> {
-    const all = await this.list();
-    storage.set(KEYS.registrations, all.map(r => r.id === id ? { ...r, status } : r));
-  },
-  async remove(id: string): Promise<void> {
-    storage.set(KEYS.registrations, (await this.list()).filter(r => r.id !== id));
-  },
+  list: (): Promise<Registration[]> => http("/registrations"),
+  create: (input: Omit<Registration, "id" | "createdAt" | "status">): Promise<Registration> =>
+    http("/registrations", { method: "POST", body: JSON.stringify(input) }),
+  updateStatus: (id: string, status: Registration["status"]): Promise<void> =>
+    http(`/registrations/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }).then(() => undefined),
+  remove: (id: string): Promise<void> =>
+    http(`/registrations/${id}`, { method: "DELETE" }).then(() => undefined),
 };
 
 // ---------- Books ----------
 export const booksApi = {
-  async list(): Promise<Book[]> { return delay(storage.get<Book[]>(KEYS.books, [])); },
-  async listActive(): Promise<Book[]> { return (await this.list()).filter(b => b.active); },
-  async get(id: string): Promise<Book | undefined> { return (await this.list()).find(b => b.id === id); },
-  async create(input: Omit<Book, "id" | "createdAt">): Promise<Book> {
-    const all = await this.list();
-    const b: Book = { ...input, id: uid("bk"), createdAt: new Date().toISOString() };
-    storage.set(KEYS.books, [b, ...all]);
-    return b;
-  },
-  async update(id: string, patch: Partial<Book>): Promise<Book | undefined> {
-    const all = await this.list();
-    const next = all.map(b => b.id === id ? { ...b, ...patch } : b);
-    storage.set(KEYS.books, next);
-    return next.find(b => b.id === id);
-  },
-  async remove(id: string): Promise<void> {
-    storage.set(KEYS.books, (await this.list()).filter(b => b.id !== id));
-  },
+  list: (): Promise<Book[]> => http("/books"),
+  listActive: async (): Promise<Book[]> => (await http<Book[]>("/books")).filter(b => b.active),
+  get: (id: string): Promise<Book> => http(`/books/${id}`),
+  create: (input: Omit<Book, "id" | "createdAt">): Promise<Book> =>
+    http("/books", { method: "POST", body: JSON.stringify(input) }),
+  update: (id: string, patch: Partial<Book>): Promise<Book> =>
+    http(`/books/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
+  remove: (id: string): Promise<void> =>
+    http(`/books/${id}`, { method: "DELETE" }).then(() => undefined),
 };
 
 // ---------- Cart (client-only) ----------
@@ -127,9 +98,9 @@ export const cartApi = {
   clear() { storage.set(KEYS.cart, []); },
 };
 
-// ---------- Orders ----------
+// ---------- Orders (local-only — Zarinpal wiring pending) ----------
 export const ordersApi = {
-  async list(): Promise<Order[]> { return delay(storage.get<Order[]>(KEYS.orders, [])); },
+  async list(): Promise<Order[]> { return storage.get<Order[]>(KEYS.orders, []); },
   async get(refOrId: string): Promise<Order | undefined> {
     return (await this.list()).find(o => o.id === refOrId || o.refCode === refOrId);
   },
@@ -165,9 +136,6 @@ export const ordersApi = {
 };
 
 // ---------- Admin auth ----------
-// Calls the real Fastify backend at /api/admin/auth/*. The JWT lives in an
-// httpOnly cookie set by the server; we mirror a boolean flag in localStorage
-// so `isLoggedIn()` stays synchronous for route guards.
 export const authApi = {
   isLoggedIn(): boolean { return storage.get<boolean>(KEYS.adminSession, false); },
   async login(user: string, pass: string): Promise<boolean> {
@@ -181,9 +149,7 @@ export const authApi = {
       if (!res.ok) return false;
       storage.set(KEYS.adminSession, true);
       return true;
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   },
   async logout() {
     try { await fetch("/api/admin/auth/logout", { method: "POST", credentials: "include" }); } catch {}
@@ -196,9 +162,7 @@ export const authApi = {
       if (ok) storage.set(KEYS.adminSession, true);
       else storage.remove(KEYS.adminSession);
       return ok;
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   },
 };
 
