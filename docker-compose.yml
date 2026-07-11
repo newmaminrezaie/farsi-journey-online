@@ -40,10 +40,18 @@ services:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_PROXY_URL: ${TELEGRAM_PROXY_URL:-}
       TELEGRAM_ADMIN_CHAT_IDS: ${TELEGRAM_ADMIN_CHAT_IDS:-}
+      # Prisma engines are generated on the host and mounted through node_modules.
+      # Keep this here so the existing image does not need to be rebuilt just to
+      # pick up Dockerfile ENV changes.
+      PRISMA_QUERY_ENGINE_LIBRARY: /app/node_modules/.prisma/client/libquery_engine-linux-musl-openssl-3.0.x.so.node
       # Payments (Phase 2)
       ZARINPAL_MERCHANT_ID: ${ZARINPAL_MERCHANT_ID:-}
       ZARINPAL_SANDBOX: ${ZARINPAL_SANDBOX:-true}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-https://higooya.ir}
+    command: >
+      sh -c "set -e;
+      if [ ! -f dist/index.js ]; then npx tsc -p tsconfig.json; fi;
+      node dist/index.js"
     volumes:
       # Volume-mount code + deps so day-to-day updates are `git pull && docker-compose restart api`
       # (no image rebuild). node_modules must be built on the host once with the

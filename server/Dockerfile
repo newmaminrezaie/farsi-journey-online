@@ -20,7 +20,7 @@ RUN sed -i 's|https://dl-cdn.alpinelinux.org|https://mirror.aminidc.com|g' /etc/
 RUN mkdir -p /app/uploads
 EXPOSE 3000
 
-# Compile TS if dist/ is missing (first boot after a fresh checkout), then
-# sync schema and start. `db push` is idempotent; the TS build is skipped
-# when dist/index.js already exists so restarts stay fast.
-CMD ["sh", "-c", "[ -f dist/index.js ] || npx tsc -p tsconfig.json && npx prisma db push --accept-data-loss --skip-generate && node dist/index.js"]
+# Compile TS if dist/ is missing, then start. Schema sync is intentionally a
+# host-side deploy step (`npx prisma db push`) so the container never tries to
+# download Prisma engines at runtime on restricted networks.
+CMD ["sh", "-c", "set -e; if [ ! -f dist/index.js ]; then npx tsc -p tsconfig.json; fi; node dist/index.js"]
