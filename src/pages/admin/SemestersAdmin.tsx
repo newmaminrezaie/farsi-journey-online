@@ -10,7 +10,7 @@ import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 const empty = {
-  titleFa: "", level: "beginner" as any, teacherId: "",
+  titleFa: "", level: "beginner" as any, teacherId: "", teacherIds: [] as string[],
   scheduleFa: "", startsOn: "", endsOn: "",
   capacity: 12, priceToman: 0, mode: "in-person" as any, status: "open" as any,
 };
