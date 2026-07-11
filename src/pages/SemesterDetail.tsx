@@ -75,7 +75,7 @@ export default function SemesterDetail() {
             <span className="chip">{modeFa(sem.mode)}</span>
           </div>
           <h1 className="text-4xl md:text-6xl leading-tight mb-4">{sem.titleFa}</h1>
-          <p className="text-primary-foreground/80">استاد: {t?.nameFa}</p>
+          <p className="text-primary-foreground/80">{assignedTeachers.length > 1 ? "اساتید" : "استاد"}: {assignedTeachers.map(x => x.nameFa).join("، ") || t?.nameFa}</p>
         </div>
       </section>
 
