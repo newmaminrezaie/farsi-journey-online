@@ -2,10 +2,10 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { semestersApi, teachersApi, registrationsApi, formatToman } from "@/lib/api";
+import { semestersApi, teachersApi, booksApi, registrationsApi, cartApi, formatToman } from "@/lib/api";
 import { formatJalali } from "@/lib/jalali";
 import { levelFa, modeFa } from "./Home";
-import { Calendar, Clock, Users, GraduationCap, ArrowRight, ScrollText } from "lucide-react";
+import { Calendar, Clock, Users, GraduationCap, ArrowRight, ScrollText, BookOpen, ShoppingCart, BadgePercent } from "lucide-react";
 
 const TERMS = [
   "این مرکز تابع مقررات پوششی و رفتاری آموزش و پرورش است، لذا از نظر رفتار و پوشش و حجاب کاملاً همانند مدارس می‌باشد.",
@@ -19,13 +19,14 @@ export default function SemesterDetail() {
   const nav = useNavigate();
   const { data: sem } = useQuery({ queryKey: ["semester", id], queryFn: () => semestersApi.get(id!), enabled: !!id });
   const { data: teachers = [] } = useQuery({ queryKey: ["teachers"], queryFn: () => teachersApi.list() });
+  const { data: books = [] } = useQuery({ queryKey: ["books"], queryFn: () => booksApi.list() });
 
   const [form, setForm] = useState({
     fullName: "", fatherName: "", birthCertNo: "",
     issuedFrom: "", birthPlace: "",
     schoolDegree: "", universityDegree: "",
     address: "", landline: "", phone: "", nationalId: "",
-    termInterest: "", levelInterest: "", selectedTeacherId: "",
+    termInterest: "", levelInterest: "", selectedTeacherId: "", selectedBookId: "",
     note: "", agreedToTerms: false,
   });
   const [submitting, setSubmitting] = useState(false);
@@ -33,6 +34,7 @@ export default function SemesterDetail() {
   if (!sem) return <div className="container py-40 text-center text-muted-foreground">در حال بارگذاری…</div>;
   const assignedIds = (sem.teacherIds && sem.teacherIds.length ? sem.teacherIds : (sem.teacherId ? [sem.teacherId] : []));
   const assignedTeachers = teachers.filter(x => assignedIds.includes(x.id));
+  const assignedBooks = books.filter(b => (sem.bookIds ?? []).includes(b.id));
   const t = assignedTeachers[0] ?? teachers.find(x => x.id === sem.teacherId);
 
   async function submit(e: React.FormEvent) {
@@ -56,6 +58,7 @@ export default function SemesterDetail() {
       termInterest: form.termInterest || sem!.titleFa,
       levelInterest: form.levelInterest || levelFa(sem!.level),
       selectedTeacherId: form.selectedTeacherId || undefined,
+      selectedBookId: form.selectedBookId || undefined,
       note: form.note,
       agreedToTerms: form.agreedToTerms,
     });
