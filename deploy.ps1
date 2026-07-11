@@ -32,7 +32,7 @@ if (Test-Path .\server\package-lock.json) {
   scp -P $Port .\server\package-lock.json "${User}@${HostName}:$RemoteServer/"
 }
 
-Write-Host "Rebuilding backend, syncing database, restarting api, and reloading nginx..." -ForegroundColor Green
-ssh -p $Port "$User@$HostName" "cd $RemoteServer && npm run build && cd $RemoteRoot && docker-compose exec -T api npx prisma db push --accept-data-loss && docker-compose restart api && $FixWebPermissions && systemctl reload nginx"
+Write-Host "Rebuilding backend, syncing database, regenerating Prisma client, restarting api, and reloading nginx..." -ForegroundColor Green
+ssh -p $Port "$User@$HostName" "cd $RemoteServer && npm run build && cd $RemoteRoot && docker-compose exec -T api npx prisma db push --accept-data-loss && docker-compose exec -T api npx prisma generate && docker-compose restart api && sleep 3 && docker-compose logs --tail=20 api && $FixWebPermissions && systemctl reload nginx"
 
 Write-Host "`nDone. Hard-refresh https://higooya.ir with Ctrl+F5." -ForegroundColor Green

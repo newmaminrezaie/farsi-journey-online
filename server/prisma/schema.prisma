@@ -55,7 +55,6 @@ model Semester {
   id          String   @id @default(cuid())
   titleFa     String
   level       String   @default("beginner")
-  teacherId   String   @default("")     // legacy primary teacher (kept for back-compat)
   teacherIds  String[] @default([])
   bookIds     String[] @default([])
   scheduleFa  String   @default("")
