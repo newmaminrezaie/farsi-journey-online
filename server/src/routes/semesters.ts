@@ -8,6 +8,7 @@ const Create = z.object({
   level: z.string().max(60).default("beginner"),
   teacherId: z.string().max(50).default(""),
   teacherIds: z.array(z.string()).default([]),
+  bookIds: z.array(z.string()).default([]),
   scheduleFa: z.string().max(500).default(""),
   startsOn: z.coerce.date(),
   endsOn: z.coerce.date(),
