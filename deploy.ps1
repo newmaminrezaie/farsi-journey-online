@@ -54,6 +54,7 @@ Invoke-Checked "Marking Prisma schema engine executable..." { ssh -p $Port "$Use
 # recreate bug, and use --no-deps so the database container is never recreated during deploy.
 $ContainerBuildCommand = "export PRISMA_SCHEMA_ENGINE_BINARY=/app/prisma-engines/schema-engine-linux-musl-openssl-3.0.x PRISMA_QUERY_ENGINE_LIBRARY=/app/prisma-engines/libquery_engine-linux-musl-openssl-3.0.x.so.node PRISMA_CLI_BINARY_TARGETS=linux-musl-openssl-3.0.x; cd /app && test -x `$PRISMA_SCHEMA_ENGINE_BINARY && test -f `$PRISMA_QUERY_ENGINE_LIBRARY && npx prisma generate --schema=prisma/schema.prisma && npx prisma db push --schema=prisma/schema.prisma --accept-data-loss && rm -rf dist/* && npm run build"
 $RemoteDeployCommand = @"
+#!/usr/bin/env bash
 set -e
 cd $RemoteRoot
 DC='docker-compose'
@@ -72,6 +73,15 @@ $FixWebPermissions
 systemctl reload nginx
 "@
 
-Invoke-Checked "Regenerating Prisma client, syncing database, rebuilding backend, restarting api, and reloading nginx..." { ssh -p $Port "$User@$HostName" $RemoteDeployCommand }
+# Windows PowerShell here-strings are CRLF by default. Sending CRLF directly to
+# bash over SSH causes errors like `set: invalid option` and paths ending in `\r`.
+# Write the remote deploy script as LF-only, upload it, then execute it on the VPS.
+$RemoteDeployCommand = $RemoteDeployCommand.Replace("`r`n", "`n").Replace("`r", "")
+$RemoteScriptPath = Join-Path $env:TEMP "higooya-remote-deploy.sh"
+$Utf8NoBom = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText($RemoteScriptPath, $RemoteDeployCommand, $Utf8NoBom)
+
+Invoke-Checked "Uploading remote deploy script..." { scp -P $Port $RemoteScriptPath "${User}@${HostName}:/tmp/higooya-remote-deploy.sh" }
+Invoke-Checked "Regenerating Prisma client, syncing database, rebuilding backend, restarting api, and reloading nginx..." { ssh -p $Port "$User@$HostName" 'bash /tmp/higooya-remote-deploy.sh; status=$?; rm -f /tmp/higooya-remote-deploy.sh; exit $status' }
 
 Write-Host "`nDone. Hard-refresh https://higooya.ir with Ctrl+F5." -ForegroundColor Green
