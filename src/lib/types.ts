@@ -56,6 +56,7 @@ export interface Registration {
   nationalId?: string;
   termInterest?: string;      // ترم مورد نظر (متن آزاد)
   levelInterest?: string;     // سطح (متن آزاد)
+  selectedTeacherId?: ID;     // استاد انتخاب‌شده هنگام ثبت‌نام
   note?: string;
   agreedToTerms?: boolean;
   status: "new" | "contacted" | "enrolled" | "rejected";
