@@ -24,13 +24,18 @@ export default function SemestersAdmin() {
   const [open, setOpen] = useState(false);
 
   function openModal(s?: Semester) {
-    if (s) { setEditing(s); setForm({ ...s }); } else { setEditing(null); setForm(empty); }
+    if (s) {
+      setEditing(s);
+      const ids = s.teacherIds && s.teacherIds.length ? s.teacherIds : (s.teacherId ? [s.teacherId] : []);
+      setForm({ ...s, teacherIds: ids });
+    } else { setEditing(null); setForm(empty); }
     setOpen(true);
   }
   async function save() {
     if (!form.titleFa || !form.startsOn || !form.endsOn) return toast.error("عنوان و تاریخ‌ها الزامی است");
-    if (editing) await semestersApi.update(editing.id, form);
-    else await semestersApi.create(form);
+    const payload = { ...form, teacherId: form.teacherIds?.[0] || form.teacherId || "" };
+    if (editing) await semestersApi.update(editing.id, payload);
+    else await semestersApi.create(payload);
     qc.invalidateQueries({ queryKey: ["semesters"] });
     setOpen(false);
     toast.success("ذخیره شد");
