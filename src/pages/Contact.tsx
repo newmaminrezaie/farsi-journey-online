@@ -2,8 +2,37 @@ import { MapPin, Phone, Clock, Send, Instagram, MessageCircle } from "lucide-rea
 import { useState } from "react";
 import { toast } from "sonner";
 
+const FORM_ENDPOINT = "https://www.form-to-email.com/api/s/1mRAr60LwuoS";
+
 export default function Contact() {
-  const [form, setForm] = useState({ name: "", phone: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const fd = new FormData();
+      fd.append("name", form.name);
+      fd.append("email", form.email);
+      fd.append("message", form.message);
+      const res = await fetch(FORM_ENDPOINT, {
+        method: "POST",
+        headers: { "X-AJAX": "true" },
+        body: fd,
+      });
+      if (res.ok) {
+        toast.success("پیام شما با موفقیت ارسال شد.");
+        setForm({ name: "", email: "", message: "" });
+      } else {
+        toast.error("ارسال پیام ناموفق بود. لطفاً دوباره تلاش کنید.");
+      }
+    } catch {
+      toast.error("ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
   return (
     <>
       <section className="bg-primary text-primary-foreground relative overflow-hidden">
