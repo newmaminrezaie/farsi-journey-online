@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { registrationsApi } from "@/lib/api";
+import { registrationsApi, semestersApi } from "@/lib/api";
+import type { Semester } from "@/lib/types";
 import { GraduationCap, ScrollText } from "lucide-react";
 
 const TERMS = [
@@ -13,7 +14,9 @@ const TERMS = [
 
 export default function Register() {
   const nav = useNavigate();
+  const [semesters, setSemesters] = useState<Semester[]>([]);
   const [form, setForm] = useState({
+    semesterId: "",
     fullName: "", fatherName: "", birthCertNo: "",
     issuedFrom: "", birthPlace: "",
     schoolDegree: "", universityDegree: "",
@@ -23,32 +26,55 @@ export default function Register() {
   });
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    semestersApi.listOpen().then(setSemesters).catch(() => setSemesters([]));
+  }, []);
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.fullName || !form.phone) return toast.error("نام زبان‌آموز و شماره همراه الزامی است");
     if (!form.agreedToTerms) return toast.error("لطفاً مقررات ثبت‌نام را تأیید کنید");
     setSubmitting(true);
-    await registrationsApi.create({
-      semesterId: null,
-      fullName: form.fullName,
-      fatherName: form.fatherName,
-      birthCertNo: form.birthCertNo,
-      nationalId: form.nationalId,
-      issuedFrom: form.issuedFrom,
-      birthPlace: form.birthPlace,
-      schoolDegree: form.schoolDegree,
-      universityDegree: form.universityDegree,
-      address: form.address,
-      phone: form.phone,
-      landline: form.landline,
-      termInterest: form.termInterest,
-      levelInterest: form.levelInterest,
-      note: form.note,
-      agreedToTerms: form.agreedToTerms,
-    });
-    setSubmitting(false);
-    toast.success("درخواست شما ثبت شد. کارشناسان گویا به‌زودی تماس می‌گیرند.");
-    nav("/");
+    const sem = form.semesterId ? semesters.find(s => s.id === form.semesterId) : null;
+    try {
+      const created = await registrationsApi.create({
+        semesterId: sem?.id ?? null,
+        fullName: form.fullName,
+        fatherName: form.fatherName,
+        birthCertNo: form.birthCertNo,
+        nationalId: form.nationalId,
+        issuedFrom: form.issuedFrom,
+        birthPlace: form.birthPlace,
+        schoolDegree: form.schoolDegree,
+        universityDegree: form.universityDegree,
+        address: form.address,
+        phone: form.phone,
+        landline: form.landline,
+        termInterest: form.termInterest || sem?.titleFa || "",
+        levelInterest: form.levelInterest,
+        note: form.note,
+        agreedToTerms: form.agreedToTerms,
+      });
+      setSubmitting(false);
+      if (sem) {
+        toast.success("فرم ثبت‌نام ثبت شد. لطفاً پرداخت را تکمیل کنید.");
+        nav("/register/pay", {
+          state: {
+            registrationId: (created as any)?.id,
+            registrantName: form.fullName,
+            phone: form.phone,
+            semester: { id: sem.id, titleFa: sem.titleFa, priceToman: sem.priceToman },
+            book: null,
+          },
+        });
+        return;
+      }
+      toast.success("درخواست شما ثبت شد. کارشناسان گویا به‌زودی تماس می‌گیرند.");
+      nav("/");
+    } catch (err: any) {
+      setSubmitting(false);
+      toast.error(err?.message || "ارسال ناموفق بود");
+    }
   }
 
   return (
