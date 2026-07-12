@@ -211,7 +211,7 @@ export default function Register() {
           </fieldset>
 
           <button type="submit" disabled={submitting} className="btn-primary w-full">
-            <GraduationCap className="h-5 w-5" /> {submitting ? "در حال ارسال…" : "ارسال درخواست ثبت‌نام"}
+            <GraduationCap className="h-5 w-5" /> {submitting ? "در حال ارسال…" : form.semesterId ? "ادامه و پرداخت شهریه" : "ارسال درخواست ثبت‌نام"}
           </button>
         </form>
       </div>
