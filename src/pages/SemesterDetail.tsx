@@ -47,7 +47,7 @@ export default function SemesterDetail() {
     if (teacherChoices.length > 0 && !form.selectedTeacherId) return toast.error("لطفاً استاد مورد نظر خود را انتخاب کنید");
     if (!form.agreedToTerms) return toast.error("لطفاً مقررات ثبت‌نام را تأیید کنید");
     setSubmitting(true);
-    await registrationsApi.create({
+    const created = await registrationsApi.create({
       semesterId: sem!.id,
       fullName: form.fullName,
       fatherName: form.fatherName,
@@ -68,8 +68,17 @@ export default function SemesterDetail() {
       agreedToTerms: form.agreedToTerms,
     });
     setSubmitting(false);
-    toast.success("ثبت‌نام شما با موفقیت ثبت شد. به‌زودی با شما تماس می‌گیریم.");
-    nav("/semesters");
+    const chosenBook = form.selectedBookId ? books.find(b => b.id === form.selectedBookId) : null;
+    toast.success("فرم ثبت‌نام ثبت شد. لطفاً پرداخت را تکمیل کنید.");
+    nav("/register/pay", {
+      state: {
+        registrationId: (created as any)?.id,
+        registrantName: form.fullName,
+        phone: form.phone,
+        semester: { id: sem!.id, titleFa: sem!.titleFa, priceToman: sem!.priceToman },
+        book: chosenBook ? { id: chosenBook.id, titleFa: chosenBook.titleFa, priceToman: chosenBook.priceToman, coverUrl: chosenBook.coverUrl } : null,
+      },
+    });
   }
 
   return (
