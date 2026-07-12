@@ -7,6 +7,7 @@ import Teachers from "@/pages/Teachers";
 import Semesters from "@/pages/Semesters";
 import SemesterDetail from "@/pages/SemesterDetail";
 import Register from "@/pages/Register";
+import RegistrationPayment from "@/pages/RegistrationPayment";
 import Shop from "@/pages/Shop";
 import ShopDetail from "@/pages/ShopDetail";
 import Cart from "@/pages/Cart";
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="/semesters" element={<Semesters />} />
         <Route path="/semesters/:id" element={<SemesterDetail />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/register/pay" element={<RegistrationPayment />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/shop/:id" element={<ShopDetail />} />
         <Route path="/cart" element={<Cart />} />

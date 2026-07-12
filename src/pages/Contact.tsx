@@ -1,4 +1,4 @@
-import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
+import { MapPin, Phone, Clock, Send, Instagram, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -19,8 +19,19 @@ export default function Contact() {
       <section className="container py-16 grid lg:grid-cols-2 gap-10">
         <div className="space-y-4">
           <Item icon={<MapPin />} title="نشانی">گناباد، خراسان رضوی، غفاری ۳ — آموزشگاه زبان‌های گویا</Item>
-          <Item icon={<Phone />} title="تلفن">۰۵۷ ۵۷۲۲ ۰۰۰۰</Item>
-          <Item icon={<Mail />} title="ایمیل">info@higooya.ir</Item>
+          <Item icon={<Phone />} title="تلفن‌های ثابت">
+            <div dir="ltr" className="space-y-0.5">
+              <div>۰۵۱ ۵۷۲۲ ۳۷۷۲</div>
+              <div>۰۵۱ ۵۷۲۲ ۲۰۷۷</div>
+            </div>
+          </Item>
+          <Item icon={<Phone />} title="همراه"><span dir="ltr">۰۹۹۱ ۵۱۳ ۱۱۶۲</span></Item>
+          <Item icon={<Instagram />} title="اینستاگرام">
+            <a href="https://instagram.com/higooya" target="_blank" rel="noreferrer" className="text-primary hover:text-gold" dir="ltr">@higooya</a>
+          </Item>
+          <Item icon={<MessageCircle />} title="ایتا">
+            <a href="https://eitaa.com/mygooya" target="_blank" rel="noreferrer" className="text-primary hover:text-gold" dir="ltr">@mygooya</a>
+          </Item>
           <Item icon={<Clock />} title="ساعات کار">شنبه تا پنجشنبه، ۸ صبح تا ۹ شب</Item>
         </div>
         <form onSubmit={e => { e.preventDefault(); toast.success("پیام شما ارسال شد."); setForm({ name: "", phone: "", message: "" }); }}
