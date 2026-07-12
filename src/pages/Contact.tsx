@@ -2,8 +2,37 @@ import { MapPin, Phone, Clock, Send, Instagram, MessageCircle } from "lucide-rea
 import { useState } from "react";
 import { toast } from "sonner";
 
+const FORM_ENDPOINT = "https://www.form-to-email.com/api/s/1mRAr60LwuoS";
+
 export default function Contact() {
-  const [form, setForm] = useState({ name: "", phone: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const fd = new FormData();
+      fd.append("name", form.name);
+      fd.append("email", form.email);
+      fd.append("message", form.message);
+      const res = await fetch(FORM_ENDPOINT, {
+        method: "POST",
+        headers: { "X-AJAX": "true" },
+        body: fd,
+      });
+      if (res.ok) {
+        toast.success("پیام شما با موفقیت ارسال شد.");
+        setForm({ name: "", email: "", message: "" });
+      } else {
+        toast.error("ارسال پیام ناموفق بود. لطفاً دوباره تلاش کنید.");
+      }
+    } catch {
+      toast.error("ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
   return (
     <>
       <section className="bg-primary text-primary-foreground relative overflow-hidden">
@@ -34,16 +63,21 @@ export default function Contact() {
           </Item>
           <Item icon={<Clock />} title="ساعات کار">شنبه تا پنجشنبه، ۸ صبح تا ۹ شب</Item>
         </div>
-        <form onSubmit={e => { e.preventDefault(); toast.success("پیام شما ارسال شد."); setForm({ name: "", phone: "", message: "" }); }}
+        <form onSubmit={handleSubmit}
               className="bg-card rounded-3xl p-8 border border-primary/10 space-y-4">
           <h3 className="text-2xl text-primary mb-2">پیام سریع</h3>
-          <input placeholder="نام" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+          <input name="name" placeholder="نام" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+                 maxLength={100}
                  className="w-full rounded-xl bg-parchment border border-primary/15 px-4 py-3" required />
-          <input placeholder="شماره تماس" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
+          <input name="email" type="email" placeholder="ایمیل" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+                 maxLength={255} dir="ltr"
                  className="w-full rounded-xl bg-parchment border border-primary/15 px-4 py-3" required />
-          <textarea placeholder="پیام شما…" value={form.message} onChange={e => setForm({ ...form, message: e.target.value })}
+          <textarea name="message" placeholder="پیام شما…" value={form.message} onChange={e => setForm({ ...form, message: e.target.value })}
+                    maxLength={2000}
                     className="w-full rounded-xl bg-parchment border border-primary/15 px-4 py-3 min-h-32" required />
-          <button className="btn-primary w-full"><Send className="h-4 w-4" /> ارسال پیام</button>
+          <button type="submit" disabled={submitting} className="btn-primary w-full disabled:opacity-60">
+            <Send className="h-4 w-4" /> {submitting ? "در حال ارسال…" : "ارسال پیام"}
+          </button>
         </form>
       </section>
     </>
