@@ -93,6 +93,36 @@ export default function Register() {
             احتراماً اینجانب <b>(زبان‌آموز)</b> اطلاعات زیر را جهت ثبت‌نام در آموزشگاه زبان گویا اعلام می‌نمایم.
           </p>
 
+          {/* انتخاب ترم — در صورت انتخاب، پس از ارسال به درگاه پرداخت هدایت می‌شوید */}
+          <fieldset className="space-y-3">
+            <legend className="text-lg font-black text-primary mb-2">انتخاب ترم (اختیاری)</legend>
+            <F label="ترم مورد نظر">
+              <select
+                value={form.semesterId}
+                onChange={e => setForm({ ...form, semesterId: e.target.value })}
+                className={inputCls}
+              >
+                <option value="">— بدون انتخاب ترم (فقط ثبت درخواست و تماس بعدی) —</option>
+                {semesters.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.titleFa} — {(s.priceToman || 0).toLocaleString("fa-IR")} تومان
+                  </option>
+                ))}
+              </select>
+            </F>
+            {form.semesterId ? (
+              <p className="text-xs text-turquoise bg-turquoise/10 border border-turquoise/30 rounded-xl p-3 leading-6">
+                برای قطعی شدن جایگاه شما در این ترم، پس از ارسال فرم به درگاه پرداخت زرین‌پال منتقل می‌شوید و می‌بایست شهریه را پرداخت کنید.
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                اگر ترم خاصی مد نظر دارید انتخاب کنید تا پس از تکمیل فرم، شهریه را پرداخت کنید. در غیر این‌صورت کارشناسان ما با شما تماس خواهند گرفت.
+              </p>
+            )}
+          </fieldset>
+
+
+
           {/* مشخصات فردی */}
           <fieldset className="space-y-4">
             <legend className="text-lg font-black text-primary mb-2">مشخصات زبان‌آموز</legend>
