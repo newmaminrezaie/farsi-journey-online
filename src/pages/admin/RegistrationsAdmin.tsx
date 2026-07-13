@@ -127,9 +127,6 @@ export default function RegistrationsAdmin() {
   }
 
   function printOne(r: Registration) {
-    const s = r.semesterId ? semById.get(r.semesterId) : null;
-    const teacher = teachers.find(t => t.id === r.selectedTeacherId);
-    const book = books.find(b => b.id === r.selectedBookId);
     openPrint(renderPrintHTML([r], semById, teachers, books));
   }
 
