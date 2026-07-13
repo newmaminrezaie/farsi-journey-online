@@ -120,6 +120,8 @@ export default function RegistrationsAdmin() {
         "استاد انتخابی": teachers.find(t => t.id === r.selectedTeacherId)?.nameFa ?? "",
         "کتاب انتخابی": books.find(b => b.id === r.selectedBookId)?.titleFa ?? "",
         "یادداشت": r.note ?? "",
+        "مبلغ پرداختی (تومان)": r.paidToman ?? 0,
+        "کد پیگیری پرداخت": r.paymentRef ?? "",
         "وضعیت": STATUS_FA[r.status] ?? r.status,
         "تاریخ ثبت": formatJalali(r.createdAt.slice(0, 10)),
       };
