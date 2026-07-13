@@ -114,19 +114,17 @@ export default function SemesterDetail() {
                 <div className="grid sm:grid-cols-2 gap-3">
                   <Input label="نام و نام خانوادگی *" value={form.fullName} onChange={v => setForm({ ...form, fullName: v })} />
                   <Input label="نام پدر" value={form.fatherName} onChange={v => setForm({ ...form, fatherName: v })} />
-                  <Input label="شماره شناسنامه" value={form.birthCertNo} onChange={v => setForm({ ...form, birthCertNo: v })} />
-                  <Input label="کد ملی" value={form.nationalId} onChange={v => setForm({ ...form, nationalId: v })} />
-                  <Input label="صادره از" value={form.issuedFrom} onChange={v => setForm({ ...form, issuedFrom: v })} />
+                  <Input label="کد ملی / شماره شناسنامه" value={form.nationalId} onChange={v => setForm({ ...form, nationalId: v })} dir="ltr" />
                   <Input label="متولد" value={form.birthPlace} onChange={v => setForm({ ...form, birthPlace: v })} placeholder="محل و سال تولد" />
-                  <Input label="مدرک تحصیلی — مدرسه" value={form.schoolDegree} onChange={v => setForm({ ...form, schoolDegree: v })} />
-                  <Input label="مدرک تحصیلی — دانشگاه" value={form.universityDegree} onChange={v => setForm({ ...form, universityDegree: v })} />
-                  <Input label="تلفن ثابت" value={form.landline} onChange={v => setForm({ ...form, landline: v })} dir="ltr" />
+                  <Input label="پایه تحصیلی" value={form.eduLevel} onChange={v => setForm({ ...form, eduLevel: v })} placeholder="مثلاً هشتم / دیپلم / کارشناسی" />
+                  <div />
+                  <Input label="تلفن ثابت *" value={form.landline} onChange={v => setForm({ ...form, landline: v })} dir="ltr" />
                   <Input label="همراه *" value={form.phone} onChange={v => setForm({ ...form, phone: v })} dir="ltr" />
                 </div>
 
                 <label className="block">
-                  <span className="block text-xs font-bold text-gold mb-1.5">آدرس</span>
-                  <textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className={fieldCls + " min-h-20"} />
+                  <span className="block text-xs font-bold text-gold mb-1.5">آدرس *</span>
+                  <textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className={fieldCls + " min-h-20"} required />
                 </label>
 
                 {teacherChoices.length > 0 && (
