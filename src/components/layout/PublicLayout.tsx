@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import SiteHeader from "./SiteHeader";
 import SiteFooter from "./SiteFooter";
+import PromoBanner from "@/components/PromoBanner";
 
 export default function PublicLayout() {
   return (
@@ -10,6 +11,8 @@ export default function PublicLayout() {
         <Outlet />
       </main>
       <SiteFooter />
+      <PromoBanner />
     </div>
   );
 }
+
