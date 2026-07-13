@@ -1,13 +1,12 @@
-// One-shot: delete all registrations. Run via
-//   docker-compose run --rm api node dist/scripts/purge-registrations.js
+// Removes ALL existing registrations and resets seatsTaken on every semester.
+// Usage inside the api container:
+//   docker-compose exec api node --loader tsx server/src/scripts/purge-registrations.ts
+// or if built: node dist/scripts/purge-registrations.js
 import { prisma } from "../lib/prisma.js";
 
 async function main() {
-  const c = await prisma.registration.count();
-  const r = await prisma.registration.deleteMany({});
-  // Reset seatsTaken counters on all semesters back to 0.
-  await prisma.semester.updateMany({ data: { seatsTaken: 0 } });
-  console.log(`Deleted ${r.count} of ${c} registrations. Reset seatsTaken to 0 on all semesters.`);
-  await prisma.$disconnect();
+  const del = await prisma.registration.deleteMany({});
+  const reset = await prisma.semester.updateMany({ data: { seatsTaken: 0 } });
+  console.log(`deleted ${del.count} registrations, reset ${reset.count} semesters.`);
 }
-main().catch(async (e) => { console.error(e); await prisma.$disconnect(); process.exit(1); });
+main().catch(e => { console.error(e); process.exit(1); }).finally(() => prisma.$disconnect());
