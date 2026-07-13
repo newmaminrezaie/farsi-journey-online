@@ -4,6 +4,7 @@ import { booksApi, formatToman } from "@/lib/api";
 import type { Book } from "@/lib/types";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import ImageInput from "@/components/ImageInput";
 
 const empty: Omit<Book, "id" | "createdAt"> = {
   titleFa: "", titleEn: "", author: "", level: "beginner", category: "grammar",
@@ -103,7 +104,7 @@ export default function BooksAdmin() {
                   <option value="true">فعال</option><option value="false">غیرفعال</option>
                 </select>
               </Field>
-              <div className="sm:col-span-2"><Field label="آدرس تصویر جلد"><input value={form.coverUrl} onChange={e => setForm({ ...form, coverUrl: e.target.value })} className={ic} placeholder="https://…" /></Field></div>
+              <div className="sm:col-span-2"><Field label="تصویر جلد"><ImageInput value={form.coverUrl} onChange={url => setForm({ ...form, coverUrl: url })} /></Field></div>
               <div className="sm:col-span-2"><Field label="توضیحات"><textarea value={form.descriptionFa} onChange={e => setForm({ ...form, descriptionFa: e.target.value })} className={ic + " min-h-24"} /></Field></div>
             </div>
             <div className="flex gap-3 mt-6">

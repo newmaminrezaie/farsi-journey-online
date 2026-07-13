@@ -24,14 +24,15 @@ export type SemesterLevel =
 
 export interface Semester {
   id: ID;
+  classCode?: string;
   titleFa: string;
   level: SemesterLevel;
-  teacherId: ID;              // legacy — primary teacher (kept for back-compat)
-  teacherIds?: ID[];          // full set of teachers offering this semester
-  bookIds?: ID[];             // books attached to this semester (optional at registration)
-  scheduleFa: string;         // free text schedule ("شنبه و دوشنبه ۱۶-۱۸")
-  startsOn: string;           // ISO yyyy-mm-dd
-  endsOn: string;             // ISO yyyy-mm-dd
+  teacherId?: ID;             // legacy — primary teacher (kept for back-compat)
+  teacherIds?: ID[];
+  bookIds?: ID[];
+  scheduleFa: string;
+  startsOn: string;
+  endsOn: string;
   capacity: number;
   seatsTaken: number;
   priceToman: number;

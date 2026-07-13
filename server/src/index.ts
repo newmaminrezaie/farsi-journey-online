@@ -15,6 +15,8 @@ import { registerSemestersRoutes } from "./routes/semesters.js";
 import { registerRegistrationsRoutes } from "./routes/registrations.js";
 import { registerBooksRoutes } from "./routes/books.js";
 import { registerNotifyRoutes } from "./routes/notify.js";
+import { registerUploadsRoutes } from "./routes/uploads.js";
+import { registerUploadsRoutes } from "./routes/uploads.js";
 import { startNotifyWorker } from "./notify/worker.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -47,6 +49,8 @@ await app.register(registerSemestersRoutes, { prefix: "/api" });
 await app.register(registerRegistrationsRoutes, { prefix: "/api" });
 await app.register(registerBooksRoutes, { prefix: "/api" });
 await app.register(registerNotifyRoutes, { prefix: "/api/admin/notify" });
+await app.register(registerUploadsRoutes, { prefix: "/api/admin" });
+await app.register(registerUploadsRoutes, { prefix: "/api/admin" });
 
 // Kick off the background notification dispatcher.
 startNotifyWorker(app.log);

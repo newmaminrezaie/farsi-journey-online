@@ -59,13 +59,38 @@ function legacyMeta(startsOn: Date) {
   return { jalaliYear, season };
 }
 
+function levelPrefix(level: string): string {
+  const map: Record<string, string> = {
+    beginner: "BG", elementary: "EL", "pre-intermediate": "PI",
+    intermediate: "IN", "upper-intermediate": "UI", advanced: "AD", ielts: "IE",
+  };
+  return map[level] ?? "GN";
+}
+
+async function generateClassCode(level: string, startsOn: Date): Promise<string> {
+  const [jy, jm] = toJalali(startsOn.getUTCFullYear(), startsOn.getUTCMonth() + 1, startsOn.getUTCDate());
+  const jyy = String(jy).slice(-2);
+  const jmm = String(jm).padStart(2, "0");
+  const prefix = `${levelPrefix(level)}-${jyy}${jmm}`;
+  // Try a few random suffixes to guarantee uniqueness.
+  for (let i = 0; i < 8; i++) {
+    const suffix = Math.random().toString(36).slice(2, 5).toUpperCase();
+    const code = `${prefix}-${suffix}`;
+    const exists = await prisma.semester.findUnique({ where: { classCode: code } }).catch(() => null);
+    if (!exists) return code;
+  }
+  return `${prefix}-${Date.now().toString(36).slice(-4).toUpperCase()}`;
+}
+
 async function createSemester(data: z.infer<typeof SemesterShape>) {
+  const classCode = await generateClassCode(data.level, data.startsOn);
+  const withCode: any = { ...data, classCode };
   try {
-    return await prisma.semester.create({ data });
+    return await prisma.semester.create({ data: withCode });
   } catch (e: any) {
     const message = String(e?.message || "");
     if (message.includes("Argument `jalaliYear` is missing") || message.includes("Argument `season` is missing")) {
-      return prisma.semester.create({ data: { ...data, ...legacyMeta(data.startsOn) } as any });
+      return prisma.semester.create({ data: { ...withCode, ...legacyMeta(data.startsOn) } as any });
     }
     throw e;
   }
@@ -84,6 +109,14 @@ function serialize(s: any) {
 export async function registerSemestersRoutes(app: FastifyInstance) {
   app.get("/semesters", async () => {
     const rows = await prisma.semester.findMany({ orderBy: { createdAt: "desc" } });
+    // Backfill classCode for any legacy row missing it.
+    for (const r of rows as any[]) {
+      if (!r.classCode) {
+        const code = await generateClassCode(r.level, r.startsOn);
+        await prisma.semester.update({ where: { id: r.id }, data: { classCode: code } as any });
+        r.classCode = code;
+      }
+    }
     return rows.map(serialize);
   });
 

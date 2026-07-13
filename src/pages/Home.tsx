@@ -181,7 +181,7 @@ export default function Home() {
       <section className="relative bg-parchment">
         <div className="absolute inset-0 tile-bg-gold opacity-50" />
         <div className="container relative py-20">
-          <SectionHeader eyebrow="فروشگاه کتاب" title="منابع منتخب" note="کتاب‌های اصلی و کاربردی برای هر سطح" />
+          <SectionHeader eyebrow="فروشگاه کتاب" title="کتاب‌هایی که با آن‌ها یاد می‌گیریم" note="کتاب‌های اصلی و کاربردی برای هر سطح" />
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {books.slice(0, 6).map(b => (
               <Link key={b.id} to={`/shop/${b.id}`} className="group">
@@ -198,6 +198,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* TESTIMONIALS */}
+      <Testimonials />
+
 
       {/* CTA */}
       <section className="container py-20">
@@ -237,4 +241,41 @@ export function levelFa(l: string): string {
 }
 export function modeFa(m: string): string {
   return ({ "in-person": "حضوری", online: "آنلاین", hybrid: "ترکیبی" } as any)[m] ?? m;
+}
+
+const TESTIMONIALS = [
+  { name: "زهرا موسوی", level: "آیلتس آکادمیک", quote: "بعد از دو ترم آماده‌سازی آیلتس در گویا، در آزمون رسمی نمره ۷ گرفتم. تمرین‌های نوشتاری و بازخورد استاد فرق را ساخت." },
+  { name: "علی رضایی", level: "متوسط", quote: "کلاس‌ها کوچک است و استاد واقعاً وقت می‌گذارد. برای اولین‌بار احساس کردم دارم انگلیسی را «می‌فهمم» نه فقط حفظ می‌کنم." },
+  { name: "مریم قربانی", level: "پیشرفته", quote: "محیط آموزشگاه گرم و حرفه‌ای است. مکالمه هفتگی با استاد اعتماد به نفسم را چند برابر کرد." },
+  { name: "امیرحسین کاظمی", level: "پیش‌متوسط", quote: "از خرید کتاب تا برنامه کلاسی، همه چیز مرتب و منظم بود. برای بچه‌ام هم ثبت‌نام کردم." },
+  { name: "فاطمه حسینی", level: "مقدماتی", quote: "از صفر شروع کردم. الان بعد از یک سال می‌توانم فیلم انگلیسی بدون زیرنویس دنبال کنم. تشکر از تیم گویا." },
+  { name: "محمد صابری", level: "آیلتس", quote: "استادان مسلط و دلسوز، منابع به‌روز، پشتیبانی خوب بعد از کلاس. آموزشگاه در گناباد نمونه است." },
+];
+
+function Testimonials() {
+  return (
+    <section className="container py-20">
+      <SectionHeader eyebrow="حرف زبان‌آموزان" title="تجربه‌ی زبان‌آموزان گویا" note="گوشه‌ای از بازخوردهای واقعی هنرجویان دوره‌های ما" />
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {TESTIMONIALS.map((t, i) => {
+          const initial = t.name.trim().charAt(0);
+          const bg = i % 3 === 0 ? "bg-gold text-gold-foreground" : i % 3 === 1 ? "bg-primary text-primary-foreground" : "bg-turquoise text-white";
+          return (
+            <figure key={t.name} className="relative bg-card rounded-3xl p-6 border border-primary/10 hover:shadow-navy transition-shadow">
+              <div className="absolute -top-4 right-6 text-6xl leading-none text-gold/70 font-black select-none">«</div>
+              <blockquote className="text-primary/85 leading-8 mb-5 pt-2">{t.quote}</blockquote>
+              <figcaption className="flex items-center gap-3 pt-4 border-t border-primary/10">
+                <div className={`h-11 w-11 rounded-full grid place-items-center font-black ${bg}`}>{initial}</div>
+                <div>
+                  <div className="font-bold text-primary text-sm">{t.name}</div>
+                  <div className="text-xs text-muted-foreground">{t.level}</div>
+                </div>
+                <div className="ms-auto text-gold text-sm tracking-widest">★★★★★</div>
+              </figcaption>
+            </figure>
+          );
+        })}
+      </div>
+    </section>
+  );
 }

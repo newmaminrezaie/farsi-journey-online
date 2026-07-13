@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { semestersApi, teachersApi, formatToman } from "@/lib/api";
@@ -5,9 +6,18 @@ import { formatJalali } from "@/lib/jalali";
 import { levelFa, modeFa } from "./Home";
 import { ArrowLeft, Users, Calendar, Clock } from "lucide-react";
 
+const MODES: Array<{ id: "all" | "in-person" | "online" | "hybrid"; label: string }> = [
+  { id: "all", label: "همه" },
+  { id: "in-person", label: "حضوری" },
+  { id: "online", label: "آنلاین" },
+  { id: "hybrid", label: "ترکیبی" },
+];
+
 export default function Semesters() {
   const { data: semesters = [] } = useQuery({ queryKey: ["semesters"], queryFn: () => semestersApi.list() });
   const { data: teachers = [] } = useQuery({ queryKey: ["teachers"], queryFn: () => teachersApi.list() });
+  const [mode, setMode] = useState<"all" | "in-person" | "online" | "hybrid">("all");
+  const filtered = mode === "all" ? semesters : semesters.filter(s => s.mode === mode);
 
   return (
     <>
@@ -24,8 +34,24 @@ export default function Semesters() {
         </div>
       </section>
 
-      <section className="container py-16 grid gap-6">
-        {semesters.map(s => {
+      <section className="container py-16">
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+          {MODES.map(m => (
+            <button
+              key={m.id}
+              onClick={() => setMode(m.id)}
+              className={`px-5 py-2 rounded-full text-sm font-bold border transition-colors ${
+                mode === m.id
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-primary border-primary/15 hover:border-gold/60"
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+        <div className="grid gap-6">
+        {filtered.map(s => {
           const ids = (s.teacherIds && s.teacherIds.length ? s.teacherIds : (s.teacherId ? [s.teacherId] : []));
           const names = ids.map(id => teachers.find(x => x.id === id)?.nameFa).filter(Boolean).join("، ");
           const capacity = s.capacity ?? 0;
@@ -35,6 +61,7 @@ export default function Semesters() {
             <article key={s.id} className="bg-card rounded-3xl p-6 md:p-8 border border-primary/10 hover:shadow-navy transition-shadow grid md:grid-cols-[1fr_auto] gap-6 items-center">
               <div>
                 <div className="flex flex-wrap gap-2 mb-3">
+                  {s.classCode && <span className="chip font-mono text-turquoise">{s.classCode}</span>}
                   <span className="chip">{modeFa(s.mode)}</span>
                   <span className="chip-gold">{levelFa(s.level)}</span>
                   {s.status === "open" && !full && <span className="chip">ثبت‌نام باز</span>}
@@ -57,6 +84,7 @@ export default function Semesters() {
             </article>
           );
         })}
+        </div>
       </section>
     </>
   );

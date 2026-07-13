@@ -4,6 +4,7 @@ import { teachersApi } from "@/lib/api";
 import type { Teacher } from "@/lib/types";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import ImageInput from "@/components/ImageInput";
 
 const empty = { nameFa: "", nameEn: "", bioFa: "", specialties: [] as string[], photoUrl: "" };
 
@@ -67,7 +68,7 @@ export default function TeachersAdmin() {
               <F label="تخصص‌ها (با کاما)">
                 <input value={form.specialties.join(",")} onChange={e => setForm({ ...form, specialties: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) })} className={ic} />
               </F>
-              <F label="آدرس تصویر"><input value={form.photoUrl} onChange={e => setForm({ ...form, photoUrl: e.target.value })} className={ic} placeholder="https://…" /></F>
+              <F label="تصویر استاد"><ImageInput value={form.photoUrl} onChange={url => setForm({ ...form, photoUrl: url })} /></F>
             </div>
             <div className="flex gap-3 mt-6"><button onClick={save} className="btn-primary flex-1">ذخیره</button><button onClick={() => setOpen(false)} className="btn-ghost">انصراف</button></div>
           </div>
