@@ -204,6 +204,7 @@ export default function RegistrationsAdmin() {
                 <th className="p-3">نام</th>
                 <th className="p-3">تلفن</th>
                 <th className="p-3">دوره</th>
+                <th className="p-3">پرداختی</th>
                 <th className="p-3">وضعیت</th>
                 <th className="p-3"></th>
               </tr>
@@ -211,6 +212,7 @@ export default function RegistrationsAdmin() {
             <tbody>
               {filtered.map(r => {
                 const s = r.semesterId ? semById.get(r.semesterId) : null;
+                const paid = r.paidToman || 0;
                 return (
                   <tr key={r.id} className="border-t border-primary/5 hover:bg-parchment/50">
                     <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">{formatJalali(r.createdAt.slice(0, 10))}</td>
@@ -218,6 +220,11 @@ export default function RegistrationsAdmin() {
                     <td className="p-3 font-bold text-primary">{r.fullName}</td>
                     <td className="p-3" dir="ltr">{r.phone}</td>
                     <td className="p-3 text-muted-foreground">{s?.titleFa ?? r.levelInterest ?? "—"}</td>
+                    <td className="p-3 whitespace-nowrap">
+                      {paid > 0
+                        ? <span className="inline-flex items-center gap-1 rounded-md bg-turquoise/15 text-turquoise font-bold px-2 py-0.5 text-xs">{formatToman(paid)}</span>
+                        : <span className="text-xs text-muted-foreground">پرداخت‌نشده</span>}
+                    </td>
                     <td className="p-3">
                       <select value={r.status} onChange={e => update(r.id, e.target.value)} className="rounded-lg bg-parchment border border-primary/15 px-2 py-1 text-xs">
                         {STATUSES.map(s2 => <option key={s2} value={s2}>{STATUS_FA[s2]}</option>)}
@@ -230,7 +237,7 @@ export default function RegistrationsAdmin() {
                   </tr>
                 );
               })}
-              {filtered.length === 0 && <tr><td colSpan={7} className="p-12 text-center text-muted-foreground">رکوردی مطابق فیلترها یافت نشد.</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={8} className="p-12 text-center text-muted-foreground">رکوردی مطابق فیلترها یافت نشد.</td></tr>}
             </tbody>
           </table>
         </div>
