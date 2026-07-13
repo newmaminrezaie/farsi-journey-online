@@ -305,19 +305,14 @@ function DetailDrawer({ reg, semester, teacherName, bookTitle, onClose, onPrint,
           <Section title="اطلاعات فردی">
             <Row k="نام و نام خانوادگی" v={reg.fullName} />
             <Row k="نام پدر" v={reg.fatherName} />
-            <Row k="کد ملی" v={reg.nationalId} />
-            <Row k="شماره شناسنامه" v={reg.birthCertNo} />
-            <Row k="صادره از" v={reg.issuedFrom} />
+            <Row k="کد ملی / شماره شناسنامه" v={reg.nationalId || reg.birthCertNo} dir="ltr" />
             <Row k="محل تولد" v={reg.birthPlace} />
+            <Row k="پایه تحصیلی" v={reg.schoolDegree || reg.universityDegree} />
           </Section>
           <Section title="اطلاعات تماس">
             <Row k="همراه" v={reg.phone} dir="ltr" />
             <Row k="تلفن ثابت" v={reg.landline} dir="ltr" />
             <Row k="آدرس" v={reg.address} />
-          </Section>
-          <Section title="تحصیلات">
-            <Row k="مدرک مدرسه" v={reg.schoolDegree} />
-            <Row k="مدرک دانشگاه" v={reg.universityDegree} />
           </Section>
           <Section title="ثبت‌نام">
             <Row k="استاد انتخابی" v={teacherName} />
