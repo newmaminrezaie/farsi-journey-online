@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { registrationsApi, semestersApi, teachersApi, booksApi } from "@/lib/api";
 import { formatJalali } from "@/lib/jalali";
 import type { Registration, Semester } from "@/lib/types";
-import { Search, Download, Printer, X, ClipboardList, GraduationCap, Users, TrendingUp, Wallet } from "lucide-react";
+import { Search, Download, Printer, X, ClipboardList, GraduationCap, Users, TrendingUp, Wallet, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatToman } from "@/lib/api";
 
@@ -94,10 +94,14 @@ export default function RegistrationsAdmin() {
 
   async function remove(id: string) {
     if (!confirm("حذف این ثبت‌نام؟")) return;
-    await registrationsApi.remove(id);
-    qc.invalidateQueries({ queryKey: ["registrations"] });
-    setSelected(null);
-    toast.success("حذف شد");
+    try {
+      await registrationsApi.remove(id);
+      qc.invalidateQueries({ queryKey: ["registrations"] });
+      setSelected(null);
+      toast.success("ثبت‌نام حذف شد");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "حذف انجام نشد");
+    }
   }
 
   function exportCSV(rows: Registration[]) {
@@ -233,6 +237,9 @@ export default function RegistrationsAdmin() {
                     <td className="p-3 text-left whitespace-nowrap">
                       <button onClick={() => setSelected(r)} className="text-xs font-bold text-primary hover:text-gold px-2">مشاهده</button>
                       <button onClick={() => printOne(r)} className="text-xs font-bold text-primary hover:text-gold px-2">چاپ</button>
+                      <button onClick={() => remove(r.id)} className="inline-flex items-center gap-1 text-xs font-bold text-destructive hover:text-destructive/80 px-2" title="حذف ثبت‌نام">
+                        <Trash2 className="h-3.5 w-3.5" /> حذف
+                      </button>
                     </td>
                   </tr>
                 );
