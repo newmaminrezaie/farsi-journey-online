@@ -153,11 +153,12 @@ export default function RegistrationsAdmin() {
       </div>
 
       {/* Metrics */}
-      <div className="grid md:grid-cols-4 gap-4 mb-6">
+      <div className="grid md:grid-cols-5 gap-4 mb-6">
         <Metric icon={<ClipboardList />} label="کل ثبت‌نام‌ها" value={total} />
         <Metric icon={<TrendingUp />} label="ثبت‌نام جدید" value={newCount} accent />
         <Metric icon={<Users />} label="قطعی شده" value={enrolled} />
         <Metric icon={<GraduationCap />} label="کلاس‌های فعال" value={uniqueClasses} />
+        <Metric icon={<Wallet />} label="مجموع پرداختی (تومان)" value={totalPaid} />
       </div>
 
       {/* Filters */}
