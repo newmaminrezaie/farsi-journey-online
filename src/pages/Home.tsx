@@ -181,7 +181,7 @@ export default function Home() {
       <section className="relative bg-parchment">
         <div className="absolute inset-0 tile-bg-gold opacity-50" />
         <div className="container relative py-20">
-          <SectionHeader eyebrow="فروشگاه کتاب" title="منابع منتخب" note="کتاب‌های اصلی و کاربردی برای هر سطح" />
+          <SectionHeader eyebrow="فروشگاه کتاب" title="کتاب‌هایی که با آن‌ها یاد می‌گیریم" note="کتاب‌های اصلی و کاربردی برای هر سطح" />
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {books.slice(0, 6).map(b => (
               <Link key={b.id} to={`/shop/${b.id}`} className="group">
@@ -198,6 +198,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* TESTIMONIALS */}
+      <Testimonials />
+
 
       {/* CTA */}
       <section className="container py-20">
