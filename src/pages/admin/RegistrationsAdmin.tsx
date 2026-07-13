@@ -403,12 +403,9 @@ function renderPrintHTML(rows: Registration[], semById: Map<string, Semester>, t
         <h3>اطلاعات فردی</h3>
         <div class="grid">
           ${row("نام پدر", r.fatherName)}
-          ${row("کد ملی", r.nationalId)}
-          ${row("شماره شناسنامه", r.birthCertNo)}
-          ${row("صادره از", r.issuedFrom)}
+          ${row("کد ملی / شناسنامه", r.nationalId || r.birthCertNo)}
           ${row("محل تولد", r.birthPlace)}
-          ${row("مدرک مدرسه", r.schoolDegree)}
-          ${row("مدرک دانشگاه", r.universityDegree)}
+          ${row("پایه تحصیلی", r.schoolDegree || r.universityDegree)}
         </div>
         <h3>تماس</h3>
         <div class="grid">
@@ -416,6 +413,12 @@ function renderPrintHTML(rows: Registration[], semById: Map<string, Semester>, t
           ${row("تلفن ثابت", r.landline)}
           <div style="grid-column:1/-1">${row("آدرس", r.address)}</div>
           <div style="grid-column:1/-1">${row("یادداشت", r.note)}</div>
+        </div>
+        <h3>پرداخت</h3>
+        <div class="grid">
+          ${row("مبلغ پرداختی", r.paidToman ? formatToman(r.paidToman) : "پرداخت‌نشده")}
+          ${row("کد پیگیری", r.paymentRef)}
+          ${row("تاریخ پرداخت", r.paidAt ? formatJalali(r.paidAt.slice(0, 10)) : "—")}
         </div>
       </div>`;
   }).join("");
