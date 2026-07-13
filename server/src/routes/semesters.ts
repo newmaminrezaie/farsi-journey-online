@@ -109,6 +109,14 @@ function serialize(s: any) {
 export async function registerSemestersRoutes(app: FastifyInstance) {
   app.get("/semesters", async () => {
     const rows = await prisma.semester.findMany({ orderBy: { createdAt: "desc" } });
+    // Backfill classCode for any legacy row missing it.
+    for (const r of rows as any[]) {
+      if (!r.classCode) {
+        const code = await generateClassCode(r.level, r.startsOn);
+        await prisma.semester.update({ where: { id: r.id }, data: { classCode: code } as any });
+        r.classCode = code;
+      }
+    }
     return rows.map(serialize);
   });
 
