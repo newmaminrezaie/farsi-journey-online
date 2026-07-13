@@ -28,6 +28,11 @@ const StatusUpdate = z.object({
   status: z.enum(["new", "contacted", "enrolled", "rejected"]),
 });
 
+const PaymentUpdate = z.object({
+  paidToman: z.number().int().nonnegative(),
+  paymentRef: z.string().max(64).default(""),
+});
+
 export async function registerRegistrationsRoutes(app: FastifyInstance) {
   // Public: create a registration from the site's forms.
   app.post("/registrations", async (req, reply) => {
