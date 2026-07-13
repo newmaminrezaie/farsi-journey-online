@@ -51,6 +51,17 @@ model Teacher {
   createdAt    DateTime @default(now())
 }
 
+model Employee {
+  id           String   @id @default(cuid())
+  nameFa       String
+  nameEn       String   @default("")
+  roleFa       String   @default("")     // نقش، مثلاً منشی، مسئول ثبت‌نام
+  bioFa        String   @default("")
+  photoUrl     String   @default("")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
 model Semester {
   id          String   @id @default(cuid())
   classCode   String   @unique @default("")
