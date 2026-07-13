@@ -3,8 +3,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { registrationsApi, semestersApi, teachersApi, booksApi } from "@/lib/api";
 import { formatJalali } from "@/lib/jalali";
 import type { Registration, Semester } from "@/lib/types";
-import { Search, Download, Printer, X, ClipboardList, GraduationCap, Users, TrendingUp } from "lucide-react";
+import { Search, Download, Printer, X, ClipboardList, GraduationCap, Users, TrendingUp, Wallet } from "lucide-react";
 import { toast } from "sonner";
+import { formatToman } from "@/lib/api";
 
 const STATUSES = ["new", "contacted", "enrolled", "rejected"] as const;
 const STATUS_FA: Record<string, string> = {
