@@ -85,6 +85,7 @@ export default function RegistrationsAdmin() {
   const enrolled = regs.filter(r => r.status === "enrolled").length;
   const newCount = regs.filter(r => r.status === "new").length;
   const uniqueClasses = new Set(regs.map(r => r.semesterId).filter(Boolean)).size;
+  const totalPaid = regs.reduce((s, r) => s + (r.paidToman || 0), 0);
 
   async function update(id: string, s: any) {
     await registrationsApi.updateStatus(id, s);
