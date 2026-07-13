@@ -8,7 +8,7 @@ const nav = [
   { to: "/", label: "خانه" },
   { to: "/semesters", label: "ترم‌ها" },
   { to: "/assessment", label: "تعیین سطح" },
-  { to: "/teachers", label: "اساتید" },
+  { to: "/teachers", label: "اساتید و کارکنان" },
   { to: "/shop", label: "فروشگاه کتاب" },
   { to: "/about", label: "درباره" },
   { to: "/contact", label: "تماس" },
@@ -49,8 +49,8 @@ export default function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <a href="tel:+985157220000" className="hidden md:inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-gold transition-colors">
-            <Phone className="h-4 w-4" /> ۰۵۷ ۵۷۲۲ ۰۰۰۰
+          <a href="tel:+985157223772" dir="ltr" className="hidden md:inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-gold transition-colors">
+            <Phone className="h-4 w-4" /> 051-57223772
           </a>
           <Link to="/cart" className="relative p-2.5 rounded-full bg-primary text-primary-foreground hover:bg-primary-soft transition-colors">
             <ShoppingBag className="h-4 w-4" />
