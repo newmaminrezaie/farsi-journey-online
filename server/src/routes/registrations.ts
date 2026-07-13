@@ -65,6 +65,22 @@ export async function registerRegistrationsRoutes(app: FastifyInstance) {
     return prisma.registration.update({ where: { id }, data: { status: parsed.data.status } });
   });
 
+  // Public: mark a registration as paid (called from the Zarinpal callback / mock).
+  app.post("/registrations/:id/payment", async (req, reply) => {
+    const id = (req.params as any).id as string;
+    const parsed = PaymentUpdate.safeParse(req.body);
+    if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() });
+    return prisma.registration.update({
+      where: { id },
+      data: {
+        paidToman: parsed.data.paidToman,
+        paymentRef: parsed.data.paymentRef,
+        paidAt: new Date(),
+        status: "enrolled",
+      },
+    });
+  });
+
   app.delete("/registrations/:id", { preHandler: requireStaff }, async (req) => {
     const id = (req.params as any).id as string;
     await prisma.registration.delete({ where: { id } });
