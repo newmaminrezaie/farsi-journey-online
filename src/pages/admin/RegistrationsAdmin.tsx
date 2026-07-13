@@ -328,6 +328,11 @@ function DetailDrawer({ reg, semester, teacherName, bookTitle, onClose, onPrint,
             <Row k="تاریخ ثبت" v={formatJalali(reg.createdAt.slice(0, 10))} />
             <Row k="وضعیت" v={STATUS_FA[reg.status]} />
           </Section>
+          <Section title="پرداخت">
+            <Row k="مبلغ پرداختی" v={reg.paidToman ? formatToman(reg.paidToman) : "پرداخت‌نشده"} />
+            <Row k="کد پیگیری پرداخت" v={reg.paymentRef} dir="ltr" />
+            <Row k="تاریخ پرداخت" v={reg.paidAt ? formatJalali(reg.paidAt.slice(0, 10)) : "—"} />
+          </Section>
         </div>
       </aside>
     </div>
