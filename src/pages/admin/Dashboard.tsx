@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { booksApi, ordersApi, registrationsApi, semestersApi, formatToman } from "@/lib/api";
-import { BookOpen, GraduationCap, ShoppingBag, ClipboardList } from "lucide-react";
+import { formatJalali } from "@/lib/jalali";
+import { BookOpen, GraduationCap, ShoppingBag, ClipboardList, TrendingUp } from "lucide-react";
 
 export default function Dashboard() {
   const { data: books = [] } = useQuery({ queryKey: ["books"], queryFn: () => booksApi.list() });
@@ -12,16 +14,57 @@ export default function Dashboard() {
   const newRegs = regs.filter(r => r.status === "new");
   const revenue = orders.filter(o => o.status !== "cancelled").reduce((s, o) => s + o.subtotalToman, 0);
 
+  // Registrations grouped by class code
+  const byClass = new Map<string, { code: string; title: string; count: number; enrolled: number }>();
+  for (const r of regs) {
+    const s = r.semesterId ? semesters.find(x => x.id === r.semesterId) : null;
+    const key = s?.id ?? "__none";
+    const code = s?.classCode ?? "بدون دوره";
+    const title = s?.titleFa ?? "درخواست عمومی";
+    const entry = byClass.get(key) ?? { code, title, count: 0, enrolled: 0 };
+    entry.count += 1;
+    if (r.status === "enrolled") entry.enrolled += 1;
+    byClass.set(key, entry);
+  }
+  const classSummary = Array.from(byClass.values()).sort((a, b) => b.count - a.count).slice(0, 8);
+
   return (
     <div>
       <h1 className="text-3xl mb-2 text-primary">داشبورد</h1>
       <p className="text-muted-foreground mb-8">نگاهی سریع به وضعیت آموزشگاه</p>
-      <div className="grid md:grid-cols-4 gap-4 mb-8">
+      <div className="grid md:grid-cols-5 gap-4 mb-8">
         <Stat icon={<GraduationCap />} label="ترم‌های فعال" value={semesters.filter(s => s.status === "open").length} />
         <Stat icon={<BookOpen />} label="کتاب‌ها" value={books.length} />
         <Stat icon={<ShoppingBag />} label="سفارش‌های در انتظار" value={pendingOrders.length} accent />
         <Stat icon={<ClipboardList />} label="ثبت‌نام جدید" value={newRegs.length} accent />
+        <Stat icon={<TrendingUp />} label="کل ثبت‌نام‌ها" value={regs.length} />
       </div>
+
+      <div className="bg-card rounded-3xl p-6 border border-primary/10 mb-6">
+        <div className="flex items-baseline justify-between mb-4">
+          <h3 className="text-lg text-primary">ثبت‌نام‌ها بر اساس کلاس</h3>
+          <Link to="/admin/registrations" className="text-xs font-bold text-gold hover:underline">مشاهده همه ←</Link>
+        </div>
+        {classSummary.length === 0 ? (
+          <p className="text-muted-foreground text-sm">هنوز ثبت‌نامی ثبت نشده.</p>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-2">
+            {classSummary.map(c => (
+              <div key={c.code + c.title} className="flex items-center justify-between p-3 rounded-xl bg-parchment/70 border border-primary/5">
+                <div>
+                  <div className="font-bold text-primary text-sm">{c.title}</div>
+                  <div className="text-xs font-mono text-turquoise font-bold">{c.code}</div>
+                </div>
+                <div className="text-left">
+                  <div className="text-2xl font-black text-primary">{c.count.toLocaleString("fa-IR")}</div>
+                  <div className="text-xs text-muted-foreground">{c.enrolled.toLocaleString("fa-IR")} قطعی</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="grid md:grid-cols-2 gap-4">
         <div className="bg-card rounded-3xl p-6 border border-primary/10">
           <h3 className="text-lg text-primary mb-4">آخرین سفارش‌ها</h3>
