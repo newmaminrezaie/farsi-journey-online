@@ -70,6 +70,7 @@ export default function SemestersAdmin() {
         <table className="w-full text-sm">
           <thead className="bg-primary/5 text-right">
             <tr>
+              <th className="p-3">کد کلاس</th>
               <th className="p-3">عنوان</th><th className="p-3">استاد</th>
               <th className="p-3">شروع</th><th className="p-3">قیمت</th>
               <th className="p-3">ظرفیت</th><th className="p-3">وضعیت</th><th className="p-3"></th>
@@ -81,6 +82,7 @@ export default function SemestersAdmin() {
               const teacherNames = teacherIds.map(id => teachers.find(t => t.id === id)?.nameFa).filter(Boolean).join("، ");
               return (
               <tr key={s.id} className="border-t border-primary/5">
+                <td className="p-3 font-mono text-xs text-turquoise font-bold">{s.classCode || "—"}</td>
                 <td className="p-3 font-bold text-primary">{s.titleFa}</td>
                 <td className="p-3 text-muted-foreground">{teacherNames || "—"}</td>
                 <td className="p-3">{formatJalali(s.startsOn)}</td>
