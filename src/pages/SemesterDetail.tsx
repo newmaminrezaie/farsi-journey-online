@@ -43,7 +43,10 @@ export default function SemesterDetail() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.fullName || !form.phone) return toast.error("نام زبان‌آموز و شماره همراه الزامی است");
+    if (!form.fullName) return toast.error("نام و نام خانوادگی الزامی است");
+    if (!form.phone) return toast.error("شماره همراه الزامی است");
+    if (!form.landline) return toast.error("تلفن ثابت الزامی است");
+    if (!form.address) return toast.error("آدرس الزامی است");
     if (teacherChoices.length > 0 && !form.selectedTeacherId) return toast.error("لطفاً استاد مورد نظر خود را انتخاب کنید");
     if (!form.agreedToTerms) return toast.error("لطفاً مقررات ثبت‌نام را تأیید کنید");
     setSubmitting(true);
@@ -51,12 +54,12 @@ export default function SemesterDetail() {
       semesterId: sem!.id,
       fullName: form.fullName,
       fatherName: form.fatherName,
-      birthCertNo: form.birthCertNo,
+      birthCertNo: "",
       nationalId: form.nationalId,
-      issuedFrom: form.issuedFrom,
+      issuedFrom: "",
       birthPlace: form.birthPlace,
-      schoolDegree: form.schoolDegree,
-      universityDegree: form.universityDegree,
+      schoolDegree: form.eduLevel,
+      universityDegree: "",
       address: form.address,
       phone: form.phone,
       landline: form.landline,
