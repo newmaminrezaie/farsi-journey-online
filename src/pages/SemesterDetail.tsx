@@ -22,10 +22,10 @@ export default function SemesterDetail() {
   const { data: books = [] } = useQuery({ queryKey: ["books"], queryFn: () => booksApi.list() });
 
   const [form, setForm] = useState({
-    fullName: "", fatherName: "", birthCertNo: "",
-    issuedFrom: "", birthPlace: "",
-    schoolDegree: "", universityDegree: "",
-    address: "", landline: "", phone: "", nationalId: "",
+    fullName: "", fatherName: "", nationalId: "",
+    birthPlace: "",
+    eduLevel: "",
+    address: "", landline: "", phone: "",
     termInterest: "", levelInterest: "", selectedTeacherId: "", selectedBookId: "",
     note: "", agreedToTerms: false,
   });
