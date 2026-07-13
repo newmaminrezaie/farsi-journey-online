@@ -1,6 +1,6 @@
 import { Outlet, NavLink, Navigate, useNavigate } from "react-router-dom";
 import { authApi } from "@/lib/api";
-import { LayoutDashboard, BookOpen, GraduationCap, Users, ShoppingBag, ClipboardList, LogOut } from "lucide-react";
+import { LayoutDashboard, BookOpen, GraduationCap, Users, ShoppingBag, ClipboardList, Megaphone, LogOut } from "lucide-react";
 import logo from "@/assets/logo-fa.png";
 
 const links = [
@@ -10,6 +10,7 @@ const links = [
   { to: "/admin/books", label: "کتاب‌ها", icon: BookOpen },
   { to: "/admin/orders", label: "سفارش‌ها", icon: ShoppingBag },
   { to: "/admin/registrations", label: "ثبت‌نام‌ها", icon: ClipboardList },
+  { to: "/admin/promo", label: "بنر تبلیغاتی", icon: Megaphone },
 ];
 
 export default function AdminLayout() {
