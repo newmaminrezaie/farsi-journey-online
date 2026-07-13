@@ -61,6 +61,8 @@ export const registrationsApi = {
     http("/registrations", { method: "POST", body: JSON.stringify(input) }),
   updateStatus: (id: string, status: Registration["status"]): Promise<void> =>
     http(`/registrations/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }).then(() => undefined),
+  markPaid: (id: string, paidToman: number, paymentRef = ""): Promise<Registration> =>
+    http(`/registrations/${id}/payment`, { method: "POST", body: JSON.stringify({ paidToman, paymentRef }) }),
   remove: (id: string): Promise<void> =>
     http(`/registrations/${id}`, { method: "DELETE" }).then(() => undefined),
 };
