@@ -1,56 +1,44 @@
-## Goal
+## Phased plan
 
-Stop localStorage-only mode. Teachers, semesters, books, and registrations get stored in Postgres on the VPS and are shared across all visitors and browsers. Rebuilds never wipe data.
+### Phase 1 — Backend + data model (requires `deploy.ps1`)
+1. **Class code**: add `classCode` (unique, short, e.g. `G-A1-0407`) to `Semester` in Prisma. Auto-generate on create from level + jalali year + sequence. Backfill existing rows.
+2. **Purge test registrations**: one-shot script `server/src/scripts/purge-registrations.ts` run via `docker-compose run --rm api node dist/scripts/purge-registrations.js`.
+3. Expose `classCode` in `GET /api/semesters` serializer.
 
-## What changes
+### Phase 2 — Admin registrations panel (frontend-only, `deploy-frontend.ps1`)
+Rebuild `RegistrationsAdmin.tsx`:
+- Full detail drawer/modal per row with every field (parents, national ID, address, school, selected teacher/book, agreedToTerms, createdAt).
+- Per-row **Print** (window.print on a styled sheet) and **Download PDF** (via `jspdf` + Persian font — or simpler: print-to-PDF friendly HTML page at `/admin/registrations/:id/print`).
+- **Bulk CSV export** of all registrations (UTF-8 BOM, Persian-safe).
+- **Filters/sort**: by date range, semester dropdown, class code, status. Column sort on date & name.
+- Show class code column.
 
-### 1. Backend schema (flatten to match the frontend)
+### Phase 3 — Admin dashboard (frontend-only)
+- Add cards: total registrations (today / week / month), per-semester breakdown with class codes, recent 10 registrations preview with quick-open.
 
-The current Prisma schema was over-engineered (`Course`, `ClassSession`, `Enrollment`, `Student` normalization). The frontend never used any of that. Flatten to what the app actually needs:
+### Phase 4 — Image upload everywhere (needs backend endpoint)
+Backend already has `@fastify/multipart` + `/uploads` static. Add `POST /api/admin/uploads` returning `{ url }`. New `<ImageInput>` component (URL field + "بارگذاری تصویر" button) used in:
+- `TeachersAdmin` (photoUrl)
+- `BooksAdmin` (coverUrl)
+- any future image URL field.
 
-- **Semester** — add `level`, `teacherIds String[]`, `scheduleFa`, `capacity`, `seatsTaken`, `priceToman`, `mode`, `status`. Drop the `Course`/`ClassSession`/`Enrollment`/`Student` relations. Old `jalaliYear`/`season`/`registrationStatus` fields removed.
-- **Registration** (new table) — captures every field the paper form has: `fullName`, `fatherName`, `birthCertNo`, `nationalId`, `issuedFrom`, `birthPlace`, `schoolDegree`, `universityDegree`, `address`, `phone`, `landline`, `termInterest`, `levelInterest`, `selectedTeacherId`, `note`, `agreedToTerms`, `semesterId` (nullable), `status`, `createdAt`.
-- **Teacher**, **Book** — unchanged (already compatible).
-- Drop unused tables: `Course`, `ClassSession`, `Enrollment`, `Student`, `BookOrder`, `BookOrderItem`, `Payment`. Book orders + Zarinpal stay on localStorage for now (as we agreed earlier — payment integration is separate work).
+### Phase 5 — Homepage tweaks (frontend-only)
+- Replace section title `منابع منتخب` with something warmer (e.g. **«کتاب‌هایی که با آن‌ها یاد می‌گیریم»**). Title text only.
+- New **student testimonials** section (6 realistic Persian reviews with names, levels, avatar initials — no fake photos).
 
-### 2. Backend routes
+### Phase 6 — Semesters page filter (frontend-only)
+Add mode filter (همه / حضوری / آنلاین / ترکیبی) chips at top of `/semesters`.
 
-- Rewrite `server/src/routes/semesters.ts` with the flat zod schema. Public `GET`. Staff-only `POST`/`PATCH`/`DELETE`.
-- New `server/src/routes/registrations.ts` — public `POST` (so the form works without login), staff-only `GET`/`PATCH`/`DELETE`. Auto-increments `Semester.seatsTaken` on create if `semesterId` set.
-- `teachers` and `books` routes stay as-is (they already work).
-- Delete stub routes for `courses`, `classSessions`, `students` and remove their registration from `index.ts`.
+---
 
-### 3. Frontend `src/lib/api.ts`
+### Deploy order
+- Phase 1 → `.\deploy.ps1` + run purge script once.
+- Phases 2, 3, 4-frontend, 5, 6 → batched, then `.\deploy-frontend.ps1`.
+- Phase 4 backend upload endpoint → `.\deploy.ps1` (can be combined with Phase 1).
 
-Replace localStorage bodies of `teachersApi`, `semestersApi`, `booksApi`, `registrationsApi` with `fetch("/api/…")` calls. Same function signatures — no page code changes. Response shapes match frontend types (backend already returns snake-free camelCase from Prisma). `cartApi`, `ordersApi`, `authApi` untouched.
-
-### 4. Frontend seed
-
-`src/lib/seed.ts` no longer runs against the network-backed entities. It becomes a no-op (or is removed from `main.tsx`). Demo data comes from a one-time DB seed script on the VPS instead.
-
-### 5. New backend seed script
-
-`server/src/scripts/seed-demo.ts` — inserts the 4 demo teachers, 4 semesters, 6 books if the DB is empty. Idempotent. Run once after `db push`.
-
-## Deploy steps you'll run on the VPS after I push code
-
-```bash
-cd /var/www/higooya/server
-npm run build
-cd ..
-npx --prefix server prisma db push --schema server/prisma/schema.prisma --accept-data-loss
-docker-compose restart api
-docker-compose exec api npm run seed:demo   # optional — only if you want demo rows
-```
-
-Then locally: `.\deploy.ps1` to ship the new frontend.
-
-**Note on `--accept-data-loss`:** the old `Semester`/`Student`/`Enrollment` rows will be dropped because their columns change. You've said the data in there was test data, so this is fine. Teacher and Book rows survive.
-
-## What's not in scope this round
-
-- Zarinpal integration (still stubbed; cart/orders remain localStorage — the buyer still sees an order-success page but nothing hits the server yet).
-- Real Telegram/Bale notifications (backend queue exists but disabled).
-- Multi-staff accounts (single admin user is enough for now).
-
-Approve and I'll implement.
+### Technical notes
+- Class code format: `{LEVEL2}-{JYY}{JMM}-{SEQ2}` e.g. `A1-0407-01`. Unique index in Prisma.
+- CSV export: client-side, no backend needed; column headers in Persian; prefix `\uFEFF`.
+- Print sheet: dedicated route with `@media print` CSS; no PDF lib needed → keeps bundle small and works offline.
+- Uploads: store under `server/uploads/`, return `/uploads/<uuid>.<ext>`. Max 5MB, jpg/png/webp only.
+- Testimonials: hardcoded array in `Home.tsx` — user asked for it to "look real"; using real photos would be misleading, so initials avatars on parchment tiles.
