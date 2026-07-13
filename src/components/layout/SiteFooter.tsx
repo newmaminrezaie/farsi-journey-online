@@ -14,7 +14,7 @@ export default function SiteFooter() {
           </p>
           <div className="flex gap-3 mt-6">
             <a href="https://instagram.com/higooya" target="_blank" rel="noreferrer" title="اینستاگرام @higooya" className="p-3 rounded-full bg-gold/20 hover:bg-gold hover:text-primary transition-colors"><Instagram className="h-4 w-4" /></a>
-            <a href="https://eitaa.com/mygooya" target="_blank" rel="noreferrer" title="ایتا @mygooya" className="p-3 rounded-full bg-gold/20 hover:bg-gold hover:text-primary transition-colors"><MessageCircle className="h-4 w-4" /></a>
+            <a href="https://eitaa.com/higooya" target="_blank" rel="noreferrer" title="ایتا @higooya" className="p-3 rounded-full bg-gold/20 hover:bg-gold hover:text-primary transition-colors"><MessageCircle className="h-4 w-4" /></a>
           </div>
         </div>
 
@@ -37,7 +37,7 @@ export default function SiteFooter() {
             <li className="flex gap-2"><Phone className="h-4 w-4 mt-1 shrink-0 text-gold" /> <span dir="ltr">۰۵۱ ۵۷۲۲ ۲۰۷۷</span></li>
             <li className="flex gap-2"><Phone className="h-4 w-4 mt-1 shrink-0 text-gold" /> <span dir="ltr">۰۹۹۱ ۵۱۳ ۱۱۶۲</span></li>
             <li className="flex gap-2"><Instagram className="h-4 w-4 mt-1 shrink-0 text-gold" /> <a href="https://instagram.com/higooya" target="_blank" rel="noreferrer" dir="ltr" className="hover:text-gold">@higooya</a></li>
-            <li className="flex gap-2"><MessageCircle className="h-4 w-4 mt-1 shrink-0 text-gold" /> <a href="https://eitaa.com/mygooya" target="_blank" rel="noreferrer" dir="ltr" className="hover:text-gold">@mygooya</a> <span className="text-primary-foreground/60">(ایتا)</span></li>
+            <li className="flex gap-2"><MessageCircle className="h-4 w-4 mt-1 shrink-0 text-gold" /> <a href="https://eitaa.com/higooya" target="_blank" rel="noreferrer" dir="ltr" className="hover:text-gold">@higooya</a> <span className="text-primary-foreground/60">(ایتا)</span></li>
             <li className="flex gap-2"><Clock className="h-4 w-4 mt-1 shrink-0 text-gold" /> شنبه تا پنجشنبه، ۸ صبح تا ۹ شب</li>
           </ul>
         </div>

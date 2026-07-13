@@ -4,7 +4,7 @@
 
 import { storage, uid, refCode } from "./storage";
 import type {
-  Book, CartItem, Order, OrderItem, Registration, Semester, Teacher,
+  Book, CartItem, Employee, Order, OrderItem, Registration, Semester, Teacher,
 } from "./types";
 
 const KEYS = {
@@ -39,6 +39,18 @@ export const teachersApi = {
     http(`/teachers/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
   remove: (id: string): Promise<void> =>
     http(`/teachers/${id}`, { method: "DELETE" }).then(() => undefined),
+};
+
+// ---------- Employees ----------
+export const employeesApi = {
+  list: (): Promise<Employee[]> => http("/employees"),
+  get: (id: string): Promise<Employee> => http(`/employees/${id}`),
+  create: (input: Omit<Employee, "id" | "createdAt">): Promise<Employee> =>
+    http("/employees", { method: "POST", body: JSON.stringify(input) }),
+  update: (id: string, patch: Partial<Employee>): Promise<Employee> =>
+    http(`/employees/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
+  remove: (id: string): Promise<void> =>
+    http(`/employees/${id}`, { method: "DELETE" }).then(() => undefined),
 };
 
 // ---------- Semesters ----------

@@ -59,7 +59,7 @@ export default function Contact() {
             <a href="https://instagram.com/higooya" target="_blank" rel="noreferrer" className="text-primary hover:text-gold" dir="ltr">@higooya</a>
           </Item>
           <Item icon={<MessageCircle />} title="ایتا">
-            <a href="https://eitaa.com/mygooya" target="_blank" rel="noreferrer" className="text-primary hover:text-gold" dir="ltr">@mygooya</a>
+            <a href="https://eitaa.com/higooya" target="_blank" rel="noreferrer" className="text-primary hover:text-gold" dir="ltr">@higooya</a>
           </Item>
           <Item icon={<Clock />} title="ساعات کار">شنبه تا پنجشنبه، ۸ صبح تا ۹ شب</Item>
         </div>

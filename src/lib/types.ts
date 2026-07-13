@@ -13,6 +13,17 @@ export interface Teacher {
   createdAt: string;
 }
 
+export interface Employee {
+  id: ID;
+  nameFa: string;
+  nameEn: string;
+  roleFa: string;          // نقش (منشی، مسئول ثبت‌نام، …)
+  bioFa: string;
+  photoUrl: string;
+  active?: boolean;
+  createdAt: string;
+}
+
 export type SemesterLevel =
   | "beginner"
   | "elementary"

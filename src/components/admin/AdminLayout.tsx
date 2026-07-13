@@ -1,12 +1,13 @@
 import { Outlet, NavLink, Navigate, useNavigate } from "react-router-dom";
 import { authApi } from "@/lib/api";
-import { LayoutDashboard, BookOpen, GraduationCap, Users, ShoppingBag, ClipboardList, Megaphone, LogOut } from "lucide-react";
+import { LayoutDashboard, BookOpen, GraduationCap, Users, UserCog, ShoppingBag, ClipboardList, Megaphone, LogOut } from "lucide-react";
 import logo from "@/assets/logo-fa.png";
 
 const links = [
   { to: "/admin/dashboard", label: "داشبورد", icon: LayoutDashboard },
   { to: "/admin/semesters", label: "ترم‌ها", icon: GraduationCap },
   { to: "/admin/teachers", label: "اساتید", icon: Users },
+  { to: "/admin/employees", label: "کارکنان", icon: UserCog },
   { to: "/admin/books", label: "کتاب‌ها", icon: BookOpen },
   { to: "/admin/orders", label: "سفارش‌ها", icon: ShoppingBag },
   { to: "/admin/registrations", label: "ثبت‌نام‌ها", icon: ClipboardList },

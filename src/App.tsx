@@ -22,6 +22,7 @@ import Dashboard from "@/pages/admin/Dashboard";
 import BooksAdmin from "@/pages/admin/BooksAdmin";
 import SemestersAdmin from "@/pages/admin/SemestersAdmin";
 import TeachersAdmin from "@/pages/admin/TeachersAdmin";
+import EmployeesAdmin from "@/pages/admin/EmployeesAdmin";
 import OrdersAdmin from "@/pages/admin/OrdersAdmin";
 import RegistrationsAdmin from "@/pages/admin/RegistrationsAdmin";
 import PromoAdmin from "@/pages/admin/PromoAdmin";
@@ -55,6 +56,7 @@ export default function App() {
         <Route path="books" element={<BooksAdmin />} />
         <Route path="semesters" element={<SemestersAdmin />} />
         <Route path="teachers" element={<TeachersAdmin />} />
+        <Route path="employees" element={<EmployeesAdmin />} />
         <Route path="orders" element={<OrdersAdmin />} />
         <Route path="registrations" element={<RegistrationsAdmin />} />
         <Route path="promo" element={<PromoAdmin />} />
