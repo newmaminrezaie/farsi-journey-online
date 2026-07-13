@@ -84,6 +84,7 @@ export default function Semesters() {
             </article>
           );
         })}
+        </div>
       </section>
     </>
   );
