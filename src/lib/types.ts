@@ -24,6 +24,7 @@ export type SemesterLevel =
 
 export interface Semester {
   id: ID;
+  classCode?: string;         // unique short code, e.g. "A1-4L9K"
   titleFa: string;
   level: SemesterLevel;
   teacherId: ID;              // legacy — primary teacher (kept for back-compat)
