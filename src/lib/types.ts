@@ -62,6 +62,9 @@ export interface Registration {
   selectedBookId?: ID;        // کتاب انتخاب‌شده هنگام ثبت‌نام (اختیاری)
   note?: string;
   agreedToTerms?: boolean;
+  paidToman?: number;
+  paymentRef?: string;
+  paidAt?: string | null;
   status: "new" | "contacted" | "enrolled" | "rejected";
   createdAt: string;
 }

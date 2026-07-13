@@ -3,8 +3,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { registrationsApi, semestersApi, teachersApi, booksApi } from "@/lib/api";
 import { formatJalali } from "@/lib/jalali";
 import type { Registration, Semester } from "@/lib/types";
-import { Search, Download, Printer, X, ClipboardList, GraduationCap, Users, TrendingUp } from "lucide-react";
+import { Search, Download, Printer, X, ClipboardList, GraduationCap, Users, TrendingUp, Wallet } from "lucide-react";
 import { toast } from "sonner";
+import { formatToman } from "@/lib/api";
 
 const STATUSES = ["new", "contacted", "enrolled", "rejected"] as const;
 const STATUS_FA: Record<string, string> = {
@@ -84,6 +85,7 @@ export default function RegistrationsAdmin() {
   const enrolled = regs.filter(r => r.status === "enrolled").length;
   const newCount = regs.filter(r => r.status === "new").length;
   const uniqueClasses = new Set(regs.map(r => r.semesterId).filter(Boolean)).size;
+  const totalPaid = regs.reduce((s, r) => s + (r.paidToman || 0), 0);
 
   async function update(id: string, s: any) {
     await registrationsApi.updateStatus(id, s);
@@ -118,6 +120,8 @@ export default function RegistrationsAdmin() {
         "استاد انتخابی": teachers.find(t => t.id === r.selectedTeacherId)?.nameFa ?? "",
         "کتاب انتخابی": books.find(b => b.id === r.selectedBookId)?.titleFa ?? "",
         "یادداشت": r.note ?? "",
+        "مبلغ پرداختی (تومان)": r.paidToman ?? 0,
+        "کد پیگیری پرداخت": r.paymentRef ?? "",
         "وضعیت": STATUS_FA[r.status] ?? r.status,
         "تاریخ ثبت": formatJalali(r.createdAt.slice(0, 10)),
       };
@@ -149,11 +153,12 @@ export default function RegistrationsAdmin() {
       </div>
 
       {/* Metrics */}
-      <div className="grid md:grid-cols-4 gap-4 mb-6">
+      <div className="grid md:grid-cols-5 gap-4 mb-6">
         <Metric icon={<ClipboardList />} label="کل ثبت‌نام‌ها" value={total} />
         <Metric icon={<TrendingUp />} label="ثبت‌نام جدید" value={newCount} accent />
         <Metric icon={<Users />} label="قطعی شده" value={enrolled} />
         <Metric icon={<GraduationCap />} label="کلاس‌های فعال" value={uniqueClasses} />
+        <Metric icon={<Wallet />} label="مجموع پرداختی (تومان)" value={totalPaid} />
       </div>
 
       {/* Filters */}
@@ -199,6 +204,7 @@ export default function RegistrationsAdmin() {
                 <th className="p-3">نام</th>
                 <th className="p-3">تلفن</th>
                 <th className="p-3">دوره</th>
+                <th className="p-3">پرداختی</th>
                 <th className="p-3">وضعیت</th>
                 <th className="p-3"></th>
               </tr>
@@ -206,6 +212,7 @@ export default function RegistrationsAdmin() {
             <tbody>
               {filtered.map(r => {
                 const s = r.semesterId ? semById.get(r.semesterId) : null;
+                const paid = r.paidToman || 0;
                 return (
                   <tr key={r.id} className="border-t border-primary/5 hover:bg-parchment/50">
                     <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">{formatJalali(r.createdAt.slice(0, 10))}</td>
@@ -213,6 +220,11 @@ export default function RegistrationsAdmin() {
                     <td className="p-3 font-bold text-primary">{r.fullName}</td>
                     <td className="p-3" dir="ltr">{r.phone}</td>
                     <td className="p-3 text-muted-foreground">{s?.titleFa ?? r.levelInterest ?? "—"}</td>
+                    <td className="p-3 whitespace-nowrap">
+                      {paid > 0
+                        ? <span className="inline-flex items-center gap-1 rounded-md bg-turquoise/15 text-turquoise font-bold px-2 py-0.5 text-xs">{formatToman(paid)}</span>
+                        : <span className="text-xs text-muted-foreground">پرداخت‌نشده</span>}
+                    </td>
                     <td className="p-3">
                       <select value={r.status} onChange={e => update(r.id, e.target.value)} className="rounded-lg bg-parchment border border-primary/15 px-2 py-1 text-xs">
                         {STATUSES.map(s2 => <option key={s2} value={s2}>{STATUS_FA[s2]}</option>)}
@@ -225,7 +237,7 @@ export default function RegistrationsAdmin() {
                   </tr>
                 );
               })}
-              {filtered.length === 0 && <tr><td colSpan={7} className="p-12 text-center text-muted-foreground">رکوردی مطابق فیلترها یافت نشد.</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={8} className="p-12 text-center text-muted-foreground">رکوردی مطابق فیلترها یافت نشد.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -293,19 +305,14 @@ function DetailDrawer({ reg, semester, teacherName, bookTitle, onClose, onPrint,
           <Section title="اطلاعات فردی">
             <Row k="نام و نام خانوادگی" v={reg.fullName} />
             <Row k="نام پدر" v={reg.fatherName} />
-            <Row k="کد ملی" v={reg.nationalId} />
-            <Row k="شماره شناسنامه" v={reg.birthCertNo} />
-            <Row k="صادره از" v={reg.issuedFrom} />
+            <Row k="کد ملی / شماره شناسنامه" v={reg.nationalId || reg.birthCertNo} dir="ltr" />
             <Row k="محل تولد" v={reg.birthPlace} />
+            <Row k="پایه تحصیلی" v={reg.schoolDegree || reg.universityDegree} />
           </Section>
           <Section title="اطلاعات تماس">
             <Row k="همراه" v={reg.phone} dir="ltr" />
             <Row k="تلفن ثابت" v={reg.landline} dir="ltr" />
             <Row k="آدرس" v={reg.address} />
-          </Section>
-          <Section title="تحصیلات">
-            <Row k="مدرک مدرسه" v={reg.schoolDegree} />
-            <Row k="مدرک دانشگاه" v={reg.universityDegree} />
           </Section>
           <Section title="ثبت‌نام">
             <Row k="استاد انتخابی" v={teacherName} />
@@ -315,6 +322,11 @@ function DetailDrawer({ reg, semester, teacherName, bookTitle, onClose, onPrint,
             <Row k="یادداشت" v={reg.note} />
             <Row k="تاریخ ثبت" v={formatJalali(reg.createdAt.slice(0, 10))} />
             <Row k="وضعیت" v={STATUS_FA[reg.status]} />
+          </Section>
+          <Section title="پرداخت">
+            <Row k="مبلغ پرداختی" v={reg.paidToman ? formatToman(reg.paidToman) : "پرداخت‌نشده"} />
+            <Row k="کد پیگیری پرداخت" v={reg.paymentRef} dir="ltr" />
+            <Row k="تاریخ پرداخت" v={reg.paidAt ? formatJalali(reg.paidAt.slice(0, 10)) : "—"} />
           </Section>
         </div>
       </aside>
@@ -386,12 +398,9 @@ function renderPrintHTML(rows: Registration[], semById: Map<string, Semester>, t
         <h3>اطلاعات فردی</h3>
         <div class="grid">
           ${row("نام پدر", r.fatherName)}
-          ${row("کد ملی", r.nationalId)}
-          ${row("شماره شناسنامه", r.birthCertNo)}
-          ${row("صادره از", r.issuedFrom)}
+          ${row("کد ملی / شناسنامه", r.nationalId || r.birthCertNo)}
           ${row("محل تولد", r.birthPlace)}
-          ${row("مدرک مدرسه", r.schoolDegree)}
-          ${row("مدرک دانشگاه", r.universityDegree)}
+          ${row("پایه تحصیلی", r.schoolDegree || r.universityDegree)}
         </div>
         <h3>تماس</h3>
         <div class="grid">
@@ -399,6 +408,12 @@ function renderPrintHTML(rows: Registration[], semById: Map<string, Semester>, t
           ${row("تلفن ثابت", r.landline)}
           <div style="grid-column:1/-1">${row("آدرس", r.address)}</div>
           <div style="grid-column:1/-1">${row("یادداشت", r.note)}</div>
+        </div>
+        <h3>پرداخت</h3>
+        <div class="grid">
+          ${row("مبلغ پرداختی", r.paidToman ? formatToman(r.paidToman) : "پرداخت‌نشده")}
+          ${row("کد پیگیری", r.paymentRef)}
+          ${row("تاریخ پرداخت", r.paidAt ? formatJalali(r.paidAt.slice(0, 10)) : "—")}
         </div>
       </div>`;
   }).join("");

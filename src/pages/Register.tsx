@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { registrationsApi, semestersApi } from "@/lib/api";
-import type { Semester } from "@/lib/types";
-import { GraduationCap, ScrollText } from "lucide-react";
+import { registrationsApi, semestersApi, teachersApi, booksApi, formatToman } from "@/lib/api";
+import type { Book, Semester, Teacher } from "@/lib/types";
+import { GraduationCap, ScrollText, BadgePercent, BookOpen } from "lucide-react";
 
 const TERMS = [
   "این مرکز تابع مقررات پوششی و رفتاری آموزش و پرورش است، لذا از نظر رفتار و پوشش و حجاب کاملاً همانند مدارس می‌باشد.",
@@ -15,62 +15,83 @@ const TERMS = [
 export default function Register() {
   const nav = useNavigate();
   const [semesters, setSemesters] = useState<Semester[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
   const [form, setForm] = useState({
     semesterId: "",
-    fullName: "", fatherName: "", birthCertNo: "",
-    issuedFrom: "", birthPlace: "",
-    schoolDegree: "", universityDegree: "",
-    address: "", landline: "", phone: "", nationalId: "",
-    termInterest: "", levelInterest: "",
+    fullName: "", fatherName: "", nationalId: "",
+    birthPlace: "",
+    eduLevel: "",
+    address: "", landline: "", phone: "",
+    selectedTeacherId: "", selectedBookId: "",
     note: "", agreedToTerms: false,
   });
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     semestersApi.listOpen().then(setSemesters).catch(() => setSemesters([]));
+    teachersApi.list().then(setTeachers).catch(() => setTeachers([]));
+    booksApi.list().then(setBooks).catch(() => setBooks([]));
   }, []);
+
+  const sem = useMemo(() => semesters.find(s => s.id === form.semesterId), [semesters, form.semesterId]);
+
+  const teacherChoices = useMemo(() => {
+    if (!sem) return [];
+    const ids = (sem.teacherIds && sem.teacherIds.length ? sem.teacherIds : (sem.teacherId ? [sem.teacherId] : []));
+    const filtered = teachers.filter(t => ids.includes(t.id));
+    return filtered.length ? filtered : teachers;
+  }, [sem, teachers]);
+
+  const bookChoices = useMemo(() => {
+    if (!sem) return [];
+    const attached = books.filter(b => (sem.bookIds ?? []).includes(b.id));
+    return attached.length ? attached : books.filter(b => b.active);
+  }, [sem, books]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.fullName || !form.phone) return toast.error("نام زبان‌آموز و شماره همراه الزامی است");
+    if (!form.semesterId) return toast.error("لطفاً ترم مورد نظر خود را انتخاب کنید");
+    if (!form.fullName) return toast.error("نام و نام خانوادگی الزامی است");
+    if (!form.phone) return toast.error("شماره همراه الزامی است");
+    if (!form.landline) return toast.error("تلفن ثابت الزامی است");
+    if (!form.address) return toast.error("آدرس الزامی است");
+    if (teacherChoices.length > 0 && !form.selectedTeacherId) return toast.error("لطفاً استاد مورد نظر خود را انتخاب کنید");
     if (!form.agreedToTerms) return toast.error("لطفاً مقررات ثبت‌نام را تأیید کنید");
     setSubmitting(true);
-    const sem = form.semesterId ? semesters.find(s => s.id === form.semesterId) : null;
     try {
       const created = await registrationsApi.create({
-        semesterId: sem?.id ?? null,
+        semesterId: sem!.id,
         fullName: form.fullName,
         fatherName: form.fatherName,
-        birthCertNo: form.birthCertNo,
+        birthCertNo: "",
         nationalId: form.nationalId,
-        issuedFrom: form.issuedFrom,
+        issuedFrom: "",
         birthPlace: form.birthPlace,
-        schoolDegree: form.schoolDegree,
-        universityDegree: form.universityDegree,
+        schoolDegree: form.eduLevel,
+        universityDegree: "",
         address: form.address,
         phone: form.phone,
         landline: form.landline,
-        termInterest: form.termInterest || sem?.titleFa || "",
-        levelInterest: form.levelInterest,
+        termInterest: sem!.titleFa,
+        levelInterest: sem!.level,
+        selectedTeacherId: form.selectedTeacherId || undefined,
+        selectedBookId: form.selectedBookId || undefined,
         note: form.note,
         agreedToTerms: form.agreedToTerms,
       });
       setSubmitting(false);
-      if (sem) {
-        toast.success("فرم ثبت‌نام ثبت شد. لطفاً پرداخت را تکمیل کنید.");
-        nav("/register/pay", {
-          state: {
-            registrationId: (created as any)?.id,
-            registrantName: form.fullName,
-            phone: form.phone,
-            semester: { id: sem.id, titleFa: sem.titleFa, priceToman: sem.priceToman },
-            book: null,
-          },
-        });
-        return;
-      }
-      toast.success("درخواست شما ثبت شد. کارشناسان گویا به‌زودی تماس می‌گیرند.");
-      nav("/");
+      const chosenBook = form.selectedBookId ? books.find(b => b.id === form.selectedBookId) : null;
+      toast.success("فرم ثبت‌نام ثبت شد. لطفاً پرداخت را تکمیل کنید.");
+      nav("/register/pay", {
+        state: {
+          registrationId: (created as any)?.id,
+          registrantName: form.fullName,
+          phone: form.phone,
+          semester: { id: sem!.id, titleFa: sem!.titleFa, priceToman: sem!.priceToman },
+          book: chosenBook ? { id: chosenBook.id, titleFa: chosenBook.titleFa, priceToman: chosenBook.priceToman, coverUrl: chosenBook.coverUrl } : null,
+        },
+      });
     } catch (err: any) {
       setSubmitting(false);
       toast.error(err?.message || "ارسال ناموفق بود");
@@ -84,25 +105,27 @@ export default function Register() {
         <div className="text-center mb-10">
           <div className="chip-gold inline-flex mb-4">باسمه تعالی</div>
           <h1 className="text-4xl md:text-5xl mb-3 text-primary">فرم ثبت‌نام آموزشگاه زبان گویا</h1>
-          <p className="text-muted-foreground text-sm">کد زبان‌آموز پس از ثبت‌نام به شما تخصیص داده خواهد شد.</p>
+          <p className="text-muted-foreground text-sm">
+            تکمیل فرم و پرداخت شهریه از طریق درگاه امن زرین‌پال، برای قطعی شدن ثبت‌نام الزامی است.
+          </p>
         </div>
 
         <form onSubmit={submit} className="bg-card p-8 md:p-10 rounded-3xl border border-primary/10 shadow-soft space-y-8">
-          {/* Preamble matching the paper form */}
           <p className="text-primary leading-8 text-sm md:text-base">
             احتراماً اینجانب <b>(زبان‌آموز)</b> اطلاعات زیر را جهت ثبت‌نام در آموزشگاه زبان گویا اعلام می‌نمایم.
           </p>
 
-          {/* انتخاب ترم — در صورت انتخاب، پس از ارسال به درگاه پرداخت هدایت می‌شوید */}
+          {/* Semester — required */}
           <fieldset className="space-y-3">
-            <legend className="text-lg font-black text-primary mb-2">انتخاب ترم (اختیاری)</legend>
-            <F label="ترم مورد نظر">
+            <legend className="text-lg font-black text-primary mb-2">انتخاب ترم *</legend>
+            <F label="ترم مورد نظر *">
               <select
                 value={form.semesterId}
-                onChange={e => setForm({ ...form, semesterId: e.target.value })}
+                onChange={e => setForm({ ...form, semesterId: e.target.value, selectedTeacherId: "", selectedBookId: "" })}
                 className={inputCls}
+                required
               >
-                <option value="">— بدون انتخاب ترم (فقط ثبت درخواست و تماس بعدی) —</option>
+                <option value="">— لطفاً یک ترم را انتخاب کنید —</option>
                 {semesters.map(s => (
                   <option key={s.id} value={s.id}>
                     {s.titleFa} — {(s.priceToman || 0).toLocaleString("fa-IR")} تومان
@@ -110,108 +133,103 @@ export default function Register() {
                 ))}
               </select>
             </F>
-            {form.semesterId ? (
-              <p className="text-xs text-turquoise bg-turquoise/10 border border-turquoise/30 rounded-xl p-3 leading-6">
-                برای قطعی شدن جایگاه شما در این ترم، پس از ارسال فرم به درگاه پرداخت زرین‌پال منتقل می‌شوید و می‌بایست شهریه را پرداخت کنید.
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                اگر ترم خاصی مد نظر دارید انتخاب کنید تا پس از تکمیل فرم، شهریه را پرداخت کنید. در غیر این‌صورت کارشناسان ما با شما تماس خواهند گرفت.
-              </p>
-            )}
+            <p className="text-xs text-turquoise bg-turquoise/10 border border-turquoise/30 rounded-xl p-3 leading-6">
+              پس از ارسال فرم به درگاه پرداخت زرین‌پال منتقل می‌شوید. ثبت‌نام تنها با پرداخت شهریه قطعی می‌گردد.
+            </p>
           </fieldset>
 
-
-
-          {/* مشخصات فردی */}
-          <fieldset className="space-y-4">
-            <legend className="text-lg font-black text-primary mb-2">مشخصات زبان‌آموز</legend>
+          {/* Personal info */}
+          <fieldset className="space-y-4 pt-2 border-t border-primary/10">
+            <legend className="text-lg font-black text-primary mb-2 pt-4">مشخصات زبان‌آموز</legend>
             <div className="grid sm:grid-cols-2 gap-4">
-              <F label="نام و نام خانوادگی (زبان‌آموز) *"><input value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })} className={inputCls} /></F>
+              <F label="نام و نام خانوادگی *"><input value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })} className={inputCls} required /></F>
               <F label="نام پدر"><input value={form.fatherName} onChange={e => setForm({ ...form, fatherName: e.target.value })} className={inputCls} /></F>
-              <F label="شماره شناسنامه"><input value={form.birthCertNo} onChange={e => setForm({ ...form, birthCertNo: e.target.value })} className={inputCls} /></F>
-              <F label="کد ملی"><input value={form.nationalId} onChange={e => setForm({ ...form, nationalId: e.target.value })} className={inputCls} /></F>
-              <F label="صادره از"><input value={form.issuedFrom} onChange={e => setForm({ ...form, issuedFrom: e.target.value })} className={inputCls} /></F>
+              <F label="کد ملی / شماره شناسنامه"><input value={form.nationalId} onChange={e => setForm({ ...form, nationalId: e.target.value })} className={inputCls} dir="ltr" /></F>
               <F label="متولد"><input value={form.birthPlace} onChange={e => setForm({ ...form, birthPlace: e.target.value })} className={inputCls} placeholder="محل و سال تولد" /></F>
-            </div>
-          </fieldset>
-
-          {/* مدرک تحصیلی */}
-          <fieldset className="space-y-4 pt-2 border-t border-primary/10">
-            <legend className="text-lg font-black text-primary mb-2 pt-4">دارای مدرک تحصیلی</legend>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <F label="مدرسه"><input value={form.schoolDegree} onChange={e => setForm({ ...form, schoolDegree: e.target.value })} className={inputCls} placeholder="مثلاً دیپلم / سوم متوسطه" /></F>
-              <F label="دانشگاه"><input value={form.universityDegree} onChange={e => setForm({ ...form, universityDegree: e.target.value })} className={inputCls} placeholder="مثلاً کارشناسی / دکتری" /></F>
-            </div>
-          </fieldset>
-
-          {/* تماس */}
-          <fieldset className="space-y-4 pt-2 border-t border-primary/10">
-            <legend className="text-lg font-black text-primary mb-2 pt-4">اطلاعات تماس</legend>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <F label="تلفن ثابت"><input value={form.landline} onChange={e => setForm({ ...form, landline: e.target.value })} className={inputCls} dir="ltr" /></F>
-              <F label="همراه *"><input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className={inputCls} dir="ltr" /></F>
               <div className="sm:col-span-2">
-                <F label="آدرس"><textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className={inputCls + " min-h-20"} /></F>
+                <F label="پایه تحصیلی">
+                  <input value={form.eduLevel} onChange={e => setForm({ ...form, eduLevel: e.target.value })} className={inputCls} placeholder="مثلاً هشتم / دیپلم / کارشناسی" />
+                </F>
               </div>
             </div>
           </fieldset>
 
-          {/* ترم و سطح — به‌شکل روایتی فرم کاغذی */}
-          <fieldset className="pt-2 border-t border-primary/10">
-            <legend className="text-lg font-black text-primary mb-3 pt-4">ترم و سطح مورد نظر</legend>
-            <div className="bg-parchment/60 border border-primary/10 rounded-2xl p-5 space-y-4">
-              <p className="text-sm text-primary leading-8">
-                که نسبت به اهداف و کلاس‌های آموزشگاه زبان آشنایی کامل داشته و مایل به شرکت در ترم
-                <input
-                  value={form.termInterest}
-                  onChange={e => setForm({ ...form, termInterest: e.target.value })}
-                  className="inline-block mx-2 rounded-lg bg-card border border-primary/20 px-3 py-1 text-sm text-primary focus:outline-none focus:border-gold min-w-32"
-                  placeholder="مثلاً پاییز ۱۴۰۴"
-                />
-                سطح
-                <input
-                  value={form.levelInterest}
-                  onChange={e => setForm({ ...form, levelInterest: e.target.value })}
-                  className="inline-block mx-2 rounded-lg bg-card border border-primary/20 px-3 py-1 text-sm text-primary focus:outline-none focus:border-gold min-w-32"
-                  placeholder="مثلاً Elementary یا A2"
-                />
-                می‌باشم.
-              </p>
-              <F label="توضیحات (اختیاری)">
-                <textarea value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} className={inputCls + " min-h-16"} />
-              </F>
+          {/* Contact */}
+          <fieldset className="space-y-4 pt-2 border-t border-primary/10">
+            <legend className="text-lg font-black text-primary mb-2 pt-4">اطلاعات تماس</legend>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <F label="تلفن ثابت *"><input value={form.landline} onChange={e => setForm({ ...form, landline: e.target.value })} className={inputCls} dir="ltr" required /></F>
+              <F label="همراه *"><input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className={inputCls} dir="ltr" required /></F>
+              <div className="sm:col-span-2">
+                <F label="آدرس *"><textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className={inputCls + " min-h-20"} required /></F>
+              </div>
             </div>
           </fieldset>
 
-          {/* مقررات */}
+          {/* Teacher — required when semester chosen */}
+          {sem && teacherChoices.length > 0 && (
+            <fieldset className="space-y-3 pt-2 border-t border-primary/10">
+              <legend className="text-lg font-black text-primary mb-2 pt-4">انتخاب استاد *</legend>
+              <F label="استاد مورد نظر *">
+                <select
+                  value={form.selectedTeacherId}
+                  onChange={e => setForm({ ...form, selectedTeacherId: e.target.value })}
+                  className={inputCls}
+                  required
+                >
+                  <option value="">— انتخاب کنید —</option>
+                  {teacherChoices.map(x => <option key={x.id} value={x.id}>{x.nameFa}</option>)}
+                </select>
+              </F>
+            </fieldset>
+          )}
+
+          {/* Optional book */}
+          {sem && bookChoices.length > 0 && (
+            <fieldset className="space-y-3 pt-2 border-t border-primary/10">
+              <legend className="text-lg font-black text-primary mb-2 pt-4 flex items-center gap-2">
+                <BadgePercent className="h-5 w-5 text-gold" /> کتاب دوره (اختیاری — ۵٪ تخفیف)
+              </legend>
+              <div className="bg-gold/10 border border-gold/40 rounded-2xl p-4">
+                <p className="text-sm text-primary leading-7 mb-3">
+                  با انتخاب کتاب و خرید آنلاین از همین سایت، <strong className="text-gold">۵٪ ارزان‌تر</strong> از حضوری خرید می‌کنید و کتاب پیش از شروع کلاس به دست شما می‌رسد.
+                </p>
+                <F label="کتاب پیشنهادی دوره">
+                  <select value={form.selectedBookId} onChange={e => setForm({ ...form, selectedBookId: e.target.value })} className={inputCls}>
+                    <option value="">— بدون انتخاب —</option>
+                    {bookChoices.map(b => (
+                      <option key={b.id} value={b.id}>
+                        <BookOpen className="inline" /> {b.titleFa} — {formatToman(b.priceToman)}
+                      </option>
+                    ))}
+                  </select>
+                </F>
+              </div>
+            </fieldset>
+          )}
+
+          <F label="توضیحات (اختیاری)">
+            <textarea value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} className={inputCls + " min-h-16"} />
+          </F>
+
+          {/* Terms */}
           <fieldset className="pt-2 border-t border-primary/10">
             <legend className="text-lg font-black text-primary mb-3 pt-4 flex items-center gap-2">
               <ScrollText className="h-5 w-5 text-gold" /> مقررات ثبت‌نام
             </legend>
             <div className="bg-parchment/60 border border-primary/10 rounded-2xl p-5">
-              <p className="text-sm text-primary mb-3">
-                ضمناً اینجانب تعهد می‌کنم تمام مقررات زیر را رعایت کنم:
-              </p>
               <ol className="list-decimal pr-5 space-y-2 text-sm text-foreground/85 leading-7">
                 {TERMS.map((t, i) => <li key={i}>{t}</li>)}
               </ol>
               <label className="flex items-start gap-3 mt-5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.agreedToTerms}
-                  onChange={e => setForm({ ...form, agreedToTerms: e.target.checked })}
-                  className="mt-1 h-5 w-5 accent-[hsl(var(--gold))]"
-                />
-                <span className="text-sm font-bold text-primary">
-                  مقررات فوق را مطالعه کرده و می‌پذیرم.
-                </span>
+                <input type="checkbox" checked={form.agreedToTerms} onChange={e => setForm({ ...form, agreedToTerms: e.target.checked })} className="mt-1 h-5 w-5 accent-[hsl(var(--gold))]" />
+                <span className="text-sm font-bold text-primary">مقررات فوق را مطالعه کرده و می‌پذیرم.</span>
               </label>
             </div>
           </fieldset>
 
           <button type="submit" disabled={submitting} className="btn-primary w-full">
-            <GraduationCap className="h-5 w-5" /> {submitting ? "در حال ارسال…" : form.semesterId ? "ادامه و پرداخت شهریه" : "ارسال درخواست ثبت‌نام"}
+            <GraduationCap className="h-5 w-5" /> {submitting ? "در حال ارسال…" : "ادامه و پرداخت شهریه"}
           </button>
         </form>
       </div>

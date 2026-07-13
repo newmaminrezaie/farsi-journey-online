@@ -91,6 +91,9 @@ model Registration {
   selectedBookId     String    @default("")
   note               String    @default("")
   agreedToTerms      Boolean   @default(false)
+  paidToman          Int       @default(0)
+  paidAt             DateTime?
+  paymentRef         String    @default("")
   status             String    @default("new")   // new | contacted | enrolled | rejected
   createdAt          DateTime  @default(now())
 

@@ -1,7 +1,7 @@
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { formatToman } from "@/lib/api";
+import { formatToman, registrationsApi } from "@/lib/api";
 import { CreditCard, ShieldCheck, BookOpen, GraduationCap, BadgePercent, CheckCircle2, ArrowRight } from "lucide-react";
 
 type PayState = {
@@ -42,6 +42,10 @@ export default function RegistrationPayment() {
     // hand-off so the UX is complete end-to-end.
     await new Promise(r => setTimeout(r, 900));
     const ref = "GY-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+    if (state?.registrationId) {
+      try { await registrationsApi.markPaid(state.registrationId, totals.total, ref); }
+      catch (e: any) { console.error(e); }
+    }
     setSubmitting(false);
     setDone({ ref });
     toast.success("پرداخت با موفقیت ثبت شد");
