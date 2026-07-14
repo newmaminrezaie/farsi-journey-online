@@ -13,7 +13,9 @@ export default function ImageInput({
   async function pick(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
-    if (f.size > 5 * 1024 * 1024) return toast.error("حجم فایل باید کمتر از ۵ مگابایت باشد");
+    const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
+    if (!ALLOWED.includes(f.type)) return toast.error("فقط فایل JPG، PNG یا WebP پذیرفته می‌شود");
+    if (f.size > 4.5 * 1024 * 1024) return toast.error("حجم فایل باید کمتر از ۴٫۵ مگابایت باشد");
     setBusy(true);
     try {
       const fd = new FormData();
