@@ -23,7 +23,7 @@ export default function SemesterDetail() {
 
   const [form, setForm] = useState({
     fullName: "", fatherName: "", nationalId: "",
-    birthPlace: "",
+    birthPlace: "", birthYear: "",
     eduLevel: "",
     address: "", landline: "", phone: "",
     termInterest: "", levelInterest: "", selectedTeacherId: "", selectedBookId: "",
@@ -44,8 +44,10 @@ export default function SemesterDetail() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.fullName) return toast.error("نام و نام خانوادگی الزامی است");
+    if (!form.nationalId.trim()) return toast.error("کد ملی الزامی است");
+    const yr = form.birthYear.replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).trim();
+    if (!/^\d{3,4}$/.test(yr)) return toast.error("سال تولد را به‌صورت عددی (مثلاً ۱۳۸۵) وارد کنید");
     if (!form.phone) return toast.error("شماره همراه الزامی است");
-    if (!form.landline) return toast.error("تلفن ثابت الزامی است");
     if (!form.address) return toast.error("آدرس الزامی است");
     if (teacherChoices.length > 0 && !form.selectedTeacherId) return toast.error("لطفاً استاد مورد نظر خود را انتخاب کنید");
     if (!form.agreedToTerms) return toast.error("لطفاً مقررات ثبت‌نام را تأیید کنید");
@@ -56,7 +58,7 @@ export default function SemesterDetail() {
       fatherName: form.fatherName,
       birthCertNo: "",
       nationalId: form.nationalId,
-      issuedFrom: "",
+      issuedFrom: yr,   // repurposed: سال تولد
       birthPlace: form.birthPlace,
       schoolDegree: form.eduLevel,
       universityDegree: "",
@@ -112,14 +114,14 @@ export default function SemesterDetail() {
 
               <form onSubmit={submit} className="space-y-5">
                 <div className="grid sm:grid-cols-2 gap-3">
-                  <Input label="نام و نام خانوادگی *" value={form.fullName} onChange={v => setForm({ ...form, fullName: v })} />
+                  <Input label="نام و نام خانوادگی *" value={form.fullName} onChange={v => setForm({ ...form, fullName: v })} required />
                   <Input label="نام پدر" value={form.fatherName} onChange={v => setForm({ ...form, fatherName: v })} />
-                  <Input label="کد ملی / شماره شناسنامه" value={form.nationalId} onChange={v => setForm({ ...form, nationalId: v })} dir="ltr" />
-                  <Input label="متولد" value={form.birthPlace} onChange={v => setForm({ ...form, birthPlace: v })} placeholder="محل و سال تولد" />
+                  <Input label="کد ملی *" value={form.nationalId} onChange={v => setForm({ ...form, nationalId: v })} dir="ltr" required />
+                  <Input label="محل تولد" value={form.birthPlace} onChange={v => setForm({ ...form, birthPlace: v })} placeholder="مثلاً گناباد" />
+                  <Input label="سال تولد *" value={form.birthYear} onChange={v => setForm({ ...form, birthYear: v.replace(/[^\d۰-۹]/g, "").slice(0, 4) })} dir="ltr" placeholder="مثلاً 1385" required />
                   <Input label="پایه تحصیلی" value={form.eduLevel} onChange={v => setForm({ ...form, eduLevel: v })} placeholder="مثلاً هشتم / دیپلم / کارشناسی" />
-                  <div />
-                  <Input label="تلفن ثابت *" value={form.landline} onChange={v => setForm({ ...form, landline: v })} dir="ltr" />
-                  <Input label="همراه *" value={form.phone} onChange={v => setForm({ ...form, phone: v })} dir="ltr" />
+                  <Input label="تلفن ثابت" value={form.landline} onChange={v => setForm({ ...form, landline: v })} dir="ltr" />
+                  <Input label="همراه *" value={form.phone} onChange={v => setForm({ ...form, phone: v })} dir="ltr" required />
                 </div>
 
                 <label className="block">
@@ -287,11 +289,11 @@ function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string
 const fieldCls = "w-full rounded-xl bg-parchment/10 border border-gold/25 px-4 py-3 text-sm text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:border-gold";
 const inlineCls = "inline-block mx-2 my-1 rounded-lg bg-parchment/10 border border-gold/25 px-3 py-1 text-sm text-primary-foreground placeholder:text-primary-foreground/45 focus:outline-none focus:border-gold min-w-28 max-w-full";
 
-function Input({ label, placeholder, value, onChange, dir }: { label: string; placeholder?: string; value: string; onChange: (v: string) => void; dir?: "rtl" | "ltr" }) {
+function Input({ label, placeholder, value, onChange, dir, required }: { label: string; placeholder?: string; value: string; onChange: (v: string) => void; dir?: "rtl" | "ltr"; required?: boolean }) {
   return (
     <label className="block">
       <span className="block text-xs font-bold text-gold mb-1.5">{label}</span>
-      <input dir={dir} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={fieldCls} />
+      <input dir={dir} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} required={required} className={fieldCls} />
     </label>
   );
 }
