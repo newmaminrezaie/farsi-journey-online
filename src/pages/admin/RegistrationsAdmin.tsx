@@ -117,8 +117,8 @@ export default function RegistrationsAdmin() {
         "نام پدر": r.fatherName ?? "",
         "کد ملی": r.nationalId ?? "",
         "شماره شناسنامه": r.birthCertNo ?? "",
-        "صادره از": r.issuedFrom ?? "",
         "محل تولد": r.birthPlace ?? "",
+        "سال تولد": r.issuedFrom ?? "",
         "همراه": r.phone,
         "تلفن ثابت": r.landline ?? "",
         "آدرس": r.address ?? "",
@@ -183,6 +183,11 @@ export default function RegistrationsAdmin() {
           <option value="">همه وضعیت‌ها</option>
           {STATUSES.map(s => <option key={s} value={s}>{STATUS_FA[s]}</option>)}
         </select>
+        <select value={payFilter} onChange={e => setPayFilter(e.target.value as any)} className="rounded-lg bg-parchment border border-primary/15 px-3 py-2 text-sm">
+          <option value="">پرداخت — همه</option>
+          <option value="unpaid">فقط پرداخت‌نشده</option>
+          <option value="paid">فقط پرداخت‌شده</option>
+        </select>
         <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} className="rounded-lg bg-parchment border border-primary/15 px-3 py-2 text-sm">
           <option value="date-desc">جدیدترین</option>
           <option value="date-asc">قدیمی‌ترین</option>
@@ -221,7 +226,7 @@ export default function RegistrationsAdmin() {
                 const s = r.semesterId ? semById.get(r.semesterId) : null;
                 const paid = r.paidToman || 0;
                 return (
-                  <tr key={r.id} className="border-t border-primary/5 hover:bg-parchment/50">
+                  <tr key={r.id} className={`border-t border-primary/5 hover:bg-parchment/50 ${paid === 0 ? "bg-destructive/[0.04]" : ""}`}>
                     <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">{formatJalali(r.createdAt.slice(0, 10))}</td>
                     <td className="p-3 font-mono text-xs text-turquoise font-bold">{s?.classCode || "—"}</td>
                     <td className="p-3 font-bold text-primary">{r.fullName}</td>
@@ -230,7 +235,7 @@ export default function RegistrationsAdmin() {
                     <td className="p-3 whitespace-nowrap">
                       {paid > 0
                         ? <span className="inline-flex items-center gap-1 rounded-md bg-turquoise/15 text-turquoise font-bold px-2 py-0.5 text-xs">{formatToman(paid)}</span>
-                        : <span className="text-xs text-muted-foreground">پرداخت‌نشده</span>}
+                        : <span className="inline-flex items-center gap-1 rounded-md bg-destructive/15 text-destructive font-bold px-2 py-0.5 text-xs"><AlertCircle className="h-3 w-3" /> پرداخت‌نشده</span>}
                     </td>
                     <td className="p-3">
                       <select value={r.status} onChange={e => update(r.id, e.target.value)} className="rounded-lg bg-parchment border border-primary/15 px-2 py-1 text-xs">
@@ -317,6 +322,7 @@ function DetailDrawer({ reg, semester, teacherName, bookTitle, onClose, onPrint,
             <Row k="نام پدر" v={reg.fatherName} />
             <Row k="کد ملی / شماره شناسنامه" v={reg.nationalId || reg.birthCertNo} dir="ltr" />
             <Row k="محل تولد" v={reg.birthPlace} />
+            <Row k="سال تولد" v={reg.issuedFrom} dir="ltr" />
             <Row k="پایه تحصیلی" v={reg.schoolDegree || reg.universityDegree} />
           </Section>
           <Section title="اطلاعات تماس">
