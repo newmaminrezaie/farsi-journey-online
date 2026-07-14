@@ -8,7 +8,8 @@ import { requireStaff } from "../middleware/auth.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = path.resolve(__dirname, "../../uploads");
 
-const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
+const MAX_BYTES = Math.floor(4.5 * 1024 * 1024);
 
 export async function registerUploadsRoutes(app: FastifyInstance) {
   await fs.mkdir(UPLOADS_DIR, { recursive: true });
@@ -21,7 +22,7 @@ export async function registerUploadsRoutes(app: FastifyInstance) {
     const name = `${Date.now()}-${randomBytes(6).toString("hex")}.${ext}`;
     const full = path.join(UPLOADS_DIR, name);
     const buf = await file.toBuffer();
-    if (buf.length > 5 * 1024 * 1024) return reply.code(400).send({ error: "too_large" });
+    if (buf.length > MAX_BYTES) return reply.code(400).send({ error: "too_large" });
     await fs.writeFile(full, buf);
     return { url: `/uploads/${name}` };
   });
