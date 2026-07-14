@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { registrationsApi, semestersApi, teachersApi, booksApi } from "@/lib/api";
 import { formatJalali } from "@/lib/jalali";
 import type { Registration, Semester } from "@/lib/types";
-import { Search, Download, Printer, X, ClipboardList, GraduationCap, Users, TrendingUp, Wallet, Trash2 } from "lucide-react";
+import { Search, Download, Printer, X, ClipboardList, GraduationCap, Users, TrendingUp, Wallet, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { formatToman } from "@/lib/api";
 
@@ -43,6 +43,7 @@ export default function RegistrationsAdmin() {
   const [q, setQ] = useState("");
   const [semesterId, setSemesterId] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [payFilter, setPayFilter] = useState<"" | "paid" | "unpaid">("");
   const [classCode, setClassCode] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -55,6 +56,8 @@ export default function RegistrationsAdmin() {
     let out = regs.filter(r => {
       if (semesterId && r.semesterId !== semesterId) return false;
       if (statusFilter && r.status !== statusFilter) return false;
+      if (payFilter === "paid" && !(r.paidToman && r.paidToman > 0)) return false;
+      if (payFilter === "unpaid" && r.paidToman && r.paidToman > 0) return false;
       if (classCode) {
         const s = r.semesterId ? semById.get(r.semesterId) : null;
         if (!s?.classCode?.toLowerCase().includes(classCode.toLowerCase())) return false;
@@ -78,12 +81,12 @@ export default function RegistrationsAdmin() {
       }); break;
     }
     return out;
-  }, [regs, q, semesterId, statusFilter, classCode, from, to, sortBy, semById]);
+  }, [regs, q, semesterId, statusFilter, payFilter, classCode, from, to, sortBy, semById]);
 
   // Metrics
   const total = regs.length;
   const enrolled = regs.filter(r => r.status === "enrolled").length;
-  const newCount = regs.filter(r => r.status === "new").length;
+  const unpaid = regs.filter(r => !r.paidToman || r.paidToman === 0).length;
   const uniqueClasses = new Set(regs.map(r => r.semesterId).filter(Boolean)).size;
   const totalPaid = regs.reduce((s, r) => s + (r.paidToman || 0), 0);
 
@@ -159,8 +162,8 @@ export default function RegistrationsAdmin() {
       {/* Metrics */}
       <div className="grid md:grid-cols-5 gap-4 mb-6">
         <Metric icon={<ClipboardList />} label="کل ثبت‌نام‌ها" value={total} />
-        <Metric icon={<TrendingUp />} label="ثبت‌نام جدید" value={newCount} accent />
-        <Metric icon={<Users />} label="قطعی شده" value={enrolled} />
+        <Metric icon={<AlertCircle />} label="پرداخت‌نشده (پیگیری)" value={unpaid} accent />
+        <Metric icon={<Users />} label="قطعی (پرداخت‌شده)" value={enrolled} />
         <Metric icon={<GraduationCap />} label="کلاس‌های فعال" value={uniqueClasses} />
         <Metric icon={<Wallet />} label="مجموع پرداختی (تومان)" value={totalPaid} />
       </div>
