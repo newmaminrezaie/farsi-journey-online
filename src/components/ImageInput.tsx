@@ -13,7 +13,9 @@ export default function ImageInput({
   async function pick(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
-    if (f.size > 5 * 1024 * 1024) return toast.error("حجم فایل باید کمتر از ۵ مگابایت باشد");
+    const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
+    if (!ALLOWED.includes(f.type)) return toast.error("فقط فایل JPG، PNG یا WebP پذیرفته می‌شود");
+    if (f.size > 4.5 * 1024 * 1024) return toast.error("حجم فایل باید کمتر از ۴٫۵ مگابایت باشد");
     setBusy(true);
     try {
       const fd = new FormData();
@@ -49,8 +51,9 @@ export default function ImageInput({
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           بارگذاری
         </button>
-        <input ref={ref} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={pick} className="hidden" />
+        <input ref={ref} type="file" accept="image/jpeg,image/png,image/webp" onChange={pick} className="hidden" />
       </div>
+      <p className="text-[10px] text-muted-foreground/70">حداکثر ۴٫۵ مگابایت — JPG، PNG یا WebP <span className="opacity-70">(ترجیحاً WebP برای حجم کمتر)</span></p>
       {value && (
         <img src={value} alt="پیش‌نمایش" className="h-24 w-24 object-cover rounded-lg border border-primary/10" />
       )}
