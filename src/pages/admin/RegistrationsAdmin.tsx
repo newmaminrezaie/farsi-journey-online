@@ -416,6 +416,7 @@ function renderPrintHTML(rows: Registration[], semById: Map<string, Semester>, t
           ${row("نام پدر", r.fatherName)}
           ${row("کد ملی / شناسنامه", r.nationalId || r.birthCertNo)}
           ${row("محل تولد", r.birthPlace)}
+          ${row("سال تولد", r.issuedFrom)}
           ${row("پایه تحصیلی", r.schoolDegree || r.universityDegree)}
         </div>
         <h3>تماس</h3>
