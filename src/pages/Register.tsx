@@ -20,7 +20,7 @@ export default function Register() {
   const [form, setForm] = useState({
     semesterId: "",
     fullName: "", fatherName: "", nationalId: "",
-    birthPlace: "",
+    birthPlace: "", birthYear: "",
     eduLevel: "",
     address: "", landline: "", phone: "",
     selectedTeacherId: "", selectedBookId: "",
@@ -53,8 +53,10 @@ export default function Register() {
     e.preventDefault();
     if (!form.semesterId) return toast.error("لطفاً ترم مورد نظر خود را انتخاب کنید");
     if (!form.fullName) return toast.error("نام و نام خانوادگی الزامی است");
+    if (!form.nationalId.trim()) return toast.error("کد ملی الزامی است");
+    const yr = form.birthYear.replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).trim();
+    if (!/^\d{3,4}$/.test(yr)) return toast.error("سال تولد را به‌صورت عددی (مثلاً ۱۳۸۵) وارد کنید");
     if (!form.phone) return toast.error("شماره همراه الزامی است");
-    if (!form.landline) return toast.error("تلفن ثابت الزامی است");
     if (!form.address) return toast.error("آدرس الزامی است");
     if (teacherChoices.length > 0 && !form.selectedTeacherId) return toast.error("لطفاً استاد مورد نظر خود را انتخاب کنید");
     if (!form.agreedToTerms) return toast.error("لطفاً مقررات ثبت‌نام را تأیید کنید");
@@ -66,7 +68,7 @@ export default function Register() {
         fatherName: form.fatherName,
         birthCertNo: "",
         nationalId: form.nationalId,
-        issuedFrom: "",
+        issuedFrom: yr,   // repurposed: سال تولد
         birthPlace: form.birthPlace,
         schoolDegree: form.eduLevel,
         universityDegree: "",
@@ -144,13 +146,14 @@ export default function Register() {
             <div className="grid sm:grid-cols-2 gap-4">
               <F label="نام و نام خانوادگی *"><input value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })} className={inputCls} required /></F>
               <F label="نام پدر"><input value={form.fatherName} onChange={e => setForm({ ...form, fatherName: e.target.value })} className={inputCls} /></F>
-              <F label="کد ملی / شماره شناسنامه"><input value={form.nationalId} onChange={e => setForm({ ...form, nationalId: e.target.value })} className={inputCls} dir="ltr" /></F>
-              <F label="متولد"><input value={form.birthPlace} onChange={e => setForm({ ...form, birthPlace: e.target.value })} className={inputCls} placeholder="محل و سال تولد" /></F>
-              <div className="sm:col-span-2">
-                <F label="پایه تحصیلی">
-                  <input value={form.eduLevel} onChange={e => setForm({ ...form, eduLevel: e.target.value })} className={inputCls} placeholder="مثلاً هشتم / دیپلم / کارشناسی" />
-                </F>
-              </div>
+              <F label="کد ملی *"><input value={form.nationalId} onChange={e => setForm({ ...form, nationalId: e.target.value })} className={inputCls} dir="ltr" required /></F>
+              <F label="محل تولد"><input value={form.birthPlace} onChange={e => setForm({ ...form, birthPlace: e.target.value })} className={inputCls} placeholder="مثلاً گناباد" /></F>
+              <F label="سال تولد *">
+                <input value={form.birthYear} onChange={e => setForm({ ...form, birthYear: e.target.value.replace(/[^\d۰-۹]/g, "").slice(0, 4) })} className={inputCls} dir="ltr" inputMode="numeric" placeholder="مثلاً 1385" required />
+              </F>
+              <F label="پایه تحصیلی">
+                <input value={form.eduLevel} onChange={e => setForm({ ...form, eduLevel: e.target.value })} className={inputCls} placeholder="مثلاً هشتم / دیپلم / کارشناسی" />
+              </F>
             </div>
           </fieldset>
 
@@ -158,7 +161,7 @@ export default function Register() {
           <fieldset className="space-y-4 pt-2 border-t border-primary/10">
             <legend className="text-lg font-black text-primary mb-2 pt-4">اطلاعات تماس</legend>
             <div className="grid sm:grid-cols-2 gap-4">
-              <F label="تلفن ثابت *"><input value={form.landline} onChange={e => setForm({ ...form, landline: e.target.value })} className={inputCls} dir="ltr" required /></F>
+              <F label="تلفن ثابت"><input value={form.landline} onChange={e => setForm({ ...form, landline: e.target.value })} className={inputCls} dir="ltr" /></F>
               <F label="همراه *"><input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className={inputCls} dir="ltr" required /></F>
               <div className="sm:col-span-2">
                 <F label="آدرس *"><textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className={inputCls + " min-h-20"} required /></F>
