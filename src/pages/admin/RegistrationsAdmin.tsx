@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { registrationsApi, semestersApi, teachersApi, booksApi } from "@/lib/api";
 import { formatJalali } from "@/lib/jalali";
 import type { Registration, Semester } from "@/lib/types";
-import { Search, Download, Printer, X, ClipboardList, GraduationCap, Users, TrendingUp, Wallet, Trash2 } from "lucide-react";
+import { Search, Download, Printer, X, ClipboardList, GraduationCap, Users, TrendingUp, Wallet, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { formatToman } from "@/lib/api";
 
@@ -43,6 +43,7 @@ export default function RegistrationsAdmin() {
   const [q, setQ] = useState("");
   const [semesterId, setSemesterId] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [payFilter, setPayFilter] = useState<"" | "paid" | "unpaid">("");
   const [classCode, setClassCode] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -55,6 +56,8 @@ export default function RegistrationsAdmin() {
     let out = regs.filter(r => {
       if (semesterId && r.semesterId !== semesterId) return false;
       if (statusFilter && r.status !== statusFilter) return false;
+      if (payFilter === "paid" && !(r.paidToman && r.paidToman > 0)) return false;
+      if (payFilter === "unpaid" && r.paidToman && r.paidToman > 0) return false;
       if (classCode) {
         const s = r.semesterId ? semById.get(r.semesterId) : null;
         if (!s?.classCode?.toLowerCase().includes(classCode.toLowerCase())) return false;
@@ -78,12 +81,12 @@ export default function RegistrationsAdmin() {
       }); break;
     }
     return out;
-  }, [regs, q, semesterId, statusFilter, classCode, from, to, sortBy, semById]);
+  }, [regs, q, semesterId, statusFilter, payFilter, classCode, from, to, sortBy, semById]);
 
   // Metrics
   const total = regs.length;
   const enrolled = regs.filter(r => r.status === "enrolled").length;
-  const newCount = regs.filter(r => r.status === "new").length;
+  const unpaid = regs.filter(r => !r.paidToman || r.paidToman === 0).length;
   const uniqueClasses = new Set(regs.map(r => r.semesterId).filter(Boolean)).size;
   const totalPaid = regs.reduce((s, r) => s + (r.paidToman || 0), 0);
 
@@ -114,8 +117,8 @@ export default function RegistrationsAdmin() {
         "نام پدر": r.fatherName ?? "",
         "کد ملی": r.nationalId ?? "",
         "شماره شناسنامه": r.birthCertNo ?? "",
-        "صادره از": r.issuedFrom ?? "",
         "محل تولد": r.birthPlace ?? "",
+        "سال تولد": r.issuedFrom ?? "",
         "همراه": r.phone,
         "تلفن ثابت": r.landline ?? "",
         "آدرس": r.address ?? "",
@@ -159,8 +162,8 @@ export default function RegistrationsAdmin() {
       {/* Metrics */}
       <div className="grid md:grid-cols-5 gap-4 mb-6">
         <Metric icon={<ClipboardList />} label="کل ثبت‌نام‌ها" value={total} />
-        <Metric icon={<TrendingUp />} label="ثبت‌نام جدید" value={newCount} accent />
-        <Metric icon={<Users />} label="قطعی شده" value={enrolled} />
+        <Metric icon={<AlertCircle />} label="پرداخت‌نشده (پیگیری)" value={unpaid} accent />
+        <Metric icon={<Users />} label="قطعی (پرداخت‌شده)" value={enrolled} />
         <Metric icon={<GraduationCap />} label="کلاس‌های فعال" value={uniqueClasses} />
         <Metric icon={<Wallet />} label="مجموع پرداختی (تومان)" value={totalPaid} />
       </div>
@@ -179,6 +182,11 @@ export default function RegistrationsAdmin() {
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="rounded-lg bg-parchment border border-primary/15 px-3 py-2 text-sm">
           <option value="">همه وضعیت‌ها</option>
           {STATUSES.map(s => <option key={s} value={s}>{STATUS_FA[s]}</option>)}
+        </select>
+        <select value={payFilter} onChange={e => setPayFilter(e.target.value as any)} className="rounded-lg bg-parchment border border-primary/15 px-3 py-2 text-sm">
+          <option value="">پرداخت — همه</option>
+          <option value="unpaid">فقط پرداخت‌نشده</option>
+          <option value="paid">فقط پرداخت‌شده</option>
         </select>
         <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} className="rounded-lg bg-parchment border border-primary/15 px-3 py-2 text-sm">
           <option value="date-desc">جدیدترین</option>
@@ -218,7 +226,7 @@ export default function RegistrationsAdmin() {
                 const s = r.semesterId ? semById.get(r.semesterId) : null;
                 const paid = r.paidToman || 0;
                 return (
-                  <tr key={r.id} className="border-t border-primary/5 hover:bg-parchment/50">
+                  <tr key={r.id} className={`border-t border-primary/5 hover:bg-parchment/50 ${paid === 0 ? "bg-destructive/[0.04]" : ""}`}>
                     <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">{formatJalali(r.createdAt.slice(0, 10))}</td>
                     <td className="p-3 font-mono text-xs text-turquoise font-bold">{s?.classCode || "—"}</td>
                     <td className="p-3 font-bold text-primary">{r.fullName}</td>
@@ -227,7 +235,7 @@ export default function RegistrationsAdmin() {
                     <td className="p-3 whitespace-nowrap">
                       {paid > 0
                         ? <span className="inline-flex items-center gap-1 rounded-md bg-turquoise/15 text-turquoise font-bold px-2 py-0.5 text-xs">{formatToman(paid)}</span>
-                        : <span className="text-xs text-muted-foreground">پرداخت‌نشده</span>}
+                        : <span className="inline-flex items-center gap-1 rounded-md bg-destructive/15 text-destructive font-bold px-2 py-0.5 text-xs"><AlertCircle className="h-3 w-3" /> پرداخت‌نشده</span>}
                     </td>
                     <td className="p-3">
                       <select value={r.status} onChange={e => update(r.id, e.target.value)} className="rounded-lg bg-parchment border border-primary/15 px-2 py-1 text-xs">
@@ -314,6 +322,7 @@ function DetailDrawer({ reg, semester, teacherName, bookTitle, onClose, onPrint,
             <Row k="نام پدر" v={reg.fatherName} />
             <Row k="کد ملی / شماره شناسنامه" v={reg.nationalId || reg.birthCertNo} dir="ltr" />
             <Row k="محل تولد" v={reg.birthPlace} />
+            <Row k="سال تولد" v={reg.issuedFrom} dir="ltr" />
             <Row k="پایه تحصیلی" v={reg.schoolDegree || reg.universityDegree} />
           </Section>
           <Section title="اطلاعات تماس">
@@ -407,6 +416,7 @@ function renderPrintHTML(rows: Registration[], semById: Map<string, Semester>, t
           ${row("نام پدر", r.fatherName)}
           ${row("کد ملی / شناسنامه", r.nationalId || r.birthCertNo)}
           ${row("محل تولد", r.birthPlace)}
+          ${row("سال تولد", r.issuedFrom)}
           ${row("پایه تحصیلی", r.schoolDegree || r.universityDegree)}
         </div>
         <h3>تماس</h3>
