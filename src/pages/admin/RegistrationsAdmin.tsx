@@ -333,7 +333,7 @@ function DetailDrawer({ reg, semester, teacherName, bookTitle, onClose, onPrint,
           <Section title="ثبت‌نام">
             <Row k="استاد انتخابی" v={teacherName} />
             <Row k="کتاب انتخابی" v={bookTitle} />
-            <Row k="ترم مورد نظر" v={reg.termInterest} />
+            <Row k="کلاس مورد نظر" v={reg.termInterest} />
             <Row k="سطح" v={reg.levelInterest} />
             <Row k="یادداشت" v={reg.note} />
             <Row k="تاریخ ثبت" v={formatJalali(reg.createdAt.slice(0, 10))} />
