@@ -38,7 +38,7 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Link to="/semesters" className="btn-gold">
-                <GraduationCap className="h-5 w-5" /> ثبت‌نام در ترم جدید
+                <GraduationCap className="h-5 w-5" /> ثبت‌نام در کلاس جدید
               </Link>
               <Link to="/shop" className="inline-flex items-center gap-2 rounded-full border-2 border-gold/60 px-7 py-3.5 font-bold text-gold hover:bg-gold hover:text-primary transition-colors">
                 <BookOpen className="h-5 w-5" /> فروشگاه کتاب
