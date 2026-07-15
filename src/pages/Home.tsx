@@ -81,7 +81,7 @@ export default function Home() {
 
       {/* ACTIVE SEMESTERS */}
       <section className="container py-20">
-        <SectionHeader eyebrow="ترم‌های جاری" title="در حال ثبت‌نام" note="از میان دوره‌های زیر مناسب‌ترین را انتخاب کنید" />
+        <SectionHeader eyebrow="کلاس‌های جاری" title="در حال ثبت‌نام" note="از میان دوره‌های زیر مناسب‌ترین را انتخاب کنید" />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {semesters.slice(0, 6).map((s, i) => {
             const teacherIds = s.teacherIds?.length ? s.teacherIds : ((s as any).teacherId ? [(s as any).teacherId] : []);
