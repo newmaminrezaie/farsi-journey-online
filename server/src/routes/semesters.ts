@@ -137,16 +137,28 @@ export async function registerSemestersRoutes(app: FastifyInstance) {
   app.post("/semesters", { preHandler: requireStaff }, async (req, reply) => {
     const parsed = Create.safeParse(req.body);
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() });
-    const row = await createSemester(parsed.data);
-    return serialize(row);
+    try {
+      const row = await createSemester(parsed.data);
+      return serialize(row);
+    } catch (e: any) {
+      if (e?.message === "duplicate_class_code") return reply.code(409).send({ error: "duplicate_class_code", message: "این کد کلاس قبلاً استفاده شده است" });
+      throw e;
+    }
   });
 
   app.patch("/semesters/:id", { preHandler: requireStaff }, async (req, reply) => {
     const id = (req.params as any).id as string;
     const parsed = Update.safeParse(req.body);
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() });
-    const row = await prisma.semester.update({ where: { id }, data: parsed.data });
-    return serialize(row);
+    const data: any = { ...parsed.data };
+    if (typeof data.classCode === "string") data.classCode = data.classCode.trim();
+    try {
+      const row = await prisma.semester.update({ where: { id }, data });
+      return serialize(row);
+    } catch (e: any) {
+      if (e?.code === "P2002") return reply.code(409).send({ error: "duplicate_class_code", message: "این کد کلاس قبلاً استفاده شده است" });
+      throw e;
+    }
   });
 
   app.delete("/semesters/:id", { preHandler: requireStaff }, async (req) => {
