@@ -233,7 +233,7 @@ export default function SemesterDetail() {
                 </div>
 
                 <button type="submit" disabled={submitting} className="btn-gold w-full">
-                  <GraduationCap className="h-5 w-5" /> {submitting ? "در حال ثبت…" : "ثبت‌نام در این ترم"}
+                  <GraduationCap className="h-5 w-5" /> {submitting ? "در حال ثبت…" : "ثبت‌نام در این کلاس"}
                 </button>
               </form>
             </div>
