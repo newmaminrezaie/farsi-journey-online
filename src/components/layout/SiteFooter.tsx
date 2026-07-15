@@ -21,7 +21,7 @@ export default function SiteFooter() {
         <div>
           <h4 className="text-gold mb-4 text-lg">دسترسی سریع</h4>
           <ul className="space-y-2 text-sm text-primary-foreground/85">
-            <li><Link to="/semesters" className="hover:text-gold">ترم‌های جاری</Link></li>
+            <li><Link to="/semesters" className="hover:text-gold">کلاس‌های جاری</Link></li>
             <li><Link to="/teachers" className="hover:text-gold">اساتید</Link></li>
             <li><Link to="/shop" className="hover:text-gold">کتاب‌ها</Link></li>
             <li><Link to="/register" className="hover:text-gold">ثبت‌نام</Link></li>
