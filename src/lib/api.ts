@@ -21,6 +21,9 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
   });
   if (!res.ok) {
+    if (res.status === 401) {
+      try { window.dispatchEvent(new CustomEvent("hg:session-expired")); } catch {}
+    }
     let msg = res.statusText;
     try { const j = await res.json(); msg = (j as any)?.error?.formErrors?.join?.(", ") || JSON.stringify(j); } catch {}
     throw new Error(`API ${res.status}: ${msg}`);

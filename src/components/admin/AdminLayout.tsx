@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
 import { Outlet, NavLink, Navigate, useNavigate } from "react-router-dom";
 import { authApi } from "@/lib/api";
-import { LayoutDashboard, BookOpen, GraduationCap, Users, UserCog, ShoppingBag, ClipboardList, Megaphone, LogOut } from "lucide-react";
+import { LayoutDashboard, BookOpen, GraduationCap, Users, UserCog, ShoppingBag, ClipboardList, Megaphone, LogOut, AlertTriangle } from "lucide-react";
 import logo from "@/assets/logo-fa.png";
 
 const links = [
@@ -16,6 +17,12 @@ const links = [
 
 export default function AdminLayout() {
   const nav = useNavigate();
+  const [expired, setExpired] = useState(false);
+  useEffect(() => {
+    const onExpired = () => setExpired(true);
+    window.addEventListener("hg:session-expired", onExpired);
+    return () => window.removeEventListener("hg:session-expired", onExpired);
+  }, []);
   if (!authApi.isLoggedIn()) return <Navigate to="/admin/login" replace />;
 
   return (
@@ -46,6 +53,23 @@ export default function AdminLayout() {
         </div>
       </aside>
       <main className="mr-64 p-8">
+        {expired && (
+          <div className="mb-6 rounded-2xl border-2 border-destructive/40 bg-destructive/10 p-4 flex items-start gap-3">
+            <AlertTriangle className="h-6 w-6 text-destructive shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <div className="font-black text-destructive mb-1">نشست شما منقضی شده است</div>
+              <p className="text-sm text-foreground/80 leading-relaxed">
+                برای ادامهٔ کار لطفاً یک‌بار از پنل <strong>خروج</strong> بزنید و دوباره وارد شوید. تا زمانی که این کار را انجام ندهید، ذخیره و ویرایش ممکن است با خطای ۴۰۱/۴۰۰ روبه‌رو شود.
+              </p>
+              <button
+                onClick={async () => { await authApi.logout(); nav("/admin/login"); }}
+                className="btn-primary mt-3 !py-2 !px-4 text-sm"
+              >
+                <LogOut className="h-4 w-4" /> خروج و ورود مجدد
+              </button>
+            </div>
+          </div>
+        )}
         <Outlet />
       </main>
     </div>
