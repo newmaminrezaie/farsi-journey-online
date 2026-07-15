@@ -139,7 +139,7 @@ export default function SemestersAdmin() {
                 </F>
               </div>
               <div className="sm:col-span-2">
-                <F label="کتاب‌های این ترم (اختیاری — به دانش‌آموز پیشنهاد داده می‌شود)">
+                <F label="کتاب‌های این کلاس (اختیاری — به دانش‌آموز پیشنهاد داده می‌شود)">
                   <div className="rounded-lg bg-parchment border border-primary/15 p-3 grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
                     {books.length === 0 && <span className="text-xs text-muted-foreground">هنوز کتابی ثبت نشده است</span>}
                     {books.map(b => {
