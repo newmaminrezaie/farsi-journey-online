@@ -17,6 +17,7 @@ function normalizeSemesterInput(input: unknown) {
 }
 
 const SemesterShape = z.object({
+  classCode: z.string().max(60).optional().default(""),
   titleFa: z.string().min(1).max(200),
   level: z.string().max(60).default("beginner"),
   
