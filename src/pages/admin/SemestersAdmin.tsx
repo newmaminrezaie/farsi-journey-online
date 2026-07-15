@@ -104,11 +104,14 @@ export default function SemestersAdmin() {
         <div className="fixed inset-0 bg-primary/40 flex items-center justify-center p-4 z-50" onClick={() => setOpen(false)}>
           <div className="bg-card rounded-3xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl text-primary">{editing ? "ویرایش ترم" : "ترم جدید"}</h2>
+              <h2 className="text-2xl text-primary">{editing ? "ویرایش کلاس" : "کلاس جدید"}</h2>
               <button onClick={() => setOpen(false)}><X className="h-5 w-5" /></button>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2"><F label="عنوان"><input value={form.titleFa} onChange={e => setForm({ ...form, titleFa: e.target.value })} className={ic} /></F></div>
+              <F label="کد کلاس (اختیاری — مثلاً 100-2)">
+                <input value={form.classCode || ""} onChange={e => setForm({ ...form, classCode: e.target.value })} placeholder="در صورت خالی بودن، خودکار ساخته می‌شود" className={ic + " font-mono"} />
+              </F>
               <F label="سطح">
                 <select value={form.level} onChange={e => setForm({ ...form, level: e.target.value })} className={ic}>
                   {["beginner","elementary","pre-intermediate","intermediate","upper-intermediate","advanced","ielts"].map(l => <option key={l}>{l}</option>)}
