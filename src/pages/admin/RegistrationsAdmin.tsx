@@ -175,7 +175,7 @@ export default function RegistrationsAdmin() {
           <input value={q} onChange={e => setQ(e.target.value)} placeholder="جستجو نام، تلفن، کد ملی…" className="w-full rounded-lg bg-parchment border border-primary/15 pr-9 pl-3 py-2 text-sm" />
         </div>
         <select value={semesterId} onChange={e => setSemesterId(e.target.value)} className="rounded-lg bg-parchment border border-primary/15 px-3 py-2 text-sm">
-          <option value="">همه ترم‌ها</option>
+          <option value="">همه کلاس‌ها</option>
           {semesters.map(s => <option key={s.id} value={s.id}>{s.titleFa}{s.classCode ? ` (${s.classCode})` : ""}</option>)}
         </select>
         <input value={classCode} onChange={e => setClassCode(e.target.value)} placeholder="کد کلاس" className="rounded-lg bg-parchment border border-primary/15 px-3 py-2 text-sm" />
