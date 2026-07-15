@@ -84,12 +84,18 @@ async function generateClassCode(level: string, startsOn: Date): Promise<string>
 }
 
 async function createSemester(data: z.infer<typeof SemesterShape>) {
-  const classCode = await generateClassCode(data.level, data.startsOn);
+  const manual = (data.classCode || "").trim();
+  const classCode = manual || await generateClassCode(data.level, data.startsOn);
   const withCode: any = { ...data, classCode };
   try {
     return await prisma.semester.create({ data: withCode });
   } catch (e: any) {
     const message = String(e?.message || "");
+    if (e?.code === "P2002" && manual) {
+      const err: any = new Error("duplicate_class_code");
+      err.statusCode = 409;
+      throw err;
+    }
     if (message.includes("Argument `jalaliYear` is missing") || message.includes("Argument `season` is missing")) {
       return prisma.semester.create({ data: { ...withCode, ...legacyMeta(data.startsOn) } as any });
     }
