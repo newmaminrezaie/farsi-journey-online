@@ -33,7 +33,7 @@ export default function Dashboard() {
       <h1 className="text-3xl mb-2 text-primary">داشبورد</h1>
       <p className="text-muted-foreground mb-8">نگاهی سریع به وضعیت آموزشگاه</p>
       <div className="grid md:grid-cols-5 gap-4 mb-8">
-        <Stat icon={<GraduationCap />} label="ترم‌های فعال" value={semesters.filter(s => s.status === "open").length} />
+        <Stat icon={<GraduationCap />} label="کلاس‌های فعال" value={semesters.filter(s => s.status === "open").length} />
         <Stat icon={<BookOpen />} label="کتاب‌ها" value={books.length} />
         <Stat icon={<ShoppingBag />} label="سفارش‌های در انتظار" value={pendingOrders.length} accent />
         <Stat icon={<ClipboardList />} label="ثبت‌نام جدید" value={newRegs.length} accent />
