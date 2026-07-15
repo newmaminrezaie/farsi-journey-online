@@ -31,7 +31,7 @@ export default function RegistrationPayment() {
     return (
       <div className="container py-32 text-center">
         <p className="text-muted-foreground mb-4">اطلاعات پرداخت در دسترس نیست.</p>
-        <Link to="/semesters" className="btn-primary">مشاهده ترم‌ها</Link>
+        <Link to="/semesters" className="btn-primary">مشاهده کلاس‌ها</Link>
       </div>
     );
   }
