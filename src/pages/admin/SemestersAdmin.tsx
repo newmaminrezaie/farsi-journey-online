@@ -8,6 +8,7 @@ import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 const empty = {
+  classCode: "",
   titleFa: "", level: "beginner" as any, teacherIds: [] as string[],
   bookIds: [] as string[],
   scheduleFa: "", startsOn: "", endsOn: "",
