@@ -24,7 +24,7 @@ export default function Semesters() {
       <section className="bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 tile-bg-navy opacity-70" />
         <div className="container relative py-20 text-center max-w-3xl">
-          <div className="chip-gold inline-flex mb-5">ترم‌ها</div>
+          <div className="chip-gold inline-flex mb-5">کلاس‌ها</div>
           <h1 className="text-4xl md:text-display leading-tight mb-4">
             دوره‌های <span className="text-gold gold-underline">در حال ثبت‌نام</span>
           </h1>
