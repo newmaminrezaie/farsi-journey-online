@@ -107,9 +107,9 @@ export default function SemesterDetail() {
             <div className="absolute inset-0 tile-bg-navy opacity-40" />
             <div className="relative">
               <div className="chip-gold mb-4 inline-flex">فرم ثبت‌نام کامل</div>
-              <h2 className="text-3xl md:text-4xl font-black mb-2">ثبت‌نام در ترم</h2>
+              <h2 className="text-3xl md:text-4xl font-black mb-2">ثبت‌نام در کلاس</h2>
               <p className="text-primary-foreground/85 leading-8 mb-6">
-                احتراماً اینجانب اطلاعات زیر را جهت ثبت‌نام در این ترم اعلام می‌نمایم.
+                احتراماً اینجانب اطلاعات زیر را جهت ثبت‌نام در این کلاس اعلام می‌نمایم.
               </p>
 
               <form onSubmit={submit} className="space-y-5">
