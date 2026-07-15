@@ -64,8 +64,8 @@ export default function SemestersAdmin() {
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl text-primary">ترم‌ها</h1>
-        <button onClick={() => openModal()} className="btn-primary"><Plus className="h-4 w-4" /> افزودن ترم</button>
+        <h1 className="text-3xl text-primary">کلاس‌ها</h1>
+        <button onClick={() => openModal()} className="btn-primary"><Plus className="h-4 w-4" /> افزودن کلاس</button>
       </div>
       <div className="bg-card rounded-3xl border border-primary/10 overflow-hidden">
         <table className="w-full text-sm">
