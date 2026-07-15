@@ -5,7 +5,7 @@ import logo from "@/assets/logo-fa.png";
 
 const links = [
   { to: "/admin/dashboard", label: "داشبورد", icon: LayoutDashboard },
-  { to: "/admin/semesters", label: "ترم‌ها", icon: GraduationCap },
+  { to: "/admin/semesters", label: "کلاس‌ها", icon: GraduationCap },
   { to: "/admin/teachers", label: "اساتید", icon: Users },
   { to: "/admin/employees", label: "کارکنان", icon: UserCog },
   { to: "/admin/books", label: "کتاب‌ها", icon: BookOpen },

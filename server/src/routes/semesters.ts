@@ -17,6 +17,7 @@ function normalizeSemesterInput(input: unknown) {
 }
 
 const SemesterShape = z.object({
+  classCode: z.string().max(60).optional().default(""),
   titleFa: z.string().min(1).max(200),
   level: z.string().max(60).default("beginner"),
   
@@ -83,12 +84,18 @@ async function generateClassCode(level: string, startsOn: Date): Promise<string>
 }
 
 async function createSemester(data: z.infer<typeof SemesterShape>) {
-  const classCode = await generateClassCode(data.level, data.startsOn);
+  const manual = (data.classCode || "").trim();
+  const classCode = manual || await generateClassCode(data.level, data.startsOn);
   const withCode: any = { ...data, classCode };
   try {
     return await prisma.semester.create({ data: withCode });
   } catch (e: any) {
     const message = String(e?.message || "");
+    if (e?.code === "P2002" && manual) {
+      const err: any = new Error("duplicate_class_code");
+      err.statusCode = 409;
+      throw err;
+    }
     if (message.includes("Argument `jalaliYear` is missing") || message.includes("Argument `season` is missing")) {
       return prisma.semester.create({ data: { ...withCode, ...legacyMeta(data.startsOn) } as any });
     }
@@ -130,16 +137,28 @@ export async function registerSemestersRoutes(app: FastifyInstance) {
   app.post("/semesters", { preHandler: requireStaff }, async (req, reply) => {
     const parsed = Create.safeParse(req.body);
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() });
-    const row = await createSemester(parsed.data);
-    return serialize(row);
+    try {
+      const row = await createSemester(parsed.data);
+      return serialize(row);
+    } catch (e: any) {
+      if (e?.message === "duplicate_class_code") return reply.code(409).send({ error: "duplicate_class_code", message: "این کد کلاس قبلاً استفاده شده است" });
+      throw e;
+    }
   });
 
   app.patch("/semesters/:id", { preHandler: requireStaff }, async (req, reply) => {
     const id = (req.params as any).id as string;
     const parsed = Update.safeParse(req.body);
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() });
-    const row = await prisma.semester.update({ where: { id }, data: parsed.data });
-    return serialize(row);
+    const data: any = { ...parsed.data };
+    if (typeof data.classCode === "string") data.classCode = data.classCode.trim();
+    try {
+      const row = await prisma.semester.update({ where: { id }, data });
+      return serialize(row);
+    } catch (e: any) {
+      if (e?.code === "P2002") return reply.code(409).send({ error: "duplicate_class_code", message: "این کد کلاس قبلاً استفاده شده است" });
+      throw e;
+    }
   });
 
   app.delete("/semesters/:id", { preHandler: requireStaff }, async (req) => {

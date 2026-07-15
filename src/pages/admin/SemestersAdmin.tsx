@@ -8,6 +8,7 @@ import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 const empty = {
+  classCode: "",
   titleFa: "", level: "beginner" as any, teacherIds: [] as string[],
   bookIds: [] as string[],
   scheduleFa: "", startsOn: "", endsOn: "",
@@ -37,7 +38,7 @@ export default function SemestersAdmin() {
     const { id, createdAt, seatsTaken, jalaliYear, season, teacherId, ...rest } = form as any;
     const payload = {
       ...rest,
-      
+      classCode: (form.classCode || "").trim(),
       teacherIds: form.teacherIds || [],
       bookIds: form.bookIds || [],
       capacity: Number(form.capacity) || 0,
@@ -63,8 +64,8 @@ export default function SemestersAdmin() {
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl text-primary">ترم‌ها</h1>
-        <button onClick={() => openModal()} className="btn-primary"><Plus className="h-4 w-4" /> افزودن ترم</button>
+        <h1 className="text-3xl text-primary">کلاس‌ها</h1>
+        <button onClick={() => openModal()} className="btn-primary"><Plus className="h-4 w-4" /> افزودن کلاس</button>
       </div>
       <div className="bg-card rounded-3xl border border-primary/10 overflow-hidden">
         <table className="w-full text-sm">
@@ -103,11 +104,14 @@ export default function SemestersAdmin() {
         <div className="fixed inset-0 bg-primary/40 flex items-center justify-center p-4 z-50" onClick={() => setOpen(false)}>
           <div className="bg-card rounded-3xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl text-primary">{editing ? "ویرایش ترم" : "ترم جدید"}</h2>
+              <h2 className="text-2xl text-primary">{editing ? "ویرایش کلاس" : "کلاس جدید"}</h2>
               <button onClick={() => setOpen(false)}><X className="h-5 w-5" /></button>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2"><F label="عنوان"><input value={form.titleFa} onChange={e => setForm({ ...form, titleFa: e.target.value })} className={ic} /></F></div>
+              <F label="کد کلاس (اختیاری — مثلاً 100-2)">
+                <input value={form.classCode || ""} onChange={e => setForm({ ...form, classCode: e.target.value })} placeholder="در صورت خالی بودن، خودکار ساخته می‌شود" className={ic + " font-mono"} />
+              </F>
               <F label="سطح">
                 <select value={form.level} onChange={e => setForm({ ...form, level: e.target.value })} className={ic}>
                   {["beginner","elementary","pre-intermediate","intermediate","upper-intermediate","advanced","ielts"].map(l => <option key={l}>{l}</option>)}
@@ -135,7 +139,7 @@ export default function SemestersAdmin() {
                 </F>
               </div>
               <div className="sm:col-span-2">
-                <F label="کتاب‌های این ترم (اختیاری — به دانش‌آموز پیشنهاد داده می‌شود)">
+                <F label="کتاب‌های این کلاس (اختیاری — به دانش‌آموز پیشنهاد داده می‌شود)">
                   <div className="rounded-lg bg-parchment border border-primary/15 p-3 grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
                     {books.length === 0 && <span className="text-xs text-muted-foreground">هنوز کتابی ثبت نشده است</span>}
                     {books.map(b => {

@@ -51,7 +51,7 @@ export default function Register() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.semesterId) return toast.error("لطفاً ترم مورد نظر خود را انتخاب کنید");
+    if (!form.semesterId) return toast.error("لطفاً کلاس مورد نظر خود را انتخاب کنید");
     if (!form.fullName) return toast.error("نام و نام خانوادگی الزامی است");
     if (!form.nationalId.trim()) return toast.error("کد ملی الزامی است");
     const yr = form.birthYear.replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).trim();
@@ -119,15 +119,15 @@ export default function Register() {
 
           {/* Semester — required */}
           <fieldset className="space-y-3">
-            <legend className="text-lg font-black text-primary mb-2">انتخاب ترم *</legend>
-            <F label="ترم مورد نظر *">
+            <legend className="text-lg font-black text-primary mb-2">انتخاب کلاس *</legend>
+            <F label="کلاس مورد نظر *">
               <select
                 value={form.semesterId}
                 onChange={e => setForm({ ...form, semesterId: e.target.value, selectedTeacherId: "", selectedBookId: "" })}
                 className={inputCls}
                 required
               >
-                <option value="">— لطفاً یک ترم را انتخاب کنید —</option>
+                <option value="">— لطفاً یک کلاس را انتخاب کنید —</option>
                 {semesters.map(s => (
                   <option key={s.id} value={s.id}>
                     {s.titleFa} — {(s.priceToman || 0).toLocaleString("fa-IR")} تومان

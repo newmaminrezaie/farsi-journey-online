@@ -107,9 +107,9 @@ export default function SemesterDetail() {
             <div className="absolute inset-0 tile-bg-navy opacity-40" />
             <div className="relative">
               <div className="chip-gold mb-4 inline-flex">فرم ثبت‌نام کامل</div>
-              <h2 className="text-3xl md:text-4xl font-black mb-2">ثبت‌نام در ترم</h2>
+              <h2 className="text-3xl md:text-4xl font-black mb-2">ثبت‌نام در کلاس</h2>
               <p className="text-primary-foreground/85 leading-8 mb-6">
-                احتراماً اینجانب اطلاعات زیر را جهت ثبت‌نام در این ترم اعلام می‌نمایم.
+                احتراماً اینجانب اطلاعات زیر را جهت ثبت‌نام در این کلاس اعلام می‌نمایم.
               </p>
 
               <form onSubmit={submit} className="space-y-5">
@@ -209,7 +209,7 @@ export default function SemesterDetail() {
 
                 <div className="bg-parchment/10 border border-gold/25 rounded-2xl p-4 space-y-3">
                   <p className="text-sm leading-8 text-primary-foreground/90">
-                    مایل به شرکت در ترم
+                    مایل به شرکت در کلاس
                     <input value={form.termInterest} onChange={e => setForm({ ...form, termInterest: e.target.value })} className={inlineCls} placeholder={sem.titleFa} />
                     سطح
                     <input value={form.levelInterest} onChange={e => setForm({ ...form, levelInterest: e.target.value })} className={inlineCls} placeholder={levelFa(sem.level)} />
@@ -233,7 +233,7 @@ export default function SemesterDetail() {
                 </div>
 
                 <button type="submit" disabled={submitting} className="btn-gold w-full">
-                  <GraduationCap className="h-5 w-5" /> {submitting ? "در حال ثبت…" : "ثبت‌نام در این ترم"}
+                  <GraduationCap className="h-5 w-5" /> {submitting ? "در حال ثبت…" : "ثبت‌نام در این کلاس"}
                 </button>
               </form>
             </div>

@@ -38,7 +38,7 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Link to="/semesters" className="btn-gold">
-                <GraduationCap className="h-5 w-5" /> ثبت‌نام در ترم جدید
+                <GraduationCap className="h-5 w-5" /> ثبت‌نام در کلاس جدید
               </Link>
               <Link to="/shop" className="inline-flex items-center gap-2 rounded-full border-2 border-gold/60 px-7 py-3.5 font-bold text-gold hover:bg-gold hover:text-primary transition-colors">
                 <BookOpen className="h-5 w-5" /> فروشگاه کتاب
@@ -81,7 +81,7 @@ export default function Home() {
 
       {/* ACTIVE SEMESTERS */}
       <section className="container py-20">
-        <SectionHeader eyebrow="ترم‌های جاری" title="در حال ثبت‌نام" note="از میان دوره‌های زیر مناسب‌ترین را انتخاب کنید" />
+        <SectionHeader eyebrow="کلاس‌های جاری" title="در حال ثبت‌نام" note="از میان دوره‌های زیر مناسب‌ترین را انتخاب کنید" />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {semesters.slice(0, 6).map((s, i) => {
             const teacherIds = s.teacherIds?.length ? s.teacherIds : ((s as any).teacherId ? [(s as any).teacherId] : []);
