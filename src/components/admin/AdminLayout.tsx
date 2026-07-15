@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
 import { Outlet, NavLink, Navigate, useNavigate } from "react-router-dom";
 import { authApi } from "@/lib/api";
-import { LayoutDashboard, BookOpen, GraduationCap, Users, UserCog, ShoppingBag, ClipboardList, Megaphone, LogOut } from "lucide-react";
+import { LayoutDashboard, BookOpen, GraduationCap, Users, UserCog, ShoppingBag, ClipboardList, Megaphone, LogOut, AlertTriangle } from "lucide-react";
 import logo from "@/assets/logo-fa.png";
 
 const links = [
@@ -16,6 +17,12 @@ const links = [
 
 export default function AdminLayout() {
   const nav = useNavigate();
+  const [expired, setExpired] = useState(false);
+  useEffect(() => {
+    const onExpired = () => setExpired(true);
+    window.addEventListener("hg:session-expired", onExpired);
+    return () => window.removeEventListener("hg:session-expired", onExpired);
+  }, []);
   if (!authApi.isLoggedIn()) return <Navigate to="/admin/login" replace />;
 
   return (
