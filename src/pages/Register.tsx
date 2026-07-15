@@ -51,7 +51,7 @@ export default function Register() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.semesterId) return toast.error("لطفاً ترم مورد نظر خود را انتخاب کنید");
+    if (!form.semesterId) return toast.error("لطفاً کلاس مورد نظر خود را انتخاب کنید");
     if (!form.fullName) return toast.error("نام و نام خانوادگی الزامی است");
     if (!form.nationalId.trim()) return toast.error("کد ملی الزامی است");
     const yr = form.birthYear.replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).trim();
