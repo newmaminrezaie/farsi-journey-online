@@ -6,7 +6,7 @@ import { cartApi } from "@/lib/api";
 
 const nav = [
   { to: "/", label: "خانه" },
-  { to: "/semesters", label: "ترم‌ها" },
+  { to: "/semesters", label: "کلاس‌ها" },
   { to: "/assessment", label: "تعیین سطح" },
   { to: "/teachers", label: "اساتید و کارکنان" },
   { to: "/shop", label: "فروشگاه کتاب" },
