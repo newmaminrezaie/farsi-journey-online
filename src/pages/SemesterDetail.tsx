@@ -209,7 +209,7 @@ export default function SemesterDetail() {
 
                 <div className="bg-parchment/10 border border-gold/25 rounded-2xl p-4 space-y-3">
                   <p className="text-sm leading-8 text-primary-foreground/90">
-                    مایل به شرکت در ترم
+                    مایل به شرکت در کلاس
                     <input value={form.termInterest} onChange={e => setForm({ ...form, termInterest: e.target.value })} className={inlineCls} placeholder={sem.titleFa} />
                     سطح
                     <input value={form.levelInterest} onChange={e => setForm({ ...form, levelInterest: e.target.value })} className={inlineCls} placeholder={levelFa(sem.level)} />
