@@ -44,7 +44,7 @@ export default function SiteFooter() {
       </div>
       <div className="border-t border-primary-foreground/10 relative">
         <div className="container py-5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-primary-foreground/60">
-          <div>© ۱۴۰۳ آموزشگاه زبان‌های گویا — تمامی حقوق محفوظ است.</div>
+          <div>© {new Intl.DateTimeFormat("fa-IR-u-ca-persian", { year: "numeric" }).format(new Date()).replace(/[^\u06F0-\u06F9]/g, "")} آموزشگاه زبان‌های گویا — تمامی حقوق محفوظ است.</div>
           <div className="bg-parchment rounded-lg p-2">
             <a
               referrerPolicy="origin"
