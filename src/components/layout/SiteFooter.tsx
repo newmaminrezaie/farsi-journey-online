@@ -43,8 +43,24 @@ export default function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-primary-foreground/10 relative">
-        <div className="container py-5 text-center text-xs text-primary-foreground/60">
-          © ۱۴۰۳ آموزشگاه زبان‌های گویا — تمامی حقوق محفوظ است.
+        <div className="container py-5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-primary-foreground/60">
+          <div>© ۱۴۰۳ آموزشگاه زبان‌های گویا — تمامی حقوق محفوظ است.</div>
+          <div className="bg-parchment rounded-lg p-2">
+            <a
+              referrerPolicy="origin"
+              target="_blank"
+              rel="noreferrer"
+              href="https://trustseal.enamad.ir/?id=6822574&Code=HjavLZ2pFAUYOmsGJfEyaiPL5Nun4GzK"
+            >
+              <img
+                referrerPolicy="origin"
+                src="https://trustseal.enamad.ir/logo.aspx?id=6822574&Code=HjavLZ2pFAUYOmsGJfEyaiPL5Nun4GzK"
+                alt="نماد اعتماد الکترونیکی"
+                style={{ cursor: "pointer" }}
+                {...({ code: "HjavLZ2pFAUYOmsGJfEyaiPL5Nun4GzK" } as any)}
+              />
+            </a>
+          </div>
         </div>
       </div>
     </footer>
