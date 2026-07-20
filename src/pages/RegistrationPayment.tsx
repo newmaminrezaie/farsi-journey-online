@@ -1,8 +1,8 @@
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { formatToman, registrationsApi } from "@/lib/api";
-import { CreditCard, ShieldCheck, BookOpen, GraduationCap, BadgePercent, CheckCircle2, ArrowRight } from "lucide-react";
+import { formatToman, paymentsApi } from "@/lib/api";
+import { CreditCard, ShieldCheck, BookOpen, GraduationCap, BadgePercent, ArrowRight } from "lucide-react";
 
 type PayState = {
   registrationId?: string;
