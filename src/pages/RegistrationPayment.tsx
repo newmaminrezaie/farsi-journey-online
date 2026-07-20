@@ -50,7 +50,7 @@ export default function RegistrationPayment() {
     }
   }
 
-  }
+
 
   return (
     <section className="container py-16 max-w-5xl grid lg:grid-cols-[1fr_400px] gap-8">
