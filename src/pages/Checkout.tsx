@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { ordersApi, cartApi, formatToman, booksApi } from "@/lib/api";
+import { ordersApi, cartApi, formatToman, booksApi, paymentsApi } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
-import { CreditCard, Info } from "lucide-react";
+import { CreditCard, Info, ShieldCheck } from "lucide-react";
 
 export default function Checkout() {
   const nav = useNavigate();
@@ -24,10 +24,20 @@ export default function Checkout() {
     e.preventDefault();
     if (!form.customerName || !form.phone || !form.address) return toast.error("همه فیلدها را پر کنید");
     setSubmitting(true);
-    const order = await ordersApi.createFromCart({ ...form, paymentMethod: method });
-    setSubmitting(false);
-    toast.success("سفارش شما ثبت شد.");
-    nav(`/order/${order.refCode}`);
+    try {
+      const order = await ordersApi.createFromCart({ ...form, paymentMethod: method });
+      if (method === "zarinpal") {
+        const { url } = await paymentsApi.startZarinpal("order", order.id);
+        window.location.href = url;
+        return;
+      }
+      toast.success("سفارش شما ثبت شد.");
+      nav(`/order/${order.refCode}`);
+    } catch (err: any) {
+      toast.error(err?.message || "خطا در ثبت سفارش");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
