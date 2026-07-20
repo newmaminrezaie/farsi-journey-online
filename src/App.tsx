@@ -15,6 +15,7 @@ import Cart from "@/pages/Cart";
 import Checkout from "@/pages/Checkout";
 import OrderSuccess from "@/pages/OrderSuccess";
 import Contact from "@/pages/Contact";
+import PaymentResult from "@/pages/PaymentResult";
 import NotFound from "@/pages/NotFound";
 import AdminLogin from "@/pages/admin/Login";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -47,6 +48,7 @@ export default function App() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order/:ref" element={<OrderSuccess />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/payment/result" element={<PaymentResult />} />
       </Route>
 
       <Route path="/admin/login" element={<AdminLogin />} />
