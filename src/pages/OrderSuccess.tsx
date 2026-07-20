@@ -29,9 +29,11 @@ export default function OrderSuccess() {
           </div>
         </div>
         <p className="text-sm text-muted-foreground mb-6">
-          {order.paymentMethod === "zarinpal"
-            ? "به‌زودی به درگاه پرداخت زرین‌پال هدایت می‌شوید (این قابلیت در فاز بعدی فعال می‌شود)."
-            : "کارشناسان ما برای هماهنگی ارسال با شما تماس می‌گیرند."}
+          {order.status === "paid"
+            ? "پرداخت شما با موفقیت انجام شد. برای هماهنگی ارسال با شما تماس می‌گیریم."
+            : order.paymentMethod === "zarinpal"
+            ? "این سفارش هنوز پرداخت نشده. لطفاً از طریق پیامک ارسال‌شده پرداخت را تکمیل کنید."
+            : "کارشناسان ما برای هماهنگی ارسال و دریافت وجه با شما تماس می‌گیرند."}
         </p>
         <Link to="/" className="btn-primary">بازگشت به خانه</Link>
       </div>

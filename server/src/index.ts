@@ -18,6 +18,8 @@ import { registerBooksRoutes } from "./routes/books.js";
 import { registerNotifyRoutes } from "./routes/notify.js";
 import { registerUploadsRoutes } from "./routes/uploads.js";
 import { registerSettingsRoutes } from "./routes/settings.js";
+import { registerOrdersRoutes } from "./routes/orders.js";
+import { registerZarinpalRoutes } from "./routes/zarinpal.js";
 import { startNotifyWorker } from "./notify/worker.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -53,6 +55,8 @@ await app.register(registerBooksRoutes, { prefix: "/api" });
 await app.register(registerNotifyRoutes, { prefix: "/api/admin/notify" });
 await app.register(registerUploadsRoutes, { prefix: "/api/admin" });
 await app.register(registerSettingsRoutes, { prefix: "/api" });
+await app.register(registerOrdersRoutes, { prefix: "/api" });
+await app.register(registerZarinpalRoutes, { prefix: "/api" });
 
 // Kick off the background notification dispatcher.
 startNotifyWorker(app.log);

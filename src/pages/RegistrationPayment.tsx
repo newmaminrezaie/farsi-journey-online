@@ -1,8 +1,8 @@
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { formatToman, registrationsApi } from "@/lib/api";
-import { CreditCard, ShieldCheck, BookOpen, GraduationCap, BadgePercent, CheckCircle2, ArrowRight } from "lucide-react";
+import { formatToman, paymentsApi } from "@/lib/api";
+import { CreditCard, ShieldCheck, BookOpen, GraduationCap, BadgePercent, ArrowRight } from "lucide-react";
 
 type PayState = {
   registrationId?: string;
@@ -17,7 +17,6 @@ export default function RegistrationPayment() {
   const loc = useLocation();
   const state = loc.state as PayState | null;
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState<null | { ref: string }>(null);
 
   const totals = useMemo(() => {
     const tuition = state?.semester.priceToman ?? 0;
@@ -37,53 +36,21 @@ export default function RegistrationPayment() {
   }
 
   async function pay() {
-    setSubmitting(true);
-    // Zarinpal integration lives on the backend (Phase-2). Simulate a redirect
-    // hand-off so the UX is complete end-to-end.
-    await new Promise(r => setTimeout(r, 900));
-    const ref = "GY-" + Math.random().toString(36).slice(2, 8).toUpperCase();
-    if (state?.registrationId) {
-      try { await registrationsApi.markPaid(state.registrationId, totals.total, ref); }
-      catch (e: any) { console.error(e); }
+    if (!state?.registrationId) {
+      toast.error("شناسه ثبت‌نام یافت نشد. لطفاً فرم را دوباره ارسال کنید.");
+      return;
     }
-    setSubmitting(false);
-    setDone({ ref });
-    toast.success("پرداخت با موفقیت ثبت شد");
+    setSubmitting(true);
+    try {
+      const { url } = await paymentsApi.startZarinpal("registration", state.registrationId);
+      window.location.href = url;
+    } catch (e: any) {
+      setSubmitting(false);
+      toast.error(e?.message || "اتصال به درگاه پرداخت ممکن نشد");
+    }
   }
 
-  if (done) {
-    return (
-      <section className="container py-16 max-w-2xl">
-        <div className="bg-card rounded-3xl p-10 border border-gold/40 text-center shadow-soft">
-          <CheckCircle2 className="h-20 w-20 text-turquoise mx-auto mb-6" />
-          <h1 className="text-3xl md:text-4xl mb-3 text-primary">ثبت‌نام و پرداخت شما انجام شد</h1>
-          <p className="text-muted-foreground mb-2">
-            {state.registrantName} عزیز، ثبت‌نام شما در «{state.semester.titleFa}» قطعی شد.
-          </p>
-          <p className="text-muted-foreground mb-6">
-            کد پیگیری: <span className="font-black text-primary tracking-wider">{done.ref}</span>
-          </p>
-          <div className="bg-parchment rounded-2xl p-5 text-right space-y-2 mb-6">
-            <Row label={`شهریه — ${state.semester.titleFa}`} value={formatToman(totals.tuition)} />
-            {state.book && (
-              <>
-                <Row label={`کتاب — ${state.book.titleFa}`} value={formatToman(totals.bookOriginal)} />
-                <Row label="تخفیف ۵٪ خرید آنلاین کتاب" value={"−" + formatToman(totals.bookDiscount)} muted />
-              </>
-            )}
-            <div className="flex justify-between pt-3 border-t border-primary/10 font-black text-primary">
-              <span>مبلغ پرداخت‌شده</span>
-              <span className="text-gold">{formatToman(totals.total)}</span>
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground mb-6">
-            جزئیات کلاس و — در صورت خرید کتاب — زمان تحویل، به شماره {state.phone} پیامک خواهد شد.
-          </p>
-          <Link to="/" className="btn-primary">بازگشت به خانه</Link>
-        </div>
-      </section>
-    );
-  }
+
 
   return (
     <section className="container py-16 max-w-5xl grid lg:grid-cols-[1fr_400px] gap-8">
