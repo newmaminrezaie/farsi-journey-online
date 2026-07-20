@@ -115,40 +115,62 @@ export const cartApi = {
   clear() { storage.set(KEYS.cart, []); },
 };
 
-// ---------- Orders (local-only — Zarinpal wiring pending) ----------
+// ---------- Orders (backend-backed, real payment flow) ----------
 export const ordersApi = {
-  async list(): Promise<Order[]> { return storage.get<Order[]>(KEYS.orders, []); },
-  async get(refOrId: string): Promise<Order | undefined> {
-    return (await this.list()).find(o => o.id === refOrId || o.refCode === refOrId);
+  list: (): Promise<Order[]> => http<any[]>("/orders").then(rs => rs.map(mapOrder)),
+  get: async (refOrId: string): Promise<Order | undefined> => {
+    try { return mapOrder(await http<any>(`/orders/by-ref/${encodeURIComponent(refOrId)}`)); }
+    catch { return undefined; }
   },
   async createFromCart(input: {
     customerName: string; phone: string; address: string; note?: string;
     paymentMethod: Order["paymentMethod"];
   }): Promise<Order> {
     const cart = cartApi.read();
-    const books = await booksApi.list();
-    const items: OrderItem[] = cart.map(ci => {
-      const b = books.find(bk => bk.id === ci.bookId)!;
-      return { bookId: b.id, titleFa: b.titleFa, qty: ci.qty, unitPriceToman: b.priceToman };
-    });
-    const subtotal = items.reduce((s, i) => s + i.qty * i.unitPriceToman, 0);
-    const all = await this.list();
-    const order: Order = {
-      id: uid("ord"),
-      refCode: refCode(),
-      customerName: input.customerName, phone: input.phone, address: input.address, note: input.note,
-      items, subtotalToman: subtotal,
-      status: "pending",
-      paymentMethod: input.paymentMethod,
-      createdAt: new Date().toISOString(),
-    };
-    storage.set(KEYS.orders, [order, ...all]);
+    const order = mapOrder(await http<any>("/orders", {
+      method: "POST",
+      body: JSON.stringify({
+        customerName: input.customerName,
+        phone: input.phone,
+        address: input.address,
+        note: input.note ?? "",
+        paymentMethod: input.paymentMethod,
+        items: cart.map(i => ({ bookId: i.bookId, qty: i.qty })),
+      }),
+    }));
     cartApi.clear();
     return order;
   },
-  async updateStatus(id: string, status: Order["status"]): Promise<void> {
-    const all = await this.list();
-    storage.set(KEYS.orders, all.map(o => o.id === id ? { ...o, status } : o));
+  updateStatus: (id: string, status: Order["status"]): Promise<void> =>
+    http(`/orders/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }).then(() => undefined),
+  remove: (id: string): Promise<void> =>
+    http(`/orders/${id}`, { method: "DELETE" }).then(() => undefined),
+};
+
+function mapOrder(row: any): Order {
+  return {
+    id: row.id,
+    refCode: row.refCode,
+    customerName: row.customerName,
+    phone: row.phone,
+    address: row.address,
+    note: row.note,
+    items: Array.isArray(row.itemsJson) ? row.itemsJson : (row.items ?? []),
+    subtotalToman: row.subtotalToman,
+    status: row.status,
+    paymentMethod: row.paymentMethod,
+    zarinpalRefId: row.paymentRef,
+    createdAt: row.createdAt,
+  };
+}
+
+// ---------- Payments (Zarinpal) ----------
+export const paymentsApi = {
+  async startZarinpal(kind: "registration" | "order", targetId: string): Promise<{ url: string; authority: string }> {
+    return http("/payments/zarinpal/request", {
+      method: "POST",
+      body: JSON.stringify({ kind, targetId }),
+    });
   },
 };
 
