@@ -169,3 +169,41 @@ model AuditLog {
 
   actor      StaffUser? @relation(fields: [actorId], references: [id])
 }
+
+// -------------------- Book shop orders --------------------
+
+model Order {
+  id             String    @id @default(cuid())
+  refCode        String    @unique
+  customerName   String
+  phone          String
+  address        String    @default("")
+  note           String    @default("")
+  itemsJson      Json
+  subtotalToman  Int
+  status         String    @default("pending")   // pending | paid | shipped | cancelled
+  paymentMethod  String    @default("zarinpal")  // zarinpal | cash-on-delivery
+  paidAt         DateTime?
+  paymentRef     String    @default("")
+  createdAt      DateTime  @default(now())
+
+  @@index([phone])
+  @@index([status])
+}
+
+// -------------------- Zarinpal payment sessions --------------------
+
+model PaymentSession {
+  id            String    @id @default(cuid())
+  authority     String    @unique
+  kind          String    // "registration" | "order"
+  targetId      String
+  amountToman   Int
+  status        String    @default("pending")   // pending | paid | failed | cancelled
+  refId         String    @default("")
+  errorMessage  String    @default("")
+  createdAt     DateTime  @default(now())
+  verifiedAt    DateTime?
+
+  @@index([kind, targetId])
+}
