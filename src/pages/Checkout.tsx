@@ -61,7 +61,7 @@ export default function Checkout() {
                 <CreditCard className="h-6 w-6 text-gold" />
                 <div>
                   <div className="font-bold text-primary">پرداخت آنلاین (زرین‌پال)</div>
-                  <div className="text-xs text-muted-foreground mt-1">فعال‌سازی در فاز بعدی</div>
+                  <div className="text-xs text-muted-foreground mt-1">پرداخت امن با کارت‌های عضو شتاب</div>
                 </div>
               </div>
             </label>
