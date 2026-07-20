@@ -78,8 +78,11 @@ export default function Checkout() {
           </div>
         </div>
 
-        <button type="submit" disabled={submitting} className="btn-primary w-full">
-          {submitting ? "در حال ثبت…" : "ثبت سفارش"}
+        <button type="submit" disabled={submitting} className={method === "zarinpal" ? "btn-gold w-full" : "btn-primary w-full"}>
+          {method === "zarinpal" && <ShieldCheck className="h-5 w-5" />}
+          {submitting
+            ? (method === "zarinpal" ? "در حال انتقال به درگاه…" : "در حال ثبت…")
+            : (method === "zarinpal" ? "پرداخت با زرین‌پال" : "ثبت سفارش")}
         </button>
       </form>
 
