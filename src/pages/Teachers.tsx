@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { employeesApi, teachersApi } from "@/lib/api";
+import RelatedLinks from "@/components/RelatedLinks";
 
 export default function Teachers() {
   const { data: teachers = [] } = useQuery({ queryKey: ["teachers"], queryFn: () => teachersApi.list() });
@@ -68,6 +69,14 @@ export default function Teachers() {
           </>
         )}
       </section>
+      <RelatedLinks
+        links={[
+          { to: "/semesters", label: "کلاس‌های در حال ثبت‌نام اساتید ما", desc: "دوره‌های حضوری و آنلاین در حال ثبت‌نام." },
+          { to: "/assessment", label: "درخواست تعیین سطح", desc: "با یکی از اساتید گویا سطح خود را بسنجید." },
+          { to: "/about", label: "درباره آموزشگاه گویا", desc: "با تاریخچه و مأموریت آموزشگاه بیشتر آشنا شوید." },
+          { to: "/contact", label: "تماس با آموزشگاه", desc: "آدرس گناباد، غفاری ۳ و شماره‌های تماس." },
+        ]}
+      />
     </>
   );
 }

@@ -5,6 +5,7 @@ import { semestersApi, teachersApi, formatToman } from "@/lib/api";
 import { formatJalali } from "@/lib/jalali";
 import { levelFa, modeFa } from "./Home";
 import { ArrowLeft, Users, Calendar, Clock } from "lucide-react";
+import RelatedLinks from "@/components/RelatedLinks";
 
 const MODES: Array<{ id: "all" | "in-person" | "online" | "hybrid"; label: string }> = [
   { id: "all", label: "همه" },
@@ -86,6 +87,15 @@ export default function Semesters() {
         })}
         </div>
       </section>
+      <RelatedLinks
+        title="گام بعدی شما"
+        links={[
+          { to: "/assessment", label: "تعیین سطح رایگان قبل از ثبت‌نام", desc: "با تعیین سطح آنلاین، بهترین کلاس را انتخاب کنید." },
+          { to: "/register", label: "ثبت‌نام سریع در کلاس زبان", desc: "فرم ثبت‌نام و پرداخت آنلاین شهریه از طریق زرین‌پال." },
+          { to: "/teachers", label: "اساتید و کارکنان گویا", desc: "کادر آموزشی مجرب دوره‌های حضوری و آنلاین." },
+          { to: "/shop", label: "کتاب‌های کلاسی زبان", desc: "کتاب‌های اصلی هر دوره را با ۵٪ تخفیف تهیه کنید." },
+        ]}
+      />
     </>
   );
 }

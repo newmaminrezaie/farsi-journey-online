@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { booksApi, formatToman } from "@/lib/api";
 import { levelFa } from "./Home";
 import { Search } from "lucide-react";
+import RelatedLinks from "@/components/RelatedLinks";
 
 const CATS = [
   { v: "", l: "همه" },
@@ -72,6 +73,15 @@ export default function Shop() {
         </div>
         {filtered.length === 0 && <div className="text-center py-20 text-muted-foreground">کتابی یافت نشد.</div>}
       </section>
+      <RelatedLinks
+        title="کتاب گرفتید؟ گام بعدی"
+        links={[
+          { to: "/semesters", label: "کلاس‌های مرتبط با کتاب انتخابی", desc: "دوره‌های زبان انگلیسی گویا برای هر سطح." },
+          { to: "/assessment", label: "تعیین سطح رایگان", desc: "قبل از خرید کتاب یا ثبت‌نام، سطح خود را بسنجید." },
+          { to: "/cart", label: "مشاهده سبد خرید", desc: "نهایی کردن سفارش و پرداخت با زرین‌پال." },
+          { to: "/contact", label: "مشاوره خرید کتاب", desc: "برای انتخاب کتاب مناسب با ما تماس بگیرید." },
+        ]}
+      />
     </>
   );
 }

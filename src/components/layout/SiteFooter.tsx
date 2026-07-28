@@ -6,7 +6,7 @@ export default function SiteFooter() {
   return (
     <footer className="mt-24 bg-primary text-primary-foreground relative overflow-hidden">
       <div className="absolute inset-0 tile-bg-navy opacity-40 pointer-events-none" />
-      <div className="container relative py-16 grid gap-10 md:grid-cols-4">
+      <div className="container relative py-16 grid gap-10 md:grid-cols-5">
         <div className="md:col-span-2">
           <img src={logo} alt="HiGooya" className="h-16 w-auto bg-parchment rounded-xl p-2 mb-5" />
           <p className="text-primary-foreground/80 leading-8 max-w-md">
@@ -21,11 +21,26 @@ export default function SiteFooter() {
         <div>
           <h4 className="text-gold mb-4 text-lg">دسترسی سریع</h4>
           <ul className="space-y-2 text-sm text-primary-foreground/85">
-            <li><Link to="/semesters" className="hover:text-gold">کلاس‌های جاری</Link></li>
-            <li><Link to="/teachers" className="hover:text-gold">اساتید</Link></li>
-            <li><Link to="/shop" className="hover:text-gold">کتاب‌ها</Link></li>
-            <li><Link to="/register" className="hover:text-gold">ثبت‌نام</Link></li>
-            <li><Link to="/about" className="hover:text-gold">درباره ما</Link></li>
+            <li><Link to="/" className="hover:text-gold" title="خانه آموزشگاه زبان گویا">خانه</Link></li>
+            <li><Link to="/semesters" className="hover:text-gold" title="کلاس‌های در حال ثبت‌نام زبان انگلیسی">کلاس‌های جاری</Link></li>
+            <li><Link to="/assessment" className="hover:text-gold" title="تعیین سطح رایگان زبان انگلیسی">تعیین سطح رایگان</Link></li>
+            <li><Link to="/teachers" className="hover:text-gold" title="اساتید و کارکنان آموزشگاه گویا">اساتید و کارکنان</Link></li>
+            <li><Link to="/shop" className="hover:text-gold" title="فروشگاه کتاب زبان انگلیسی">فروشگاه کتاب</Link></li>
+            <li><Link to="/register" className="hover:text-gold" title="ثبت‌نام در کلاس‌های زبان">ثبت‌نام آنلاین</Link></li>
+            <li><Link to="/about" className="hover:text-gold" title="درباره آموزشگاه گویا">درباره ما</Link></li>
+            <li><Link to="/contact" className="hover:text-gold" title="تماس با آموزشگاه گویا در گناباد">تماس با ما</Link></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-gold mb-4 text-lg">دوره‌های محبوب</h4>
+          <ul className="space-y-2 text-sm text-primary-foreground/85">
+            <li><Link to="/semesters" className="hover:text-gold" title="کلاس آیلتس آکادمیک در گناباد">آماده‌سازی آیلتس آکادمیک</Link></li>
+            <li><Link to="/semesters" className="hover:text-gold" title="کلاس مکالمه زبان انگلیسی">دوره مکالمه انگلیسی</Link></li>
+            <li><Link to="/semesters" className="hover:text-gold" title="کلاس زبان انگلیسی کودکان">زبان انگلیسی کودکان</Link></li>
+            <li><Link to="/semesters" className="hover:text-gold" title="کلاس انگلیسی نوجوانان">انگلیسی نوجوانان</Link></li>
+            <li><Link to="/semesters" className="hover:text-gold" title="کلاس آنلاین زبان انگلیسی">کلاس آنلاین انگلیسی</Link></li>
+            <li><Link to="/assessment" className="hover:text-gold" title="تعیین سطح رایگان">تعیین سطح آنلاین</Link></li>
           </ul>
         </div>
 
