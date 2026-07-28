@@ -52,7 +52,7 @@ export default function AdminLayout() {
           </button>
         </div>
       </aside>
-      <main className="mr-64 p-8">
+      <main className="me-64 p-8">
         {expired && (
           <div className="mb-6 rounded-2xl border-2 border-destructive/40 bg-destructive/10 p-4 flex items-start gap-3">
             <AlertTriangle className="h-6 w-6 text-destructive shrink-0 mt-0.5" />
