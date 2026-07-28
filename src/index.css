@@ -65,14 +65,38 @@ a[href*="lovable.app"] {
 
 @layer base {
   * { @apply border-border; }
-  html { font-family: 'Vazirmatn Variable', Vazirmatn, system-ui, sans-serif; }
+  html { font-family: 'Vazirmatn Variable', Vazirmatn, system-ui, sans-serif; -webkit-text-size-adjust: 100%; }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "ss02";
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
-  h1, h2, h3, h4 { font-family: 'Estedad', 'Vazirmatn Variable', serif; font-weight: 900; }
+  h1, h2, h3, h4 {
+    font-family: 'Estedad', 'Vazirmatn Variable', serif;
+    font-weight: 900;
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+  }
+  h1 { line-height: 1.15; }
+  p { line-height: 1.9; }
   ::selection { background: hsl(var(--gold) / 0.35); color: hsl(var(--primary)); }
+
+  /* Universal focus ring — subtle gold glow, works in RTL naturally */
+  :where(a, button, [role="button"], input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--gold) / 0.55);
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+  }
+
+  /* Persian numerals — tabular for consistent alignment in tables and prices */
+  .persian-nums, table td, table th {
+    font-feature-settings: "tnum", "ss01";
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Force LTR only where the content is inherently LTR (phones, IDs, prices in fa-IR) */
+  [dir="ltr"] { unicode-bidi: isolate; }
 }
 
 @layer components {
@@ -110,13 +134,32 @@ a[href*="lovable.app"] {
     opacity: 0.6;
   }
 
+  /* Ornamental section eyebrow — small diamond leader used on section headers */
+  .section-eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gold;
+  }
+  .section-eyebrow::before,
+  .section-eyebrow::after {
+    content: "";
+    display: inline-block;
+    width: 1.75rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.7), transparent);
+  }
+
+  /* Slim gold rule between blocks */
+  .rule-gold {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.55), transparent);
+  }
+
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-primary-foreground font-bold transition-all;
-    @apply hover:shadow-navy hover:-translate-y-0.5;
+    @apply hover:shadow-navy hover:-translate-y-0.5 active:translate-y-0;
   }
   .btn-gold {
     @apply inline-flex items-center justify-center gap-2 rounded-full bg-gold px-7 py-3.5 text-gold-foreground font-bold transition-all;
-    @apply hover:shadow-gold hover:-translate-y-0.5;
+    @apply hover:shadow-gold hover:-translate-y-0.5 active:translate-y-0;
   }
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded-full border border-primary/30 bg-transparent px-7 py-3.5 text-primary font-bold transition-all;
@@ -132,7 +175,40 @@ a[href*="lovable.app"] {
     background-color: hsl(var(--gold) / 0.18);
     color: hsl(var(--primary));
   }
+  .chip-navy {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-primary text-primary-foreground;
+  }
+
+  /* Unified form input — used across public and admin forms */
+  .hg-input {
+    @apply block w-full rounded-xl bg-parchment border border-primary/15 px-4 py-3 text-sm text-primary;
+    @apply transition-colors placeholder:text-muted-foreground;
+    @apply focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/25;
+  }
+  .hg-input:disabled { @apply opacity-60 cursor-not-allowed; }
+  textarea.hg-input { @apply min-h-24 leading-7; }
+  select.hg-input {
+    background-image: linear-gradient(45deg, transparent 50%, hsl(var(--primary)) 50%),
+                      linear-gradient(135deg, hsl(var(--primary)) 50%, transparent 50%);
+    background-position: calc(0% + 14px) 55%, calc(0% + 19px) 55%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    padding-inline-start: 2rem;
+  }
+
+  .hg-label { @apply block text-sm font-bold text-primary mb-1.5; }
+
+  /* Elevated content card with subtle warm border */
+  .hg-card {
+    @apply bg-card rounded-3xl border border-primary/10 shadow-soft;
+  }
+  .hg-card-pad { @apply p-6 md:p-8; }
+
+  .link-gold {
+    @apply text-primary underline-offset-4 decoration-gold/60 hover:text-gold hover:decoration-gold transition-colors;
+  }
 }
+
 
 /* react-multi-date-picker theme override to match design */
 .rmdp-container { width: 100%; }
