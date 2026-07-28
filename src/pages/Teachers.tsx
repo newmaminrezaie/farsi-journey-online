@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { employeesApi, teachersApi } from "@/lib/api";
+import RelatedLinks from "@/components/RelatedLinks";
 
 export default function Teachers() {
   const { data: teachers = [] } = useQuery({ queryKey: ["teachers"], queryFn: () => teachersApi.list() });
