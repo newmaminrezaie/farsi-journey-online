@@ -69,6 +69,14 @@ export default function About() {
           </div>
         </div>
       </section>
+      <RelatedLinks
+        links={[
+          { to: "/semesters", label: "کلاس‌های فعال آموزشگاه گویا", desc: "دوره‌های زبان انگلیسی، مکالمه و آیلتس." },
+          { to: "/teachers", label: "اساتید و کارکنان آموزشگاه", desc: "کادر مجرب و دلسوز گویا در گناباد." },
+          { to: "/assessment", label: "تعیین سطح رایگان", desc: "قبل از شروع، سطح خود را دقیق مشخص کنید." },
+          { to: "/contact", label: "آدرس و شماره تماس گویا", desc: "گناباد، غفاری ۳ — همیشه در خدمت شما." },
+        ]}
+      />
     </>
   );
 }
