@@ -7,6 +7,7 @@ import { formatJalali } from "@/lib/jalali";
 import { TileStar, TileHex } from "@/components/PersianPattern";
 import logoFa from "@/assets/logo-fa.png";
 import { localImages } from "@/assets/local";
+import RelatedLinks from "@/components/RelatedLinks";
 
 export default function Home() {
   const { data: semesters = [] } = useQuery({ queryKey: ["semesters", "open"], queryFn: () => semestersApi.listOpen() });
