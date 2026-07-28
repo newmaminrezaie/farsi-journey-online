@@ -64,17 +64,17 @@ export default function Contact() {
           <Item icon={<Clock />} title="ساعات کار">شنبه تا پنجشنبه، ۸ صبح تا ۹ شب</Item>
         </div>
         <form onSubmit={handleSubmit}
-              className="bg-card rounded-3xl p-8 border border-primary/10 space-y-4">
+              className="hg-card hg-card-pad space-y-4">
           <h3 className="text-2xl text-primary mb-2">پیام سریع</h3>
           <input name="name" placeholder="نام" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
                  maxLength={100}
-                 className="w-full rounded-xl bg-parchment border border-primary/15 px-4 py-3" required />
+                 className="hg-input" required />
           <input name="email" type="email" placeholder="ایمیل" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
                  maxLength={255} dir="ltr"
-                 className="w-full rounded-xl bg-parchment border border-primary/15 px-4 py-3" required />
+                 className="hg-input" required />
           <textarea name="message" placeholder="پیام شما…" value={form.message} onChange={e => setForm({ ...form, message: e.target.value })}
                     maxLength={2000}
-                    className="w-full rounded-xl bg-parchment border border-primary/15 px-4 py-3 min-h-32" required />
+                    className="hg-input min-h-32" required />
           <button type="submit" disabled={submitting} className="btn-primary w-full disabled:opacity-60">
             <Send className="h-4 w-4" /> {submitting ? "در حال ارسال…" : "ارسال پیام"}
           </button>
