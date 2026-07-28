@@ -108,7 +108,7 @@ export default function Checkout() {
   );
 }
 
-const inp = "w-full rounded-xl bg-parchment border border-primary/15 px-4 py-3 text-sm text-primary focus:outline-none focus:border-gold";
+const inp = "hg-input";
 function F({ label, children }: { label: string; children: React.ReactNode }) {
   return <label className="block"><span className="block text-sm font-bold text-primary mb-1.5">{label}</span>{children}</label>;
 }

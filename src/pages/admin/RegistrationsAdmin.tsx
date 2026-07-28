@@ -171,8 +171,8 @@ export default function RegistrationsAdmin() {
       {/* Filters */}
       <div className="bg-card rounded-2xl p-4 border border-primary/10 mb-4 grid md:grid-cols-6 gap-3">
         <div className="relative md:col-span-2">
-          <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input value={q} onChange={e => setQ(e.target.value)} placeholder="جستجو نام، تلفن، کد ملی…" className="w-full rounded-lg bg-parchment border border-primary/15 pr-9 pl-3 py-2 text-sm" />
+          <Search className="h-4 w-4 absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <input value={q} onChange={e => setQ(e.target.value)} placeholder="جستجو نام، تلفن، کد ملی…" className="w-full rounded-lg bg-parchment border border-primary/15 pe-9 ps-3 py-2 text-sm focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/25" />
         </div>
         <select value={semesterId} onChange={e => setSemesterId(e.target.value)} className="rounded-lg bg-parchment border border-primary/15 px-3 py-2 text-sm">
           <option value="">همه کلاس‌ها</option>
