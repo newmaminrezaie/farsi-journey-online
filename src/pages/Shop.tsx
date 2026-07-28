@@ -40,9 +40,9 @@ export default function Shop() {
       <section className="container py-10">
         <div className="flex flex-col md:flex-row gap-3 mb-8">
           <div className="relative flex-1">
-            <Search className="absolute right-3 top-3.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute end-3 top-3.5 h-4 w-4 text-muted-foreground pointer-events-none" />
             <input value={q} onChange={e => setQ(e.target.value)} placeholder="جستجو در کتاب‌ها…"
-              className="w-full rounded-full bg-card border border-primary/10 pr-10 pl-4 py-3 focus:outline-none focus:border-gold" />
+              className="w-full rounded-full bg-card border border-primary/10 pe-10 ps-4 py-3 focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/25" />
           </div>
           <div className="flex flex-wrap gap-2">
             {CATS.map(c => (
