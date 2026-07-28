@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { booksApi, formatToman } from "@/lib/api";
 import { levelFa } from "./Home";
 import { Search } from "lucide-react";
+import RelatedLinks from "@/components/RelatedLinks";
 
 const CATS = [
   { v: "", l: "همه" },
