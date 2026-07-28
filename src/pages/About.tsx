@@ -1,6 +1,7 @@
 import { TileHex } from "@/components/PersianPattern";
 import { CheckCircle2 } from "lucide-react";
 import { localImages } from "@/assets/local";
+import RelatedLinks from "@/components/RelatedLinks";
 
 export default function About() {
   return (
