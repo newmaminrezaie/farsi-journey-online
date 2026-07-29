@@ -118,6 +118,11 @@ export default function Home() {
             );
           })}
         </div>
+        <div className="text-center mt-10">
+          <Link to="/semesters" className="btn-primary" title="مشاهده همه کلاس‌های زبان انگلیسی">
+            مشاهده همه کلاس‌ها <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </div>
       </section>
 
       {/* WHY US */}
