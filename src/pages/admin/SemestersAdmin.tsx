@@ -29,7 +29,7 @@ export default function SemestersAdmin() {
       setEditing(s);
       const legacyTeacherId = (s as any).teacherId;
       const ids = s.teacherIds && s.teacherIds.length ? s.teacherIds : (legacyTeacherId ? [legacyTeacherId] : []);
-      setForm({ ...s, teacherIds: ids, bookIds: s.bookIds ?? [] });
+      setForm({ ...s, teacherIds: ids, bookIds: s.bookIds ?? [], days: s.days ?? [], startTime: s.startTime ?? "" });
     } else { setEditing(null); setForm(empty); }
     setOpen(true);
   }
