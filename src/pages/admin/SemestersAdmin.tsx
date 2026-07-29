@@ -11,7 +11,7 @@ const empty = {
   classCode: "",
   titleFa: "", level: "beginner" as any, teacherIds: [] as string[],
   bookIds: [] as string[],
-  scheduleFa: "", startsOn: "", endsOn: "",
+  scheduleFa: "", days: [] as string[], startTime: "", startsOn: "", endsOn: "",
   capacity: 12, priceToman: 0, mode: "in-person" as any, status: "open" as any,
 };
 
