@@ -8,10 +8,39 @@ services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
+    # RAM budget: hard cap ~200MB. Tuned for a tiny single-tenant DB.
+    mem_limit: 220m
+    memswap_limit: 400m
+    shm_size: 64m
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-higooya}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: ${POSTGRES_DB:-higooya}
+    # Low-memory postgres tuning (defaults assume a much bigger box).
+    command:
+      - postgres
+      - -c
+      - max_connections=20
+      - -c
+      - shared_buffers=48MB
+      - -c
+      - work_mem=2MB
+      - -c
+      - maintenance_work_mem=32MB
+      - -c
+      - effective_cache_size=128MB
+      - -c
+      - max_worker_processes=2
+      - -c
+      - max_parallel_workers=0
+      - -c
+      - max_parallel_workers_per_gather=0
+      - -c
+      - autovacuum_max_workers=1
+      - -c
+      - wal_buffers=2MB
+      - -c
+      - synchronous_commit=off
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     ports:
