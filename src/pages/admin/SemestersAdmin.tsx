@@ -4,6 +4,8 @@ import { semestersApi, teachersApi, booksApi, formatToman } from "@/lib/api";
 import type { Semester } from "@/lib/types";
 import { formatJalali } from "@/lib/jalali";
 import JalaliDateInput from "@/components/JalaliDateInput";
+import { WEEKDAYS } from "@/lib/terms";
+
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -11,7 +13,7 @@ const empty = {
   classCode: "",
   titleFa: "", level: "beginner" as any, teacherIds: [] as string[],
   bookIds: [] as string[],
-  scheduleFa: "", startsOn: "", endsOn: "",
+  scheduleFa: "", days: [] as string[], startTime: "", startsOn: "", endsOn: "",
   capacity: 12, priceToman: 0, mode: "in-person" as any, status: "open" as any,
 };
 
@@ -29,7 +31,7 @@ export default function SemestersAdmin() {
       setEditing(s);
       const legacyTeacherId = (s as any).teacherId;
       const ids = s.teacherIds && s.teacherIds.length ? s.teacherIds : (legacyTeacherId ? [legacyTeacherId] : []);
-      setForm({ ...s, teacherIds: ids, bookIds: s.bookIds ?? [] });
+      setForm({ ...s, teacherIds: ids, bookIds: s.bookIds ?? [], days: s.days ?? [], startTime: s.startTime ?? "" });
     } else { setEditing(null); setForm(empty); }
     setOpen(true);
   }
@@ -177,7 +179,31 @@ export default function SemestersAdmin() {
                   <option value="open">باز</option><option value="closed">بسته</option><option value="archived">بایگانی</option>
                 </select>
               </F>
-              <div className="sm:col-span-2"><F label="برنامه (متن آزاد)"><input value={form.scheduleFa} onChange={e => setForm({ ...form, scheduleFa: e.target.value })} className={ic} /></F></div>
+              <F label="ساعت شروع کلاس">
+                <input type="time" value={form.startTime || ""} onChange={e => setForm({ ...form, startTime: e.target.value })} className={ic} dir="ltr" />
+              </F>
+              <div className="sm:col-span-2">
+                <F label="روزهای هفته">
+                  <div className="flex flex-wrap gap-2">
+                    {WEEKDAYS.map(w => {
+                      const cur: string[] = form.days || [];
+                      const on = cur.includes(w.value);
+                      return (
+                        <button
+                          type="button"
+                          key={w.value}
+                          onClick={() => setForm({ ...form, days: on ? cur.filter(x => x !== w.value) : [...cur, w.value] })}
+                          className={`rounded-lg px-3 py-1.5 text-xs font-bold border transition-colors ${on ? "bg-primary text-primary-foreground border-primary" : "bg-parchment text-primary border-primary/15 hover:border-gold"}`}
+                        >
+                          {w.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </F>
+              </div>
+              <div className="sm:col-span-2"><F label="توضیح برنامه (متن آزاد)"><input value={form.scheduleFa} onChange={e => setForm({ ...form, scheduleFa: e.target.value })} className={ic} placeholder="مثلاً: هر جلسه ۹۰ دقیقه" /></F></div>
+
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={save} className="btn-primary flex-1">ذخیره</button>

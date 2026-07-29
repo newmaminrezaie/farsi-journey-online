@@ -7,12 +7,8 @@ import { formatJalali } from "@/lib/jalali";
 import { levelFa, modeFa } from "./Home";
 import { Calendar, Clock, Users, GraduationCap, ArrowRight, ScrollText, BookOpen, ShoppingCart, BadgePercent } from "lucide-react";
 
-const TERMS = [
-  "این مرکز تابع مقررات پوششی و رفتاری آموزش و پرورش است، لذا از نظر رفتار و پوشش و حجاب کاملاً همانند مدارس می‌باشد.",
-  "تکمیل فرم ثبت‌نام و واریز شهریه به منزله ثبت‌نام قطعی تلقی شده و در صورت انصراف مبلغ شهریه استرداد نخواهد شد، مگر در مواردی که از طرف آموزشگاه تعطیل یا منحل گردد.",
-  "غیبت بیش از ۴ جلسه موجه یا غیر موجه در طول ترم باعث محرومیت از امتحان و در نتیجه عدم دریافت گواهینامه می‌شود.",
-  "آموزشگاه در خصوص رفت و برگشت شما به کلاس هیچ‌گونه مسئولیتی ندارد.",
-];
+import { TERMS, weekdaysFa, timeFa } from "@/lib/terms";
+
 
 export default function SemesterDetail() {
   const { id } = useParams();
@@ -252,8 +248,15 @@ export default function SemesterDetail() {
           </div>
           <div className="bg-card rounded-3xl p-6 border border-primary/10">
             <h3 className="text-base mb-3 text-primary flex items-center gap-2"><Clock className="h-4 w-4 text-gold" /> برنامه کلاس‌ها</h3>
-            <p className="text-primary/80 leading-7 text-sm">{sem.scheduleFa}</p>
+            {weekdaysFa(sem.days) && (
+              <div className="text-sm font-bold text-primary mb-1">روزها: {weekdaysFa(sem.days)}</div>
+            )}
+            {sem.startTime && (
+              <div className="text-sm font-bold text-primary mb-1">ساعت شروع: {timeFa(sem.startTime)}</div>
+            )}
+            {sem.scheduleFa && <p className="text-primary/80 leading-7 text-sm">{sem.scheduleFa}</p>}
           </div>
+
           {assignedTeachers.length > 0 && (
             <div className="bg-card rounded-3xl p-6 border border-primary/10">
               <div className="chip mb-3">{assignedTeachers.length > 1 ? "اساتید دوره" : "استاد دوره"}</div>

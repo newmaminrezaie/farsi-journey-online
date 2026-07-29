@@ -24,6 +24,9 @@ const SemesterShape = z.object({
   teacherIds: z.array(z.string()).default([]),
   bookIds: z.array(z.string()).default([]),
   scheduleFa: z.string().max(500).default(""),
+  days: z.array(z.string().max(20)).default([]),
+  startTime: z.string().max(10).default(""),
+
   startsOn: z.coerce.date(),
   endsOn: z.coerce.date(),
   capacity: z.number().int().min(0).default(0),
