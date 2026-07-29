@@ -25,7 +25,14 @@ import { startNotifyWorker } from "./notify/worker.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = path.resolve(__dirname, "../uploads");
 
-const app = Fastify({ logger: true, trustProxy: true });
+// Low-RAM VPS: keep the logger quiet in production (pino buffers + serializes
+// every request otherwise) and cap request body size.
+const app = Fastify({
+  logger: { level: process.env.LOG_LEVEL ?? (process.env.NODE_ENV === "production" ? "warn" : "info") },
+  trustProxy: true,
+  bodyLimit: 1 * 1024 * 1024,
+  disableRequestLogging: process.env.NODE_ENV === "production",
+});
 
 await app.register(cors, {
   origin: true,
