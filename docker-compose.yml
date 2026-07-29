@@ -8,10 +8,39 @@ services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
+    # RAM budget: hard cap ~200MB. Tuned for a tiny single-tenant DB.
+    mem_limit: 220m
+    memswap_limit: 400m
+    shm_size: 64m
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-higooya}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: ${POSTGRES_DB:-higooya}
+    # Low-memory postgres tuning (defaults assume a much bigger box).
+    command:
+      - postgres
+      - -c
+      - max_connections=20
+      - -c
+      - shared_buffers=48MB
+      - -c
+      - work_mem=2MB
+      - -c
+      - maintenance_work_mem=32MB
+      - -c
+      - effective_cache_size=128MB
+      - -c
+      - max_worker_processes=2
+      - -c
+      - max_parallel_workers=0
+      - -c
+      - max_parallel_workers_per_gather=0
+      - -c
+      - autovacuum_max_workers=1
+      - -c
+      - wal_buffers=2MB
+      - -c
+      - synchronous_commit=off
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     ports:
@@ -25,15 +54,22 @@ services:
   api:
     build: ./server
     restart: unless-stopped
+    # RAM budget: hard cap ~256MB; V8 heap capped below it so Node GCs
+    # instead of getting OOM-killed by the kernel.
+    mem_limit: 256m
+    memswap_limit: 512m
     depends_on:
       db:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-higooya}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-higooya}
+      NODE_OPTIONS: "--max-old-space-size=192"
+      # Small Prisma pool — each connection costs RAM on both sides.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-higooya}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-higooya}?connection_limit=5&pool_timeout=20
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
       PORT: "3000"
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
       # Notifications
       BALE_BOT_TOKEN: ${BALE_BOT_TOKEN:-}
       BALE_ADMIN_CHAT_IDS: ${BALE_ADMIN_CHAT_IDS:-}
@@ -51,7 +87,7 @@ services:
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-https://higooya.ir}
     command: >
       sh -c "set -e;
-      if [ ! -f dist/index.js ]; then npx tsc -p tsconfig.json; fi;
+      if [ ! -f dist/index.js ]; then NODE_OPTIONS=--max-old-space-size=512 npx tsc -p tsconfig.json; fi;
       node dist/index.js"
     volumes:
       # Volume-mount code + deps so day-to-day updates are `git pull && docker-compose restart api`
@@ -72,6 +108,8 @@ services:
   backup:
     image: alpine:3.20
     restart: unless-stopped
+    # Idle crond + a nightly pg_dump; 96MB is plenty.
+    mem_limit: 96m
     depends_on:
       - db
     environment:

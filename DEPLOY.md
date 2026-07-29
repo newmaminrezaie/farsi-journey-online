@@ -160,3 +160,33 @@ docker compose exec -T db pg_restore -U higooya -d higooya --clean --if-exists <
 For off-site copies, `rclone config` a remote (Arvan Object Storage, S3, etc.)
 and set `RCLONE_REMOTE=<name>:higooya-backups` in `.env`.
 
+
+## RAM budget (small VPS, ~1GB shared with other sites)
+
+The stack is capped so it can never starve the other apps on the box:
+
+| service | cap | notes |
+|---|---|---|
+| `db` (postgres) | 220MB | tuned: `shared_buffers=48MB`, `work_mem=2MB`, `max_connections=20`, no parallel workers |
+| `api` (node) | 256MB | `NODE_OPTIONS=--max-old-space-size=192`, Prisma pool `connection_limit=5` |
+| `backup` | 96MB | idle crond + nightly `pg_dump` |
+
+Total steady-state ≈ 350–450MB resident, hard ceiling 572MB.
+
+Other measures already applied:
+
+- Production Fastify logger runs at `warn` with per-request logging off (`LOG_LEVEL` in `.env` overrides).
+- Prisma logs errors only in production.
+- Request body limit 1MB (uploads use the multipart limit instead).
+- Keep a swapfile on the host so `tsc`/`prisma generate` spikes don't OOM-kill containers:
+
+```bash
+sudo fallocate -l 1G /swapfile && sudo chmod 600 /swapfile
+sudo mkswap /swapfile && sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+sudo sysctl -w vm.swappiness=10
+```
+
+Apply the new limits with `docker-compose up -d --force-recreate db api backup`
+(containers must be recreated — a plain `restart` keeps the old limits).
+Check actual usage any time with `docker stats --no-stream`.
