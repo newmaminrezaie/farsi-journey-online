@@ -314,9 +314,12 @@ function DetailDrawer({ reg, semester, teacherName, bookTitle, onClose, onPrint,
               <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                 <div>شروع: {formatJalali(semester.startsOn)}</div>
                 <div>پایان: {formatJalali(semester.endsOn)}</div>
-                <div>برنامه: {semester.scheduleFa || "—"}</div>
+                <div>روزها: {weekdaysFa(semester.days) || "—"}</div>
+                <div>ساعت شروع: {timeFa(semester.startTime) || "—"}</div>
+                <div className="col-span-2">برنامه: {scheduleSummary(semester) || "—"}</div>
                 <div>حالت: {semester.mode}</div>
               </div>
+
             </div>
           )}
           <Section title="اطلاعات فردی">
