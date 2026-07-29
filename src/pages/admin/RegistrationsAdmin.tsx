@@ -115,6 +115,8 @@ export default function RegistrationsAdmin() {
       return {
         "کد کلاس": s?.classCode ?? "",
         "دوره": s?.titleFa ?? r.levelInterest ?? "",
+        "روز و ساعت کلاس": scheduleSummary(s),
+
         "نام و نام خانوادگی": r.fullName,
         "نام پدر": r.fatherName ?? "",
         "کد ملی": r.nationalId ?? "",
