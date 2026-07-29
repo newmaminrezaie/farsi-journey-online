@@ -70,6 +70,9 @@ model Semester {
   teacherIds  String[] @default([])
   bookIds     String[] @default([])
   scheduleFa  String   @default("")
+  days        String[] @default([])
+  startTime   String   @default("")
+
   startsOn    DateTime @db.Date
   endsOn      DateTime @db.Date
   capacity    Int      @default(0)
