@@ -177,7 +177,31 @@ export default function SemestersAdmin() {
                   <option value="open">باز</option><option value="closed">بسته</option><option value="archived">بایگانی</option>
                 </select>
               </F>
-              <div className="sm:col-span-2"><F label="برنامه (متن آزاد)"><input value={form.scheduleFa} onChange={e => setForm({ ...form, scheduleFa: e.target.value })} className={ic} /></F></div>
+              <F label="ساعت شروع کلاس">
+                <input type="time" value={form.startTime || ""} onChange={e => setForm({ ...form, startTime: e.target.value })} className={ic} dir="ltr" />
+              </F>
+              <div className="sm:col-span-2">
+                <F label="روزهای هفته">
+                  <div className="flex flex-wrap gap-2">
+                    {WEEKDAYS.map(w => {
+                      const cur: string[] = form.days || [];
+                      const on = cur.includes(w.value);
+                      return (
+                        <button
+                          type="button"
+                          key={w.value}
+                          onClick={() => setForm({ ...form, days: on ? cur.filter(x => x !== w.value) : [...cur, w.value] })}
+                          className={`rounded-lg px-3 py-1.5 text-xs font-bold border transition-colors ${on ? "bg-primary text-primary-foreground border-primary" : "bg-parchment text-primary border-primary/15 hover:border-gold"}`}
+                        >
+                          {w.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </F>
+              </div>
+              <div className="sm:col-span-2"><F label="توضیح برنامه (متن آزاد)"><input value={form.scheduleFa} onChange={e => setForm({ ...form, scheduleFa: e.target.value })} className={ic} placeholder="مثلاً: هر جلسه ۹۰ دقیقه" /></F></div>
+
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={save} className="btn-primary flex-1">ذخیره</button>
