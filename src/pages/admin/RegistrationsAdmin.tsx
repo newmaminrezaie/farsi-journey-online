@@ -376,68 +376,137 @@ function openPrint(html: string) {
   w.onload = () => { w.focus(); w.print(); };
 }
 
+// Monochrome institute mark, embedded so the printed copy needs no network.
+const LOGO_SVG = `
+<svg viewBox="0 0 64 64" width="58" height="58" aria-hidden="true">
+  <g transform="translate(32 32)">
+    <rect x="-26" y="-26" width="52" height="52" rx="4" fill="none" stroke="#000" stroke-width="2"/>
+    <rect x="-26" y="-26" width="52" height="52" rx="4" fill="none" stroke="#000" stroke-width="2" transform="rotate(45)"/>
+    <circle r="19" fill="#fff" stroke="#000" stroke-width="1.5"/>
+    ${Array.from({ length: 8 })
+      .map((_, i) => `<circle r="1.4" cx="${(Math.cos((i * Math.PI) / 4) * 22).toFixed(2)}" cy="${(Math.sin((i * Math.PI) / 4) * 22).toFixed(2)}" fill="#000"/>`)
+      .join("")}
+  </g>
+  <text x="32" y="43" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="26" font-weight="700" fill="#000">G</text>
+</svg>`;
+
+function esc(v: any): string {
+  return String(v ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c] as string));
+}
+
 function renderPrintHTML(rows: Registration[], semById: Map<string, Semester>, teachers: any[], books: any[]): string {
   const style = `
     <style>
-      @media print { @page { size: A4; margin: 12mm; } }
-      body { font-family: Vazirmatn, Tahoma, sans-serif; direction: rtl; color: #0F2350; margin: 0; padding: 16px; }
-      .rec { border: 1.5px solid #0F2350; border-radius: 12px; padding: 16px; margin-bottom: 14px; page-break-inside: avoid; }
-      .head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #D4A017; padding-bottom: 8px; margin-bottom: 12px; }
-      .head h2 { margin: 0; font-size: 18px; }
-      .code { font-family: monospace; color: #2AA6A0; font-weight: 900; }
-      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; font-size: 12px; }
-      .k { color: #666; font-size: 10px; display: block; }
-      .v { font-weight: 700; }
-      h3 { font-size: 12px; color: #D4A017; margin: 10px 0 6px; border-bottom: 1px dashed #ccc; padding-bottom: 4px; }
-      .title { text-align: center; font-size: 20px; font-weight: 900; margin-bottom: 20px; }
-      .subtitle { text-align: center; color: #666; font-size: 11px; margin-bottom: 20px; }
+      @media print { @page { size: A4; margin: 10mm; } .rec { page-break-after: always; } .rec:last-child { page-break-after: auto; } }
+      * { box-sizing: border-box; }
+      body { font-family: Vazirmatn, Tahoma, sans-serif; direction: rtl; color: #000; background: #fff; margin: 0; padding: 0; font-size: 12px; }
+      .rec { border: 1.5px solid #000; padding: 14px 16px; margin: 0 0 14px; page-break-inside: avoid; }
+      .letterhead { display: flex; align-items: center; gap: 14px; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 12px; }
+      .letterhead .logo { flex: 0 0 auto; }
+      .letterhead .org { flex: 1 1 auto; text-align: center; }
+      .letterhead .org h1 { margin: 0; font-size: 17px; font-weight: 900; letter-spacing: -.3px; }
+      .letterhead .org .sub { font-size: 10px; margin-top: 3px; }
+      .letterhead .meta { flex: 0 0 auto; font-size: 10px; text-align: left; line-height: 1.7; border: 1px solid #000; padding: 6px 8px; min-width: 118px; }
+      .doc-title { text-align: center; font-size: 13px; font-weight: 900; border: 1.5px solid #000; padding: 5px; margin-bottom: 12px; }
+      h3 { font-size: 11px; margin: 12px 0 6px; padding: 3px 8px; background: #000; color: #fff; font-weight: 900; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; border: 1px solid #000; border-bottom: 0; }
+      .cell { border-bottom: 1px solid #000; border-inline-start: 1px solid #000; padding: 5px 8px; min-height: 32px; }
+      .cell:nth-child(3n+1) { border-inline-start: 0; }
+      .cell.wide { grid-column: 1 / -1; border-inline-start: 0; }
+      .cell.half { grid-column: span 2; }
+      .k { font-size: 9px; color: #333; display: block; margin-bottom: 2px; }
+      .v { font-weight: 700; font-size: 12px; }
+      ol.terms { margin: 0; padding-inline-start: 18px; font-size: 10.5px; line-height: 1.85; }
+      ol.terms li { margin-bottom: 2px; }
+      .agree { margin-top: 6px; font-size: 10.5px; font-weight: 700; }
+      .box { display: inline-block; width: 11px; height: 11px; border: 1.2px solid #000; vertical-align: -1px; margin-inline-end: 5px; text-align: center; line-height: 10px; font-size: 9px; }
+      .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+      .sign .slot { border: 1px solid #000; padding: 8px 10px 34px; font-size: 10.5px; font-weight: 700; }
+      .foot { margin-top: 10px; border-top: 1px dashed #000; padding-top: 6px; font-size: 9px; display: flex; justify-content: space-between; }
     </style>
   `;
+  const today = formatJalali(new Date().toISOString().slice(0, 10));
+
   const items = rows.map(r => {
     const s = r.semesterId ? semById.get(r.semesterId) : null;
     const t = teachers.find(x => x.id === r.selectedTeacherId)?.nameFa ?? "";
     const b = books.find(x => x.id === r.selectedBookId)?.titleFa ?? "";
-    const row = (k: string, v?: string) => `<div><span class="k">${k}</span><span class="v">${v || "—"}</span></div>`;
+    const cell = (k: string, v?: string, cls = "") =>
+      `<div class="cell ${cls}"><span class="k">${esc(k)}</span><span class="v">${esc(v) || "—"}</span></div>`;
+    const schedule = scheduleSummary(s) || "—";
+
     return `
       <div class="rec">
-        <div class="head">
-          <h2>${r.fullName}</h2>
-          <span class="code">${s?.classCode || ""}</span>
+        <div class="letterhead">
+          <div class="logo">${LOGO_SVG}</div>
+          <div class="org">
+            <h1>آموزشگاه زبان گویا</h1>
+            <div class="sub">گناباد، خراسان رضوی — غفاری ۳ &nbsp;|&nbsp; ۰۵۱-۵۷۲۲۳۷۷۲ &nbsp;|&nbsp; higooya.ir</div>
+          </div>
+          <div class="meta">
+            <div>کد کلاس: ${esc(s?.classCode || "—")}</div>
+            <div>تاریخ چاپ: ${esc(today)}</div>
+          </div>
         </div>
-        <h3>دوره</h3>
+
+        <div class="doc-title">فرم ثبت‌نام دانش‌پژوه</div>
+
+        <h3>مشخصات فردی</h3>
         <div class="grid">
-          ${row("عنوان دوره", s?.titleFa ?? r.levelInterest)}
-          ${row("تاریخ ثبت", formatJalali(r.createdAt.slice(0, 10)))}
-          ${row("استاد انتخابی", t)}
-          ${row("کتاب انتخابی", b)}
+          ${cell("نام و نام خانوادگی", r.fullName, "half")}
+          ${cell("نام پدر", r.fatherName)}
+          ${cell("کد ملی / شماره شناسنامه", r.nationalId || r.birthCertNo)}
+          ${cell("محل تولد", r.birthPlace)}
+          ${cell("سال تولد", r.issuedFrom)}
+          ${cell("پایه تحصیلی", r.schoolDegree || r.universityDegree)}
+          ${cell("تلفن همراه", r.phone)}
+          ${cell("تلفن ثابت", r.landline)}
+          ${cell("نشانی", r.address, "wide")}
         </div>
-        <h3>اطلاعات فردی</h3>
+
+        <h3>مشخصات کلاس</h3>
         <div class="grid">
-          ${row("نام پدر", r.fatherName)}
-          ${row("کد ملی / شناسنامه", r.nationalId || r.birthCertNo)}
-          ${row("محل تولد", r.birthPlace)}
-          ${row("سال تولد", r.issuedFrom)}
-          ${row("پایه تحصیلی", r.schoolDegree || r.universityDegree)}
+          ${cell("عنوان کلاس", s?.titleFa ?? r.termInterest)}
+          ${cell("کد کلاس", s?.classCode)}
+          ${cell("سطح", s?.level ?? r.levelInterest)}
+          ${cell("روز و ساعت برگزاری", schedule, "half")}
+          ${cell("نحوه برگزاری", s?.mode === "online" ? "آنلاین" : s?.mode === "hybrid" ? "ترکیبی" : s ? "حضوری" : "")}
+          ${cell("تاریخ شروع", s ? formatJalali(s.startsOn) : "")}
+          ${cell("تاریخ پایان", s ? formatJalali(s.endsOn) : "")}
+          ${cell("استاد", t)}
+          ${cell("کتاب انتخابی", b, "half")}
+          ${cell("یادداشت", r.note)}
         </div>
-        <h3>تماس</h3>
+
+        <h3>وضعیت مالی</h3>
         <div class="grid">
-          ${row("همراه", r.phone)}
-          ${row("تلفن ثابت", r.landline)}
-          <div style="grid-column:1/-1">${row("آدرس", r.address)}</div>
-          <div style="grid-column:1/-1">${row("یادداشت", r.note)}</div>
+          ${cell("شهریه کلاس", s ? formatToman(s.priceToman) : "—")}
+          ${cell("مبلغ پرداختی", r.paidToman ? formatToman(r.paidToman) : "پرداخت‌نشده")}
+          ${cell("کد پیگیری پرداخت", r.paymentRef)}
+          ${cell("تاریخ پرداخت", r.paidAt ? formatJalali(r.paidAt.slice(0, 10)) : "—")}
+          ${cell("تاریخ ثبت‌نام", formatJalali(r.createdAt.slice(0, 10)))}
+          ${cell("وضعیت پرونده", STATUS_FA[r.status] ?? r.status)}
         </div>
-        <h3>پرداخت</h3>
-        <div class="grid">
-          ${row("مبلغ پرداختی", r.paidToman ? formatToman(r.paidToman) : "پرداخت‌نشده")}
-          ${row("کد پیگیری", r.paymentRef)}
-          ${row("تاریخ پرداخت", r.paidAt ? formatJalali(r.paidAt.slice(0, 10)) : "—")}
+
+        <h3>مقررات ثبت‌نام</h3>
+        <ol class="terms">
+          ${TERMS.map(x => `<li>${esc(x)}</li>`).join("")}
+        </ol>
+        <div class="agree"><span class="box">${r.agreedToTerms ? "✓" : ""}</span> مقررات فوق را مطالعه کرده و می‌پذیرم.</div>
+
+        <div class="sign">
+          <div class="slot">امضای دانش‌پژوه / ولی:</div>
+          <div class="slot">مهر و امضای آموزشگاه:</div>
+        </div>
+
+        <div class="foot">
+          <span>این فرم پس از امضا در پرونده آموزشگاه بایگانی می‌شود.</span>
+          <span>شناسه پرونده: ${esc(r.id)}</span>
         </div>
       </div>`;
   }).join("");
-  return `<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>ثبت‌نام‌ها — HiGooya</title>${style}</head>
-    <body>
-      <div class="title">آموزشگاه زبان گویا — فرم ثبت‌نام</div>
-      <div class="subtitle">تعداد: ${rows.length.toLocaleString("fa-IR")} — تاریخ چاپ: ${formatJalali(new Date().toISOString().slice(0, 10))}</div>
-      ${items}
-    </body></html>`;
+
+  return `<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>فرم ثبت‌نام — آموزشگاه زبان گویا</title>${style}</head>
+    <body>${items}</body></html>`;
 }
+
