@@ -5,12 +5,8 @@ import { registrationsApi, semestersApi, teachersApi, booksApi, formatToman } fr
 import type { Book, Semester, Teacher } from "@/lib/types";
 import { GraduationCap, ScrollText, BadgePercent, BookOpen } from "lucide-react";
 
-const TERMS = [
-  "این مرکز تابع مقررات پوششی و رفتاری آموزش و پرورش است، لذا از نظر رفتار و پوشش و حجاب کاملاً همانند مدارس می‌باشد.",
-  "تکمیل فرم ثبت‌نام و واریز شهریه به منزله ثبت‌نام قطعی تلقی شده و در صورت انصراف مبلغ شهریه استرداد نخواهد شد، مگر در مواردی که از طرف آموزشگاه تعطیل یا منحل گردد.",
-  "غیبت بیش از ۴ جلسه موجه یا غیر موجه در طول ترم باعث محرومیت از امتحان و در نتیجه عدم دریافت گواهینامه می‌شود.",
-  "آموزشگاه در خصوص رفت و برگشت شما به کلاس هیچ‌گونه مسئولیتی ندارد.",
-];
+import { TERMS } from "@/lib/terms";
+
 
 export default function Register() {
   const nav = useNavigate();
