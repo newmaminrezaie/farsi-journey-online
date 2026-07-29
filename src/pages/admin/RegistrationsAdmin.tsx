@@ -6,6 +6,8 @@ import type { Registration, Semester } from "@/lib/types";
 import { Search, Download, Printer, X, ClipboardList, GraduationCap, Users, TrendingUp, Wallet, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { formatToman } from "@/lib/api";
+import { TERMS, scheduleSummary, weekdaysFa, timeFa } from "@/lib/terms";
+
 
 const STATUSES = ["new", "contacted", "enrolled", "rejected"] as const;
 const STATUS_FA: Record<string, string> = {
