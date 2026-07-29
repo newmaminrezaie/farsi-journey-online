@@ -87,7 +87,7 @@ services:
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-https://higooya.ir}
     command: >
       sh -c "set -e;
-      if [ ! -f dist/index.js ]; then npx tsc -p tsconfig.json; fi;
+      if [ ! -f dist/index.js ]; then NODE_OPTIONS=--max-old-space-size=512 npx tsc -p tsconfig.json; fi;
       node dist/index.js"
     volumes:
       # Volume-mount code + deps so day-to-day updates are `git pull && docker-compose restart api`
@@ -108,6 +108,8 @@ services:
   backup:
     image: alpine:3.20
     restart: unless-stopped
+    # Idle crond + a nightly pg_dump; 96MB is plenty.
+    mem_limit: 96m
     depends_on:
       - db
     environment:
