@@ -4,6 +4,8 @@ import { semestersApi, teachersApi, booksApi, formatToman } from "@/lib/api";
 import type { Semester } from "@/lib/types";
 import { formatJalali } from "@/lib/jalali";
 import JalaliDateInput from "@/components/JalaliDateInput";
+import { WEEKDAYS } from "@/lib/terms";
+
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
