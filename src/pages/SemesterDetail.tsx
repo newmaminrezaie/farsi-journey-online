@@ -248,8 +248,15 @@ export default function SemesterDetail() {
           </div>
           <div className="bg-card rounded-3xl p-6 border border-primary/10">
             <h3 className="text-base mb-3 text-primary flex items-center gap-2"><Clock className="h-4 w-4 text-gold" /> برنامه کلاس‌ها</h3>
-            <p className="text-primary/80 leading-7 text-sm">{sem.scheduleFa}</p>
+            {weekdaysFa(sem.days) && (
+              <div className="text-sm font-bold text-primary mb-1">روزها: {weekdaysFa(sem.days)}</div>
+            )}
+            {sem.startTime && (
+              <div className="text-sm font-bold text-primary mb-1">ساعت شروع: {timeFa(sem.startTime)}</div>
+            )}
+            {sem.scheduleFa && <p className="text-primary/80 leading-7 text-sm">{sem.scheduleFa}</p>}
           </div>
+
           {assignedTeachers.length > 0 && (
             <div className="bg-card rounded-3xl p-6 border border-primary/10">
               <div className="chip mb-3">{assignedTeachers.length > 1 ? "اساتید دوره" : "استاد دوره"}</div>
