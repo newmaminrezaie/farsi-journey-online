@@ -42,6 +42,9 @@ export interface Semester {
   teacherIds?: ID[];
   bookIds?: ID[];
   scheduleFa: string;
+  days?: string[];            // روزهای هفته: saturday…friday
+  startTime?: string;         // ساعت شروع کلاس، فرمت HH:mm
+
   startsOn: string;
   endsOn: string;
   capacity: number;
