@@ -54,15 +54,22 @@ services:
   api:
     build: ./server
     restart: unless-stopped
+    # RAM budget: hard cap ~256MB; V8 heap capped below it so Node GCs
+    # instead of getting OOM-killed by the kernel.
+    mem_limit: 256m
+    memswap_limit: 512m
     depends_on:
       db:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-higooya}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-higooya}
+      NODE_OPTIONS: "--max-old-space-size=192"
+      # Small Prisma pool — each connection costs RAM on both sides.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-higooya}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-higooya}?connection_limit=5&pool_timeout=20
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
       PORT: "3000"
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
       # Notifications
       BALE_BOT_TOKEN: ${BALE_BOT_TOKEN:-}
       BALE_ADMIN_CHAT_IDS: ${BALE_ADMIN_CHAT_IDS:-}
