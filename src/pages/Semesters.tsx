@@ -91,7 +91,15 @@ export default function Semesters() {
             <article key={s.id} className="bg-card rounded-3xl p-6 md:p-8 border border-primary/10 hover:shadow-navy transition-shadow grid md:grid-cols-[1fr_auto] gap-6 items-center">
               <div>
                 <div className="flex flex-wrap gap-2 mb-3">
-                  {s.classCode && <span className="chip font-mono text-turquoise">{s.classCode}</span>}
+                  {s.groups?.length
+                    ? s.groups.map(g => (
+                        <span key={g.teacherId} className="chip font-mono text-turquoise">
+                          {g.classCode || s.classCode}
+                          {g.capacity ? ` · ${g.capacity.toLocaleString("fa-IR")} نفر` : ""}
+                        </span>
+                      ))
+                    : s.classCode && <span className="chip font-mono text-turquoise">{s.classCode}</span>}
+
                   <span className="chip">{modeFa(s.mode)}</span>
                   <span className="chip-gold">{levelFa(s.level)}</span>
                   {s.status === "open" && !full && <span className="chip">ثبت‌نام باز</span>}
