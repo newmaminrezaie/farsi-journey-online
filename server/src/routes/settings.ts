@@ -23,8 +23,18 @@ const PromoBanner = z.object({
 });
 export type PromoBannerT = z.infer<typeof PromoBanner>;
 
+const HeroSlides = z.object({
+  intervalMs: z.number().int().min(2000).max(30000).default(6000),
+  slides: z.array(z.object({
+    imageUrl: z.string().max(500).default(""),
+    alt: z.string().max(160).default(""),
+  })).max(6).default([]),
+});
+export type HeroSlidesT = z.infer<typeof HeroSlides>;
+
 const Settings = z.object({
   promoBanner: PromoBanner.default({} as any),
+  heroSlides: HeroSlides.default({} as any),
 });
 type SettingsT = z.infer<typeof Settings>;
 
@@ -46,6 +56,21 @@ export async function registerSettingsRoutes(app: FastifyInstance) {
   app.get("/settings/promo-banner", async () => {
     const s = await readAll();
     return s.promoBanner;
+  });
+
+  // Public: hero slider
+  app.get("/settings/hero", async () => {
+    const s = await readAll();
+    return s.heroSlides;
+  });
+
+  // Admin: update hero slider
+  app.put("/admin/settings/hero", { preHandler: requireStaff }, async (req, reply) => {
+    const parsed = HeroSlides.safeParse(req.body);
+    if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() });
+    const cur = await readAll();
+    await writeAll({ ...cur, heroSlides: parsed.data });
+    return parsed.data;
   });
 
   // Admin: update promo banner

@@ -28,6 +28,7 @@ import OrdersAdmin from "@/pages/admin/OrdersAdmin";
 import RegistrationsAdmin from "@/pages/admin/RegistrationsAdmin";
 import PromoAdmin from "@/pages/admin/PromoAdmin";
 import AnnouncementsAdmin from "@/pages/admin/AnnouncementsAdmin";
+import HeroAdmin from "@/pages/admin/HeroAdmin";
 
 export default function App() {
   return (
@@ -62,6 +63,7 @@ export default function App() {
         <Route path="employees" element={<EmployeesAdmin />} />
         <Route path="orders" element={<OrdersAdmin />} />
         <Route path="registrations" element={<RegistrationsAdmin />} />
+        <Route path="hero" element={<HeroAdmin />} />
         <Route path="announcements" element={<AnnouncementsAdmin />} />
         <Route path="promo" element={<PromoAdmin />} />
       </Route>
