@@ -4,7 +4,7 @@
 
 import { storage, uid, refCode } from "./storage";
 import type {
-  Announcement, Book, CartItem, Employee, Order, OrderItem, Registration, Semester, Teacher,
+  Announcement, Book, CartItem, Discount, DiscountCheck, Employee, Order, OrderItem, Registration, Semester, Teacher,
 } from "./types";
 
 const KEYS = {
@@ -169,10 +169,14 @@ function mapOrder(row: any): Order {
 
 // ---------- Payments (Zarinpal) ----------
 export const paymentsApi = {
-  async startZarinpal(kind: "registration" | "order", targetId: string): Promise<{ url: string; authority: string }> {
+  async startZarinpal(
+    kind: "registration" | "order",
+    targetId: string,
+    discountCode = "",
+  ): Promise<{ url: string; authority: string; amountToman?: number; discountToman?: number }> {
     return http("/payments/zarinpal/request", {
       method: "POST",
-      body: JSON.stringify({ kind, targetId }),
+      body: JSON.stringify({ kind, targetId, discountCode }),
     });
   },
 };
@@ -223,4 +227,17 @@ export const announcementsApi = {
     http(`/admin/announcements/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
   remove: (id: string): Promise<void> =>
     http(`/admin/announcements/${id}`, { method: "DELETE" }).then(() => undefined),
+};
+
+// ---------- Discount codes (کدهای تخفیف) ----------
+export const discountsApi = {
+  validate: (code: string, scope: "registration" | "shop", amountToman: number): Promise<DiscountCheck> =>
+    http("/discounts/validate", { method: "POST", body: JSON.stringify({ code, scope, amountToman }) }),
+  listAll: (): Promise<Discount[]> => http("/admin/discounts"),
+  create: (input: Partial<Discount> & { code: string; percent: number }): Promise<Discount> =>
+    http("/admin/discounts", { method: "POST", body: JSON.stringify(input) }),
+  update: (id: string, patch: Partial<Discount>): Promise<Discount> =>
+    http(`/admin/discounts/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
+  remove: (id: string): Promise<void> =>
+    http(`/admin/discounts/${id}`, { method: "DELETE" }).then(() => undefined),
 };

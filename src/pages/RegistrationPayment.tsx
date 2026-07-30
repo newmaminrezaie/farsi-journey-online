@@ -2,6 +2,7 @@ import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { formatToman, paymentsApi } from "@/lib/api";
+import DiscountCodeField from "@/components/DiscountCodeField";
 import { CreditCard, ShieldCheck, BookOpen, GraduationCap, BadgePercent, ArrowRight } from "lucide-react";
 
 type PayState = {
@@ -17,6 +18,8 @@ export default function RegistrationPayment() {
   const loc = useLocation();
   const state = loc.state as PayState | null;
   const [submitting, setSubmitting] = useState(false);
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountToman, setDiscountToman] = useState(0);
 
   const totals = useMemo(() => {
     const tuition = state?.semester.priceToman ?? 0;
@@ -42,7 +45,7 @@ export default function RegistrationPayment() {
     }
     setSubmitting(true);
     try {
-      const { url } = await paymentsApi.startZarinpal("registration", state.registrationId);
+      const { url } = await paymentsApi.startZarinpal("registration", state.registrationId, discountCode);
       window.location.href = url;
     } catch (e: any) {
       setSubmitting(false);
@@ -88,6 +91,12 @@ export default function RegistrationPayment() {
           )}
         </div>
 
+        <DiscountCodeField
+          scope="registration"
+          amountToman={totals.total}
+          onApply={(code, off) => { setDiscountCode(code); setDiscountToman(off); }}
+        />
+
         <div className="bg-card rounded-3xl border border-primary/10 p-6 md:p-8">
           <h3 className="text-lg text-primary mb-4 flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-gold" /> شیوه پرداخت
@@ -118,10 +127,13 @@ export default function RegistrationPayment() {
                 <SummaryRow label="تخفیف کتاب (۵٪)" value={"−" + formatToman(totals.bookDiscount)} accent />
               </>
             )}
+            {discountToman > 0 && (
+              <SummaryRow label={`کد تخفیف (${discountCode})`} value={"−" + formatToman(discountToman)} accent />
+            )}
           </div>
           <div className="flex justify-between items-baseline mb-6">
             <span className="text-primary-foreground/70">مبلغ نهایی</span>
-            <span className="text-2xl font-black text-gold">{formatToman(totals.total)}</span>
+            <span className="text-2xl font-black text-gold">{formatToman(Math.max(0, totals.total - discountToman))}</span>
           </div>
           <button
             onClick={pay}

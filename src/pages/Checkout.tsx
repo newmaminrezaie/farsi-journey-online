@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { ordersApi, cartApi, formatToman, booksApi, paymentsApi } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { CreditCard, Info, ShieldCheck } from "lucide-react";
+import DiscountCodeField from "@/components/DiscountCodeField";
 
 export default function Checkout() {
   const nav = useNavigate();
@@ -15,6 +16,8 @@ export default function Checkout() {
   const [form, setForm] = useState({ customerName: "", phone: "", address: "", note: "" });
   const [method, setMethod] = useState<"zarinpal" | "cash-on-delivery">("zarinpal");
   const [submitting, setSubmitting] = useState(false);
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountToman, setDiscountToman] = useState(0);
 
   if (items.length === 0) {
     return <div className="container py-40 text-center text-muted-foreground">سبد خرید خالی است.</div>;
@@ -27,7 +30,7 @@ export default function Checkout() {
     try {
       const order = await ordersApi.createFromCart({ ...form, paymentMethod: method });
       if (method === "zarinpal") {
-        const { url } = await paymentsApi.startZarinpal("order", order.id);
+        const { url } = await paymentsApi.startZarinpal("order", order.id, discountCode);
         window.location.href = url;
         return;
       }
@@ -78,6 +81,16 @@ export default function Checkout() {
           </div>
         </div>
 
+        {method === "zarinpal" ? (
+          <DiscountCodeField
+            scope="shop"
+            amountToman={total}
+            onApply={(code, off) => { setDiscountCode(code); setDiscountToman(off); }}
+          />
+        ) : (
+          <p className="text-xs text-muted-foreground">کد تخفیف تنها برای پرداخت آنلاین (زرین‌پال) قابل استفاده است.</p>
+        )}
+
         <button type="submit" disabled={submitting} className={method === "zarinpal" ? "btn-gold w-full" : "btn-primary w-full"}>
           {method === "zarinpal" && <ShieldCheck className="h-5 w-5" />}
           {submitting
@@ -98,9 +111,17 @@ export default function Checkout() {
               </div>
             ))}
           </div>
+          {method === "zarinpal" && discountToman > 0 && (
+            <div className="flex justify-between text-sm mb-3">
+              <span className="text-primary-foreground/80">کد تخفیف ({discountCode})</span>
+              <span className="text-turquoise font-bold">−{formatToman(discountToman)}</span>
+            </div>
+          )}
           <div className="flex justify-between items-baseline">
             <span className="text-primary-foreground/70">مبلغ نهایی</span>
-            <span className="text-2xl font-black text-gold">{formatToman(total)}</span>
+            <span className="text-2xl font-black text-gold">
+              {formatToman(method === "zarinpal" ? Math.max(0, total - discountToman) : total)}
+            </span>
           </div>
         </div>
       </aside>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet, NavLink, Navigate, useNavigate } from "react-router-dom";
 import { authApi } from "@/lib/api";
-import { LayoutDashboard, BookOpen, GraduationCap, Users, UserCog, ShoppingBag, ClipboardList, Megaphone, Bell, Images, LogOut, AlertTriangle } from "lucide-react";
+import { LayoutDashboard, BookOpen, GraduationCap, Users, UserCog, ShoppingBag, ClipboardList, Megaphone, Bell, Images, BadgePercent, LogOut, AlertTriangle } from "lucide-react";
 import logo from "@/assets/logo-fa.png";
 
 const links = [
@@ -14,6 +14,7 @@ const links = [
   { to: "/admin/registrations", label: "ثبت‌نام‌ها", icon: ClipboardList },
   { to: "/admin/hero", label: "تصاویر سربرگ", icon: Images },
   { to: "/admin/announcements", label: "اطلاعیه‌ها", icon: Bell },
+  { to: "/admin/discounts", label: "کدهای تخفیف", icon: BadgePercent },
   { to: "/admin/promo", label: "بنر تبلیغاتی", icon: Megaphone },
 ];
 

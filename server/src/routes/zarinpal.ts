@@ -7,6 +7,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { enqueueNotification } from "../notify/enqueue.js";
 import { templates } from "../notify/templates.js";
+import { evaluateDiscount, holdDiscountForAuthority, consumeDiscountForAuthority } from "./discounts.js";
 
 const MERCHANT = process.env.ZARINPAL_MERCHANT_ID ?? "";
 const SANDBOX = String(process.env.ZARINPAL_SANDBOX ?? "false").toLowerCase() === "true";
@@ -21,6 +22,7 @@ const startPay = (auth: string) => `${PAY_HOST}/pg/StartPay/${auth}`;
 const RequestBody = z.object({
   kind: z.enum(["registration", "order"]),
   targetId: z.string().min(1),
+  discountCode: z.string().max(40).optional().default(""),
 });
 
 async function callZarinpal(url: string, body: any): Promise<any> {
@@ -44,7 +46,7 @@ export async function registerZarinpalRoutes(app: FastifyInstance) {
     if (!MERCHANT) return reply.code(500).send({ error: "zarinpal_not_configured" });
     const parsed = RequestBody.safeParse(req.body);
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() });
-    const { kind, targetId } = parsed.data;
+    const { kind, targetId, discountCode } = parsed.data;
 
     // Resolve amount + description from the target row.
     let amountToman = 0;
@@ -77,6 +79,18 @@ export async function registerZarinpalRoutes(app: FastifyInstance) {
       mobile = order.phone;
     }
 
+    // ---- کد تخفیف ----
+    let appliedCode = "";
+    let discountToman = 0;
+    if (discountCode && discountCode.trim()) {
+      const res = await evaluateDiscount(discountCode, kind === "registration" ? "registration" : "shop", amountToman);
+      if (!res.ok) return reply.code(400).send({ error: "invalid_discount", messageFa: res.messageFa });
+      appliedCode = res.code;
+      discountToman = res.discountToman;
+      amountToman = res.finalToman;
+      description = `${description} — کد تخفیف ${appliedCode}`.slice(0, 500);
+    }
+
     if (amountToman < 1000) {
       return reply.code(400).send({ error: "amount_too_low", amountToman });
     }
@@ -101,8 +115,9 @@ export async function registerZarinpalRoutes(app: FastifyInstance) {
     await prisma.paymentSession.create({
       data: { authority, kind, targetId, amountToman, status: "pending" },
     });
+    if (appliedCode) await holdDiscountForAuthority(authority, appliedCode);
 
-    return { url: startPay(authority), authority };
+    return { url: startPay(authority), authority, amountToman, discountToman, discountCode: appliedCode };
   });
 
   // Zarinpal redirects the browser back here after the user pays or cancels.
@@ -151,7 +166,10 @@ export async function registerZarinpalRoutes(app: FastifyInstance) {
       });
     }
 
-    // Success — mark target paid + enqueue notification, all in one transaction.
+    // Success — consume the discount code (if any) then mark target paid.
+    const usedCode = await consumeDiscountForAuthority(authority);
+
+    // mark target paid + enqueue notification, all in one transaction.
     try {
       await prisma.$transaction(async (tx) => {
         await tx.paymentSession.update({
@@ -182,7 +200,7 @@ export async function registerZarinpalRoutes(app: FastifyInstance) {
             amountToman: session.amountToman,
             paymentRef: refId,
           });
-          await enqueueNotification(tx, "registration_new", text);
+          await enqueueNotification(tx, "registration_new", usedCode ? `${text}\nکد تخفیف: ${usedCode}` : text);
         } else {
           const order = await tx.order.update({
             where: { id: session.targetId },
@@ -203,7 +221,7 @@ export async function registerZarinpalRoutes(app: FastifyInstance) {
             subtotalToman: order.subtotalToman,
             itemsSummary,
           });
-          await enqueueNotification(tx, "book_order_paid", text);
+          await enqueueNotification(tx, "book_order_paid", usedCode ? `${text}\nکد تخفیف: ${usedCode}` : text);
         }
       });
     } catch (err) {

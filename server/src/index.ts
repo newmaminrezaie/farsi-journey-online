@@ -20,6 +20,7 @@ import { registerUploadsRoutes } from "./routes/uploads.js";
 import { registerSettingsRoutes } from "./routes/settings.js";
 import { registerAnnouncementsRoutes } from "./routes/announcements.js";
 import { registerOrdersRoutes } from "./routes/orders.js";
+import { registerDiscountsRoutes } from "./routes/discounts.js";
 import { registerZarinpalRoutes } from "./routes/zarinpal.js";
 import { startNotifyWorker } from "./notify/worker.js";
 
@@ -65,6 +66,7 @@ await app.register(registerUploadsRoutes, { prefix: "/api/admin" });
 await app.register(registerSettingsRoutes, { prefix: "/api" });
 await app.register(registerAnnouncementsRoutes, { prefix: "/api" });
 await app.register(registerOrdersRoutes, { prefix: "/api" });
+await app.register(registerDiscountsRoutes, { prefix: "/api" });
 await app.register(registerZarinpalRoutes, { prefix: "/api" });
 
 // Kick off the background notification dispatcher.
