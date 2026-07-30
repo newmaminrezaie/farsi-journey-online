@@ -96,7 +96,8 @@ Invoke-Checked "Marking Prisma schema engine executable..." { Invoke-Ssh "chmod 
 # so `prisma generate` / `db push` use the pre-downloaded engines instead of binaries.prisma.sh.
 # Remove only the API container first to avoid docker-compose v1's KeyError: ContainerConfig
 # recreate bug, and use --no-deps so the database container is never recreated during deploy.
-$ContainerBuildCommand = "export PRISMA_SCHEMA_ENGINE_BINARY=/app/prisma-engines/schema-engine-linux-musl-openssl-3.0.x PRISMA_QUERY_ENGINE_LIBRARY=/app/prisma-engines/libquery_engine-linux-musl-openssl-3.0.x.so.node PRISMA_CLI_BINARY_TARGETS=linux-musl-openssl-3.0.x; cd /app && test -x `$PRISMA_SCHEMA_ENGINE_BINARY && test -f `$PRISMA_QUERY_ENGINE_LIBRARY && npx prisma generate --schema=prisma/schema.prisma && npx prisma db push --schema=prisma/schema.prisma --accept-data-loss && rm -rf dist/* && npm run build"
+$PrismaEnv = "export PRISMA_SCHEMA_ENGINE_BINARY=/app/prisma-engines/schema-engine-linux-musl-openssl-3.0.x PRISMA_QUERY_ENGINE_LIBRARY=/app/prisma-engines/libquery_engine-linux-musl-openssl-3.0.x.so.node PRISMA_CLI_BINARY_TARGETS=linux-musl-openssl-3.0.x;"
+$ContainerBuildCommand = "$PrismaEnv cd /app && test -x `$PRISMA_SCHEMA_ENGINE_BINARY && test -f `$PRISMA_QUERY_ENGINE_LIBRARY && npx prisma generate --schema=prisma/schema.prisma && npx prisma db push --schema=prisma/schema.prisma --accept-data-loss && rm -rf dist/* && npx tsc -p tsconfig.json"
 $RemoteDeployCommand = @"
 #!/usr/bin/env bash
 set -e
