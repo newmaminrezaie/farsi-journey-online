@@ -73,11 +73,14 @@ function legacyMeta(startsOn: Date) {
 
 function levelPrefix(level: string): string {
   const map: Record<string, string> = {
+    "pre-a": "PA", a: "A", "pre-b": "PB", b: "B", c: "C", d: "D", e: "E",
+    // legacy
     beginner: "BG", elementary: "EL", "pre-intermediate": "PI",
     intermediate: "IN", "upper-intermediate": "UI", advanced: "AD", ielts: "IE",
   };
   return map[level] ?? "GN";
 }
+
 
 async function generateClassCode(level: string, startsOn: Date): Promise<string> {
   const [jy, jm] = toJalali(startsOn.getUTCFullYear(), startsOn.getUTCMonth() + 1, startsOn.getUTCDate());
