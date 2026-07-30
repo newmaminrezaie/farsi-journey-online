@@ -47,7 +47,7 @@ function Invoke-Checked {
     & $Command
     if ($LASTEXITCODE -eq 0) { return }
     if ($attempt -le $Retries) {
-      Write-Host "  attempt $attempt failed (exit $LASTEXITCODE) — retrying..." -ForegroundColor Yellow
+      Write-Host "  attempt $attempt failed (exit $LASTEXITCODE) - retrying..." -ForegroundColor Yellow
       Start-Sleep -Seconds 5
     }
   }
@@ -86,7 +86,7 @@ foreach ($f in $engineFiles) {
 if ($needUpload) {
   Invoke-Checked "Uploading Prisma engines (large, this can take a while)..." { scp @ScpOpts -r .\server\prisma-engines\* "${User}@${HostName}:$RemoteServer/prisma-engines/" }
 } else {
-  Write-Host "  engines already present and identical in size — skipping upload" -ForegroundColor DarkGray
+  Write-Host "  engines already present and identical in size - skipping upload" -ForegroundColor DarkGray
 }
 
 Invoke-Checked "Marking Prisma schema engine executable..." { Invoke-Ssh "chmod +x $RemoteServer/prisma-engines/schema-engine-linux-musl-openssl-3.0.x" }
