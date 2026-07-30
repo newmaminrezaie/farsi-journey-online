@@ -8,6 +8,7 @@ import { TileStar, TileHex } from "@/components/PersianPattern";
 import logoFa from "@/assets/logo-fa.png";
 import { localImages } from "@/assets/local";
 import RelatedLinks from "@/components/RelatedLinks";
+import AnnouncementsSection from "@/components/AnnouncementsSection";
 import { levelLabel } from "@/lib/levels";
 
 
@@ -81,6 +82,8 @@ export default function Home() {
       </section>
 
       <div className="section-divider" />
+
+      <AnnouncementsSection />
 
       {/* ACTIVE SEMESTERS */}
       <section className="container py-20">
