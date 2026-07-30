@@ -200,7 +200,7 @@ export async function registerZarinpalRoutes(app: FastifyInstance) {
             amountToman: session.amountToman,
             paymentRef: refId,
           });
-          await enqueueNotification(tx, "registration_new", text);
+          await enqueueNotification(tx, "registration_new", usedCode ? `${text}\nکد تخفیف: ${usedCode}` : text);
         } else {
           const order = await tx.order.update({
             where: { id: session.targetId },
@@ -221,7 +221,7 @@ export async function registerZarinpalRoutes(app: FastifyInstance) {
             subtotalToman: order.subtotalToman,
             itemsSummary,
           });
-          await enqueueNotification(tx, "book_order_paid", text);
+          await enqueueNotification(tx, "book_order_paid", usedCode ? `${text}\nکد تخفیف: ${usedCode}` : text);
         }
       });
     } catch (err) {
