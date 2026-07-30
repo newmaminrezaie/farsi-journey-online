@@ -128,7 +128,7 @@ export default function SemesterDetail() {
                 {teacherChoices.length > 0 && (
                   <label className="block">
                     <span className="block text-xs font-bold text-gold mb-1.5">
-                      انتخاب استاد * {assignedTeachersRaw.length > 1 ? "(چند استاد این ترم را ارائه می‌دهند)" : ""}
+                      انتخاب استاد * {assignedTeachersRaw.length > 1 ? "(هر استاد گروه و ظرفیت جداگانه دارد)" : ""}
                     </span>
                     <select
                       value={form.selectedTeacherId}
@@ -137,12 +137,22 @@ export default function SemesterDetail() {
                       required
                     >
                       <option value="">— انتخاب کنید —</option>
-                      {teacherChoices.map(x => (
-                        <option key={x.id} value={x.id} className="text-primary">{x.nameFa}</option>
-                      ))}
+                      {teacherChoices.map(x => {
+                        const g = groupOf(x.id);
+                        const left = remainingFor(x.id);
+                        const full = left !== null && left <= 0;
+                        return (
+                          <option key={x.id} value={x.id} disabled={full} className="text-primary">
+                            {x.nameFa}
+                            {g?.classCode ? ` — کد ${g.classCode}` : ""}
+                            {left !== null ? (full ? " — تکمیل ظرفیت" : ` — ${left.toLocaleString("fa-IR")} صندلی خالی`) : ""}
+                          </option>
+                        );
+                      })}
                     </select>
                   </label>
                 )}
+
 
                 {bookChoices.length > 0 && (
                   <div className="bg-gradient-to-l from-gold/20 to-parchment/10 border border-gold/40 rounded-2xl p-5 space-y-4">
