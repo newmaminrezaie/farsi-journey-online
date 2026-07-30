@@ -16,12 +16,19 @@ function normalizeSemesterInput(input: unknown) {
   return data;
 }
 
+const GroupShape = z.object({
+  teacherId: z.string().max(60),
+  classCode: z.string().max(60).default(""),
+  capacity: z.number().int().min(0).default(0),
+});
+
 const SemesterShape = z.object({
   classCode: z.string().max(60).optional().default(""),
   titleFa: z.string().min(1).max(200),
-  level: z.string().max(60).default("beginner"),
+  level: z.string().max(60).default("pre-a"),
   
   teacherIds: z.array(z.string()).default([]),
+  groups: z.array(GroupShape).default([]),
   bookIds: z.array(z.string()).default([]),
   scheduleFa: z.string().max(500).default(""),
   days: z.array(z.string().max(20)).default([]),
@@ -37,6 +44,7 @@ const SemesterShape = z.object({
 });
 const Create = z.preprocess(normalizeSemesterInput, SemesterShape);
 const Update = z.preprocess(normalizeSemesterInput, SemesterShape.partial());
+
 
 function toJalali(gy: number, gm: number, gd: number): [number, number, number] {
   const gdm = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
