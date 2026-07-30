@@ -50,9 +50,9 @@ export default function Home() {
 
             <div className="mt-12 grid grid-cols-3 gap-6 max-w-lg">
               {[
-                { n: "۱۴+", l: "سال تجربه" },
-                { n: "۲٬۵۰۰+", l: "زبان‌آموز" },
-                { n: "۱۲", l: "استاد متخصص" },
+                { n: "۱۶+", l: "سال تجربه" },
+                { n: "۸٬۰۰۰+", l: "زبان‌آموز" },
+                { n: "۳۵", l: "استاد متخصص" },
               ].map(s => (
                 <div key={s.l} className="text-center border-r border-gold/25 pr-4 first:border-r-0 first:pr-0">
                   <div className="text-3xl md:text-4xl font-black text-gold">{s.n}</div>
@@ -219,7 +219,7 @@ export default function Home() {
           { to: "/assessment", label: "تعیین سطح رایگان زبان انگلیسی", desc: "قبل از ثبت‌نام سطح خود را به‌صورت رایگان مشخص کنید." },
           { to: "/teachers", label: "آشنایی با اساتید و کارکنان آموزشگاه", desc: "کادر مجرب گویا در گناباد را بشناسید." },
           { to: "/shop", label: "فروشگاه کتاب‌های اصلی زبان", desc: "کتاب‌های کمبریج و آکسفورد با تخفیف ویژه زبان‌آموزان." },
-          { to: "/about", label: "درباره آموزشگاه گویا در گناباد", desc: "بیش از ۱۴ سال تجربه در آموزش تخصصی زبان." },
+          { to: "/about", label: "درباره آموزشگاه گویا در گناباد", desc: "بیش از ۱۶ سال تجربه در آموزش تخصصی زبان." },
           { to: "/contact", label: "تماس با آموزشگاه زبان گویا", desc: "آدرس غفاری ۳، تلفن و راه‌های ارتباطی." },
         ]}
       />
