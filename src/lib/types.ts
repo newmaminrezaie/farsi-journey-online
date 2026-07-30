@@ -144,3 +144,15 @@ export interface Order {
   zarinpalRefId?: string;
   createdAt: string;
 }
+
+export interface Announcement {
+  id: ID;
+  title: string;
+  body: string;
+  kind: "news" | "important" | "event";
+  pinned: boolean;
+  published: boolean;
+  linkHref: string;
+  linkLabel: string;
+  createdAt: string;
+}

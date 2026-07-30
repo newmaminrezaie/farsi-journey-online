@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet, NavLink, Navigate, useNavigate } from "react-router-dom";
 import { authApi } from "@/lib/api";
-import { LayoutDashboard, BookOpen, GraduationCap, Users, UserCog, ShoppingBag, ClipboardList, Megaphone, LogOut, AlertTriangle } from "lucide-react";
+import { LayoutDashboard, BookOpen, GraduationCap, Users, UserCog, ShoppingBag, ClipboardList, Megaphone, Bell, LogOut, AlertTriangle } from "lucide-react";
 import logo from "@/assets/logo-fa.png";
 
 const links = [
@@ -12,6 +12,7 @@ const links = [
   { to: "/admin/books", label: "کتاب‌ها", icon: BookOpen },
   { to: "/admin/orders", label: "سفارش‌ها", icon: ShoppingBag },
   { to: "/admin/registrations", label: "ثبت‌نام‌ها", icon: ClipboardList },
+  { to: "/admin/announcements", label: "اطلاعیه‌ها", icon: Bell },
   { to: "/admin/promo", label: "بنر تبلیغاتی", icon: Megaphone },
 ];
 

@@ -4,7 +4,7 @@
 
 import { storage, uid, refCode } from "./storage";
 import type {
-  Book, CartItem, Employee, Order, OrderItem, Registration, Semester, Teacher,
+  Announcement, Book, CartItem, Employee, Order, OrderItem, Registration, Semester, Teacher,
 } from "./types";
 
 const KEYS = {
@@ -212,3 +212,15 @@ export const authApi = {
 export function formatToman(n: number | null | undefined): string {
   return (Number(n) || 0).toLocaleString("fa-IR") + " تومان";
 }
+
+// ---------- Announcements (اطلاعیه‌ها) ----------
+export const announcementsApi = {
+  listPublic: (): Promise<Announcement[]> => http("/announcements"),
+  listAll: (): Promise<Announcement[]> => http("/admin/announcements"),
+  create: (input: Partial<Announcement> & { title: string }): Promise<Announcement> =>
+    http("/admin/announcements", { method: "POST", body: JSON.stringify(input) }),
+  update: (id: string, patch: Partial<Announcement>): Promise<Announcement> =>
+    http(`/admin/announcements/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
+  remove: (id: string): Promise<void> =>
+    http(`/admin/announcements/${id}`, { method: "DELETE" }).then(() => undefined),
+};
