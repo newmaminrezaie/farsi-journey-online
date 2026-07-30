@@ -58,6 +58,11 @@ export default function SemesterDetail() {
     if (!form.phone) return toast.error("شماره همراه الزامی است");
     if (!form.address) return toast.error("آدرس الزامی است");
     if (teacherChoices.length > 0 && !form.selectedTeacherId) return toast.error("لطفاً استاد مورد نظر خود را انتخاب کنید");
+    if (form.selectedTeacherId) {
+      const left = remainingFor(form.selectedTeacherId);
+      if (left !== null && left <= 0) return toast.error("ظرفیت کلاس این استاد تکمیل شده است؛ لطفاً استاد دیگری انتخاب کنید");
+    }
+
     if (!form.agreedToTerms) return toast.error("لطفاً مقررات ثبت‌نام را تأیید کنید");
     setSubmitting(true);
     const created = await registrationsApi.create({
