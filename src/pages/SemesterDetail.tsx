@@ -37,6 +37,16 @@ export default function SemesterDetail() {
   const bookChoices = assignedBooksRaw.length > 0 ? assignedBooksRaw : books.filter(b => b.active);
   const t = assignedTeachers[0] ?? teachers.find(x => x.id === sem.teacherId);
 
+  const groups = (sem as any).groups as Array<{ teacherId: string; classCode: string; capacity: number }> | undefined;
+  const groupOf = (teacherId: string) => groups?.find(g => g.teacherId === teacherId);
+  // null = no per-teacher capacity configured
+  const remainingFor = (teacherId: string): number | null => {
+    const g = groupOf(teacherId);
+    if (!g || !g.capacity) return null;
+    return Math.max(0, g.capacity - (seats?.byTeacher?.[teacherId] ?? 0));
+  };
+
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.fullName) return toast.error("نام و نام خانوادگی الزامی است");
