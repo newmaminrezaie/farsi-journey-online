@@ -25,6 +25,14 @@ export interface Employee {
 }
 
 export type SemesterLevel =
+  | "pre-a"
+  | "a"
+  | "pre-b"
+  | "b"
+  | "c"
+  | "d"
+  | "e"
+  // legacy values still present in older records
   | "beginner"
   | "elementary"
   | "pre-intermediate"
@@ -33,6 +41,13 @@ export type SemesterLevel =
   | "advanced"
   | "ielts";
 
+// A per-teacher group inside a class: its own class code and its own capacity.
+export interface SemesterGroup {
+  teacherId: ID;
+  classCode: string;
+  capacity: number;
+}
+
 export interface Semester {
   id: ID;
   classCode?: string;
@@ -40,6 +55,7 @@ export interface Semester {
   level: SemesterLevel;
   teacherId?: ID;             // legacy — primary teacher (kept for back-compat)
   teacherIds?: ID[];
+  groups?: SemesterGroup[];   // per-teacher class code + capacity
   bookIds?: ID[];
   scheduleFa: string;
   days?: string[];            // روزهای هفته: saturday…friday
@@ -54,6 +70,7 @@ export interface Semester {
   status: "open" | "closed" | "archived";
   createdAt: string;
 }
+
 
 export interface Registration {
   id: ID;

@@ -16,12 +16,19 @@ function normalizeSemesterInput(input: unknown) {
   return data;
 }
 
+const GroupShape = z.object({
+  teacherId: z.string().max(60),
+  classCode: z.string().max(60).default(""),
+  capacity: z.number().int().min(0).default(0),
+});
+
 const SemesterShape = z.object({
   classCode: z.string().max(60).optional().default(""),
   titleFa: z.string().min(1).max(200),
-  level: z.string().max(60).default("beginner"),
+  level: z.string().max(60).default("pre-a"),
   
   teacherIds: z.array(z.string()).default([]),
+  groups: z.array(GroupShape).default([]),
   bookIds: z.array(z.string()).default([]),
   scheduleFa: z.string().max(500).default(""),
   days: z.array(z.string().max(20)).default([]),
@@ -37,6 +44,7 @@ const SemesterShape = z.object({
 });
 const Create = z.preprocess(normalizeSemesterInput, SemesterShape);
 const Update = z.preprocess(normalizeSemesterInput, SemesterShape.partial());
+
 
 function toJalali(gy: number, gm: number, gd: number): [number, number, number] {
   const gdm = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
@@ -65,11 +73,14 @@ function legacyMeta(startsOn: Date) {
 
 function levelPrefix(level: string): string {
   const map: Record<string, string> = {
+    "pre-a": "PA", a: "A", "pre-b": "PB", b: "B", c: "C", d: "D", e: "E",
+    // legacy
     beginner: "BG", elementary: "EL", "pre-intermediate": "PI",
     intermediate: "IN", "upper-intermediate": "UI", advanced: "AD", ielts: "IE",
   };
   return map[level] ?? "GN";
 }
+
 
 async function generateClassCode(level: string, startsOn: Date): Promise<string> {
   const [jy, jm] = toJalali(startsOn.getUTCFullYear(), startsOn.getUTCMonth() + 1, startsOn.getUTCDate());
@@ -136,6 +147,26 @@ export async function registerSemestersRoutes(app: FastifyInstance) {
     if (!row) return reply.code(404).send({ error: "not_found" });
     return serialize(row);
   });
+
+  // Public: how many students already registered per teacher (group) of a class.
+  app.get("/semesters/:id/seats", async (req) => {
+    const id = (req.params as any).id as string;
+    const rows = await prisma.registration.groupBy({
+      by: ["selectedTeacherId"],
+      where: { semesterId: id },
+      _count: { _all: true },
+    });
+    const byTeacher: Record<string, number> = {};
+    let total = 0;
+    for (const r of rows as any[]) {
+      const count = r._count?._all ?? 0;
+      total += count;
+      if (r.selectedTeacherId) byTeacher[r.selectedTeacherId] = count;
+    }
+    return { total, byTeacher };
+  });
+
+
 
   app.post("/semesters", { preHandler: requireStaff }, async (req, reply) => {
     const parsed = Create.safeParse(req.body);

@@ -16,6 +16,8 @@ export default function SemesterDetail() {
   const { data: sem } = useQuery({ queryKey: ["semester", id], queryFn: () => semestersApi.get(id!), enabled: !!id });
   const { data: teachers = [] } = useQuery({ queryKey: ["teachers"], queryFn: () => teachersApi.list() });
   const { data: books = [] } = useQuery({ queryKey: ["books"], queryFn: () => booksApi.list() });
+  const { data: seats } = useQuery({ queryKey: ["semester-seats", id], queryFn: () => semestersApi.seats(id!), enabled: !!id });
+
 
   const [form, setForm] = useState({
     fullName: "", fatherName: "", nationalId: "",
@@ -37,6 +39,16 @@ export default function SemesterDetail() {
   const bookChoices = assignedBooksRaw.length > 0 ? assignedBooksRaw : books.filter(b => b.active);
   const t = assignedTeachers[0] ?? teachers.find(x => x.id === sem.teacherId);
 
+  const groups = (sem as any).groups as Array<{ teacherId: string; classCode: string; capacity: number }> | undefined;
+  const groupOf = (teacherId: string) => groups?.find(g => g.teacherId === teacherId);
+  // null = no per-teacher capacity configured
+  const remainingFor = (teacherId: string): number | null => {
+    const g = groupOf(teacherId);
+    if (!g || !g.capacity) return null;
+    return Math.max(0, g.capacity - (seats?.byTeacher?.[teacherId] ?? 0));
+  };
+
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.fullName) return toast.error("نام و نام خانوادگی الزامی است");
@@ -46,6 +58,11 @@ export default function SemesterDetail() {
     if (!form.phone) return toast.error("شماره همراه الزامی است");
     if (!form.address) return toast.error("آدرس الزامی است");
     if (teacherChoices.length > 0 && !form.selectedTeacherId) return toast.error("لطفاً استاد مورد نظر خود را انتخاب کنید");
+    if (form.selectedTeacherId) {
+      const left = remainingFor(form.selectedTeacherId);
+      if (left !== null && left <= 0) return toast.error("ظرفیت کلاس این استاد تکمیل شده است؛ لطفاً استاد دیگری انتخاب کنید");
+    }
+
     if (!form.agreedToTerms) return toast.error("لطفاً مقررات ثبت‌نام را تأیید کنید");
     setSubmitting(true);
     const created = await registrationsApi.create({
@@ -128,7 +145,7 @@ export default function SemesterDetail() {
                 {teacherChoices.length > 0 && (
                   <label className="block">
                     <span className="block text-xs font-bold text-gold mb-1.5">
-                      انتخاب استاد * {assignedTeachersRaw.length > 1 ? "(چند استاد این ترم را ارائه می‌دهند)" : ""}
+                      انتخاب استاد * {assignedTeachersRaw.length > 1 ? "(هر استاد گروه و ظرفیت جداگانه دارد)" : ""}
                     </span>
                     <select
                       value={form.selectedTeacherId}
@@ -137,12 +154,22 @@ export default function SemesterDetail() {
                       required
                     >
                       <option value="">— انتخاب کنید —</option>
-                      {teacherChoices.map(x => (
-                        <option key={x.id} value={x.id} className="text-primary">{x.nameFa}</option>
-                      ))}
+                      {teacherChoices.map(x => {
+                        const g = groupOf(x.id);
+                        const left = remainingFor(x.id);
+                        const full = left !== null && left <= 0;
+                        return (
+                          <option key={x.id} value={x.id} disabled={full} className="text-primary">
+                            {x.nameFa}
+                            {g?.classCode ? ` — کد ${g.classCode}` : ""}
+                            {left !== null ? (full ? " — تکمیل ظرفیت" : ` — ${left.toLocaleString("fa-IR")} صندلی خالی`) : ""}
+                          </option>
+                        );
+                      })}
                     </select>
                   </label>
                 )}
+
 
                 {bookChoices.length > 0 && (
                   <div className="bg-gradient-to-l from-gold/20 to-parchment/10 border border-gold/40 rounded-2xl p-5 space-y-4">

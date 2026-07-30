@@ -6,6 +6,8 @@ import { formatJalali } from "@/lib/jalali";
 import { levelFa, modeFa } from "./Home";
 import { ArrowLeft, Users, Calendar, Clock } from "lucide-react";
 import RelatedLinks from "@/components/RelatedLinks";
+import { LEVELS } from "@/lib/levels";
+
 
 const MODES: Array<{ id: "all" | "in-person" | "online" | "hybrid"; label: string }> = [
   { id: "all", label: "همه" },
@@ -18,7 +20,10 @@ export default function Semesters() {
   const { data: semesters = [] } = useQuery({ queryKey: ["semesters"], queryFn: () => semestersApi.list() });
   const { data: teachers = [] } = useQuery({ queryKey: ["teachers"], queryFn: () => teachersApi.list() });
   const [mode, setMode] = useState<"all" | "in-person" | "online" | "hybrid">("all");
-  const filtered = mode === "all" ? semesters : semesters.filter(s => s.mode === mode);
+  const [level, setLevel] = useState<string>("all");
+  const filtered = semesters
+    .filter(s => mode === "all" || s.mode === mode)
+    .filter(s => level === "all" || s.level === level);
 
   return (
     <>
@@ -36,7 +41,7 @@ export default function Semesters() {
       </section>
 
       <section className="container py-16">
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
           {MODES.map(m => (
             <button
               key={m.id}
@@ -51,6 +56,30 @@ export default function Semesters() {
             </button>
           ))}
         </div>
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+          <button
+            onClick={() => setLevel("all")}
+            className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-colors ${
+              level === "all" ? "bg-gold text-gold-foreground border-gold" : "bg-card text-primary border-primary/15 hover:border-gold/60"
+            }`}
+          >
+            همه سطوح
+          </button>
+          {LEVELS.map(l => (
+            <button
+              key={l.value}
+              onClick={() => setLevel(l.value)}
+              title={l.books}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-colors ${
+                level === l.value ? "bg-gold text-gold-foreground border-gold" : "bg-card text-primary border-primary/15 hover:border-gold/60"
+              }`}
+            >
+              {l.label}
+              <span className="font-normal opacity-70"> — {l.books}</span>
+            </button>
+          ))}
+        </div>
+
         <div className="grid gap-6">
         {filtered.map(s => {
           const ids = (s.teacherIds && s.teacherIds.length ? s.teacherIds : (s.teacherId ? [s.teacherId] : []));
@@ -62,7 +91,15 @@ export default function Semesters() {
             <article key={s.id} className="bg-card rounded-3xl p-6 md:p-8 border border-primary/10 hover:shadow-navy transition-shadow grid md:grid-cols-[1fr_auto] gap-6 items-center">
               <div>
                 <div className="flex flex-wrap gap-2 mb-3">
-                  {s.classCode && <span className="chip font-mono text-turquoise">{s.classCode}</span>}
+                  {s.groups?.length
+                    ? s.groups.map(g => (
+                        <span key={g.teacherId} className="chip font-mono text-turquoise">
+                          {g.classCode || s.classCode}
+                          {g.capacity ? ` · ${g.capacity.toLocaleString("fa-IR")} نفر` : ""}
+                        </span>
+                      ))
+                    : s.classCode && <span className="chip font-mono text-turquoise">{s.classCode}</span>}
+
                   <span className="chip">{modeFa(s.mode)}</span>
                   <span className="chip-gold">{levelFa(s.level)}</span>
                   {s.status === "open" && !full && <span className="chip">ثبت‌نام باز</span>}

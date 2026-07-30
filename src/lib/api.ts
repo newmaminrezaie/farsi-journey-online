@@ -61,6 +61,9 @@ export const semestersApi = {
   list: (): Promise<Semester[]> => http("/semesters"),
   listOpen: async (): Promise<Semester[]> => (await http<Semester[]>("/semesters")).filter(s => s.status !== "archived"),
   get: (id: string): Promise<Semester> => http(`/semesters/${id}`),
+  seats: (id: string): Promise<{ total: number; byTeacher: Record<string, number> }> =>
+    http(`/semesters/${id}/seats`),
+
   create: (input: Omit<Semester, "id" | "createdAt" | "seatsTaken"> & { seatsTaken?: number }): Promise<Semester> =>
     http("/semesters", { method: "POST", body: JSON.stringify({ seatsTaken: 0, ...input }) }),
   update: (id: string, patch: Partial<Semester>): Promise<Semester> =>

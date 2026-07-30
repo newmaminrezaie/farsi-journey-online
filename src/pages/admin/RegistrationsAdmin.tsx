@@ -62,7 +62,7 @@ export default function RegistrationsAdmin() {
       if (payFilter === "unpaid" && r.paidToman && r.paidToman > 0) return false;
       if (classCode) {
         const s = r.semesterId ? semById.get(r.semesterId) : null;
-        if (!s?.classCode?.toLowerCase().includes(classCode.toLowerCase())) return false;
+        if (!codeFor(s, r.selectedTeacherId).toLowerCase().includes(classCode.toLowerCase())) return false;
       }
       if (from && r.createdAt.slice(0, 10) < from) return false;
       if (to && r.createdAt.slice(0, 10) > to) return false;
@@ -113,7 +113,7 @@ export default function RegistrationsAdmin() {
     const mapped = rows.map(r => {
       const s = r.semesterId ? semById.get(r.semesterId) : null;
       return {
-        "کد کلاس": s?.classCode ?? "",
+        "کد کلاس": codeFor(s, r.selectedTeacherId),
         "دوره": s?.titleFa ?? r.levelInterest ?? "",
         "روز و ساعت کلاس": scheduleSummary(s),
 
@@ -146,8 +146,17 @@ export default function RegistrationsAdmin() {
   }
 
   function printAll() {
-    openPrint(renderPrintHTML(filtered, semById, teachers, books));
+    // Print class by class: group by semester, then by selected teacher (each group has its own class code).
+    const sorted = [...filtered].sort((a, b) => {
+      const sa = a.semesterId ?? "", sb = b.semesterId ?? "";
+      if (sa !== sb) return sa.localeCompare(sb);
+      const ta = a.selectedTeacherId ?? "", tb = b.selectedTeacherId ?? "";
+      if (ta !== tb) return ta.localeCompare(tb);
+      return a.fullName.localeCompare(b.fullName, "fa");
+    });
+    openPrint(renderPrintHTML(sorted, semById, teachers, books));
   }
+
 
   return (
     <div>
@@ -232,7 +241,7 @@ export default function RegistrationsAdmin() {
                 return (
                   <tr key={r.id} className={`border-t border-primary/5 hover:bg-parchment/50 ${paid === 0 ? "bg-destructive/[0.04]" : ""}`}>
                     <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">{formatJalali(r.createdAt.slice(0, 10))}</td>
-                    <td className="p-3 font-mono text-xs text-turquoise font-bold">{s?.classCode || "—"}</td>
+                    <td className="p-3 font-mono text-xs text-turquoise font-bold">{codeFor(s, r.selectedTeacherId) || "—"}</td>
                     <td className="p-3 font-bold text-primary">{r.fullName}</td>
                     <td className="p-3" dir="ltr">{r.phone}</td>
                     <td className="p-3 text-muted-foreground">{s?.titleFa ?? r.levelInterest ?? "—"}</td>
@@ -311,7 +320,7 @@ function DetailDrawer({ reg, semester, teacherName, bookTitle, onClose, onPrint,
             <div className="bg-card rounded-2xl p-4 border border-gold/30">
               <div className="flex items-baseline justify-between mb-2">
                 <h3 className="font-black text-primary">{semester.titleFa}</h3>
-                <span className="font-mono text-turquoise font-bold text-sm">{semester.classCode}</span>
+                <span className="font-mono text-turquoise font-bold text-sm">{codeFor(semester, reg.selectedTeacherId) || "—"}</span>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                 <div>شروع: {formatJalali(semester.startsOn)}</div>
@@ -373,6 +382,14 @@ function Row({ k, v, dir }: { k: string; v?: string; dir?: string }) {
       <dd className="font-bold text-primary" dir={dir}>{v || "—"}</dd>
     </div>
   );
+}
+
+
+// Class code shown for a registration: the selected teacher's group code when set.
+function codeFor(s: Semester | undefined, teacherId?: string): string {
+  if (!s) return "";
+  const g = teacherId ? s.groups?.find(x => x.teacherId === teacherId) : undefined;
+  return g?.classCode || s.classCode || "";
 }
 
 // ---- Print ----
@@ -451,7 +468,7 @@ function renderPrintHTML(rows: Registration[], semById: Map<string, Semester>, t
             <div class="sub">گناباد، خراسان رضوی — غفاری ۳ &nbsp;|&nbsp; ۰۵۱-۵۷۲۲۳۷۷۲ &nbsp;|&nbsp; higooya.ir</div>
           </div>
           <div class="meta">
-            <div>کد کلاس: ${esc(s?.classCode || "—")}</div>
+            <div>کد کلاس: ${esc(codeFor(s, r.selectedTeacherId) || "—")}</div>
             <div>تاریخ چاپ: ${esc(today)}</div>
           </div>
         </div>
@@ -474,7 +491,7 @@ function renderPrintHTML(rows: Registration[], semById: Map<string, Semester>, t
         <h3>مشخصات کلاس</h3>
         <div class="grid">
           ${cell("عنوان کلاس", s?.titleFa ?? r.termInterest)}
-          ${cell("کد کلاس", s?.classCode)}
+          ${cell("کد کلاس", codeFor(s, r.selectedTeacherId))}
           ${cell("سطح", s?.level ?? r.levelInterest)}
           ${cell("روز و ساعت برگزاری", schedule, "half")}
           ${cell("نحوه برگزاری", s?.mode === "online" ? "آنلاین" : s?.mode === "hybrid" ? "ترکیبی" : s ? "حضوری" : "")}
