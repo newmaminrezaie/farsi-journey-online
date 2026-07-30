@@ -146,8 +146,17 @@ export default function RegistrationsAdmin() {
   }
 
   function printAll() {
-    openPrint(renderPrintHTML(filtered, semById, teachers, books));
+    // Print class by class: group by semester, then by selected teacher (each group has its own class code).
+    const sorted = [...filtered].sort((a, b) => {
+      const sa = a.semesterId ?? "", sb = b.semesterId ?? "";
+      if (sa !== sb) return sa.localeCompare(sb);
+      const ta = a.selectedTeacherId ?? "", tb = b.selectedTeacherId ?? "";
+      if (ta !== tb) return ta.localeCompare(tb);
+      return a.fullName.localeCompare(b.fullName, "fa");
+    });
+    openPrint(renderPrintHTML(sorted, semById, teachers, books));
   }
+
 
   return (
     <div>
