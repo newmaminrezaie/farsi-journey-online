@@ -9,6 +9,7 @@ import logoFa from "@/assets/logo-fa.png";
 import { localImages } from "@/assets/local";
 import RelatedLinks from "@/components/RelatedLinks";
 import AnnouncementsSection from "@/components/AnnouncementsSection";
+import HeroSlider from "@/components/HeroSlider";
 import { levelLabel } from "@/lib/levels";
 
 
@@ -66,10 +67,7 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.9, delay: 0.15 }}
             className="md:col-span-2 relative">
-            <div className="warm-photo-overlay warm-photo rounded-3xl">
-              <img src={localImages.heroClass}
-                   alt="کلاس زبان" className="w-full h-[420px] object-cover" />
-            </div>
+            <HeroSlider />
             <div className="absolute -bottom-6 -left-6 bg-parchment text-primary rounded-2xl p-4 shadow-navy flex items-center gap-3">
               <img src={logoFa} alt="گویا" className="h-12 w-12 object-contain" />
               <div>
