@@ -68,6 +68,8 @@ model Semester {
   titleFa     String
   level       String   @default("beginner")
   teacherIds  String[] @default([])
+  groups      Json?                              // [{ teacherId, classCode, capacity }]
+
   bookIds     String[] @default([])
   scheduleFa  String   @default("")
   days        String[] @default([])
