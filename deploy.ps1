@@ -11,42 +11,86 @@ $RemoteDist = "$RemoteRoot/dist"
 $RemoteServer = "$RemoteRoot/server"
 $FixWebPermissions = "chmod 755 /var /var/www $RemoteRoot $RemoteDist && chown -R root:www-data $RemoteDist && find $RemoteDist -type d -exec chmod 755 {} \; && find $RemoteDist -type f -exec chmod 644 {} \;"
 
+# Keep flaky/slow links alive: the 15MB+18MB Prisma engine uploads take ~30min on
+# this connection and the server was dropping the session right after them.
+$SshOpts = @(
+  "-p", "$Port",
+  "-o", "ServerAliveInterval=15",
+  "-o", "ServerAliveCountMax=20",
+  "-o", "TCPKeepAlive=yes",
+  "-o", "ConnectTimeout=30"
+)
+$ScpOpts = @(
+  "-P", "$Port",
+  "-o", "ServerAliveInterval=15",
+  "-o", "ServerAliveCountMax=20",
+  "-o", "TCPKeepAlive=yes",
+  "-o", "ConnectTimeout=30"
+)
+
+function Invoke-Ssh {
+  param([Parameter(Mandatory = $true)][string]$Script)
+  ssh @SshOpts "$User@$HostName" $Script
+}
+
 function Invoke-Checked {
   param(
     [Parameter(Mandatory = $true)]
     [string]$Label,
     [Parameter(Mandatory = $true)]
-    [scriptblock]$Command
+    [scriptblock]$Command,
+    [int]$Retries = 2
   )
 
   Write-Host $Label -ForegroundColor Green
-  & $Command
-  if ($LASTEXITCODE -ne 0) {
-    throw "$Label failed with exit code $LASTEXITCODE."
+  for ($attempt = 1; $attempt -le ($Retries + 1); $attempt++) {
+    & $Command
+    if ($LASTEXITCODE -eq 0) { return }
+    if ($attempt -le $Retries) {
+      Write-Host "  attempt $attempt failed (exit $LASTEXITCODE) — retrying..." -ForegroundColor Yellow
+      Start-Sleep -Seconds 5
+    }
   }
+  throw "$Label failed with exit code $LASTEXITCODE."
 }
 
-Invoke-Checked "Building..." { npm run build }
+Invoke-Checked "Building..." { npm run build } -Retries 0
 
-Invoke-Checked "Fetching Prisma engines locally (for offline VPS install)..." { & (Join-Path $PSScriptRoot "scripts\fetch-prisma-engines.ps1") }
+Invoke-Checked "Fetching Prisma engines locally (for offline VPS install)..." { & (Join-Path $PSScriptRoot "scripts\fetch-prisma-engines.ps1") } -Retries 0
 
-Invoke-Checked "Clearing remote frontend/backend build folders..." { ssh -p $Port "$User@$HostName" "mkdir -p $RemoteDist $RemoteServer/src $RemoteServer/prisma $RemoteServer/prisma-engines $RemoteServer/dist && rm -rf $RemoteDist/* $RemoteServer/src/* $RemoteServer/prisma/* $RemoteServer/dist/*" }
+Invoke-Checked "Clearing remote frontend/backend build folders..." { Invoke-Ssh "mkdir -p $RemoteDist $RemoteServer/src $RemoteServer/prisma $RemoteServer/prisma-engines $RemoteServer/dist && rm -rf $RemoteDist/* $RemoteServer/src/* $RemoteServer/prisma/* $RemoteServer/dist/*" }
 
-Invoke-Checked "Uploading frontend..." { scp -P $Port -r .\dist\* "${User}@${HostName}:$RemoteDist/" }
+Invoke-Checked "Uploading frontend..." { scp @ScpOpts -r .\dist\* "${User}@${HostName}:$RemoteDist/" }
 
-Invoke-Checked "Fixing frontend permissions..." { ssh -p $Port "$User@$HostName" $FixWebPermissions }
+Invoke-Checked "Fixing frontend permissions..." { Invoke-Ssh $FixWebPermissions }
 
 Write-Host "Uploading backend source..." -ForegroundColor Green
-Invoke-Checked "Uploading docker-compose.yml..." { scp -P $Port .\docker-compose.yml "${User}@${HostName}:$RemoteRoot/" }
-Invoke-Checked "Uploading server source..." { scp -P $Port -r .\server\src\* "${User}@${HostName}:$RemoteServer/src/" }
-Invoke-Checked "Uploading Prisma schema..." { scp -P $Port -r .\server\prisma\* "${User}@${HostName}:$RemoteServer/prisma/" }
-Invoke-Checked "Uploading server package files..." { scp -P $Port .\server\package.json .\server\tsconfig.json "${User}@${HostName}:$RemoteServer/" }
+Invoke-Checked "Uploading docker-compose.yml..." { scp @ScpOpts .\docker-compose.yml "${User}@${HostName}:$RemoteRoot/" }
+Invoke-Checked "Uploading server source..." { scp @ScpOpts -r .\server\src\* "${User}@${HostName}:$RemoteServer/src/" }
+Invoke-Checked "Uploading Prisma schema..." { scp @ScpOpts -r .\server\prisma\* "${User}@${HostName}:$RemoteServer/prisma/" }
+Invoke-Checked "Uploading server package files..." { scp @ScpOpts .\server\package.json .\server\tsconfig.json "${User}@${HostName}:$RemoteServer/" }
 if (Test-Path .\server\package-lock.json) {
-  Invoke-Checked "Uploading server lockfile..." { scp -P $Port .\server\package-lock.json "${User}@${HostName}:$RemoteServer/" }
+  Invoke-Checked "Uploading server lockfile..." { scp @ScpOpts .\server\package-lock.json "${User}@${HostName}:$RemoteServer/" }
 }
 
-Invoke-Checked "Uploading Prisma engines..." { scp -P $Port -r .\server\prisma-engines\* "${User}@${HostName}:$RemoteServer/prisma-engines/" }
-Invoke-Checked "Marking Prisma schema engine executable..." { ssh -p $Port "$User@$HostName" "chmod +x $RemoteServer/prisma-engines/schema-engine-linux-musl-openssl-3.0.x" }
+# Prisma engines are ~33MB and never change unless the Prisma version changes.
+# Compare sizes with the VPS first and skip the (very slow) upload when they match.
+Write-Host "Checking remote Prisma engines..." -ForegroundColor Green
+$engineFiles = Get-ChildItem (Join-Path $PSScriptRoot "server\prisma-engines") -File
+$remoteSizes = (Invoke-Ssh "stat -c '%n %s' $RemoteServer/prisma-engines/* 2>/dev/null || true") -join "`n"
+$needUpload = $false
+foreach ($f in $engineFiles) {
+  if ($remoteSizes -notmatch [regex]::Escape("$($f.Name) $($f.Length)")) { $needUpload = $true }
+}
+
+if ($needUpload) {
+  Invoke-Checked "Uploading Prisma engines (large, this can take a while)..." { scp @ScpOpts -r .\server\prisma-engines\* "${User}@${HostName}:$RemoteServer/prisma-engines/" }
+} else {
+  Write-Host "  engines already present and identical in size — skipping upload" -ForegroundColor DarkGray
+}
+
+Invoke-Checked "Marking Prisma schema engine executable..." { Invoke-Ssh "chmod +x $RemoteServer/prisma-engines/schema-engine-linux-musl-openssl-3.0.x" }
+
 
 # PRISMA_SCHEMA_ENGINE_BINARY + PRISMA_QUERY_ENGINE_LIBRARY are set in docker-compose.yml,
 # so `prisma generate` / `db push` use the pre-downloaded engines instead of binaries.prisma.sh.
@@ -112,7 +156,7 @@ $RemoteScriptPath = Join-Path $env:TEMP "higooya-remote-deploy.sh"
 $Utf8NoBom = New-Object System.Text.UTF8Encoding $false
 [System.IO.File]::WriteAllText($RemoteScriptPath, $RemoteDeployCommand, $Utf8NoBom)
 
-Invoke-Checked "Uploading remote deploy script..." { scp -P $Port $RemoteScriptPath "${User}@${HostName}:/tmp/higooya-remote-deploy.sh" }
-Invoke-Checked "Regenerating Prisma client, syncing database, rebuilding backend, restarting api, and reloading nginx..." { ssh -p $Port "$User@$HostName" 'bash /tmp/higooya-remote-deploy.sh; status=$?; rm -f /tmp/higooya-remote-deploy.sh; exit $status' }
+Invoke-Checked "Uploading remote deploy script..." { scp @ScpOpts $RemoteScriptPath "${User}@${HostName}:/tmp/higooya-remote-deploy.sh" }
+Invoke-Checked "Regenerating Prisma client, syncing database, rebuilding backend, restarting api, and reloading nginx..." { Invoke-Ssh 'bash /tmp/higooya-remote-deploy.sh; status=$?; rm -f /tmp/higooya-remote-deploy.sh; exit $status' } -Retries 0
 
 Write-Host "`nDone. Hard-refresh https://higooya.ir with Ctrl+F5." -ForegroundColor Green
