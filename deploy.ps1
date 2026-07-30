@@ -130,7 +130,27 @@ fi
 # Stop RAM consumers before Prisma. Do NOT start api before build, because its
 # startup command may run TypeScript compilation at the same time as this deploy.
 `$DC stop api backup >/dev/null 2>&1 || true
+# Step 1: Prisma generate + schema sync (needs the db network, low RAM).
 `$DC run --rm --no-deps api sh -lc '$ContainerBuildCommand'
+
+# Step 2: TypeScript compile. The compose service is capped at mem_limit 256m with
+# NODE_OPTIONS=--max-old-space-size=192, which is not enough for tsc (it OOMs with
+# "Ineffective mark-compacts near heap limit"). Run the compiler in a throwaway
+# container outside those caps instead; the host swapfile absorbs the spike.
+API_IMAGE=`$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E '(_|-)api:latest`$' | head -n 1)
+if [ -z "`$API_IMAGE" ]; then API_IMAGE=`$(docker inspect --format '{{.Config.Image}}' `$(`$DC ps -q api 2>/dev/null | head -n 1) 2>/dev/null || echo node:20-alpine); fi
+echo "building TypeScript with image: `$API_IMAGE"
+docker run --rm --network none \
+  -m 900m --memory-swap 1800m \
+  -e NODE_OPTIONS=--max-old-space-size=768 \
+  -v $RemoteServer/dist:/app/dist \
+  -v $RemoteServer/src:/app/src:ro \
+  -v $RemoteServer/node_modules:/app/node_modules \
+  -v $RemoteServer/prisma:/app/prisma \
+  -v $RemoteServer/package.json:/app/package.json:ro \
+  -v $RemoteServer/tsconfig.json:/app/tsconfig.json:ro \
+  -w /app "`$API_IMAGE" sh -lc 'rm -rf dist/* && npx tsc -p tsconfig.json'
+test -f $RemoteServer/dist/index.js
 `$DC rm -sf api >/dev/null 2>&1 || true
 `$DC up -d --no-deps api
 `$DC rm -sf backup >/dev/null 2>&1 || true
