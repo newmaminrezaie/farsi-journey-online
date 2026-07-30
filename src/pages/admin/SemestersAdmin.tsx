@@ -116,12 +116,31 @@ export default function SemestersAdmin() {
               const teacherNames = teacherIds.map(id => teachers.find(t => t.id === id)?.nameFa).filter(Boolean).join("، ");
               return (
               <tr key={s.id} className="border-t border-primary/5">
-                <td className="p-3 font-mono text-xs text-turquoise font-bold">{s.classCode || "—"}</td>
-                <td className="p-3 font-bold text-primary">{s.titleFa}</td>
-                <td className="p-3 text-muted-foreground">{teacherNames || "—"}</td>
+                <td className="p-3 font-mono text-xs text-turquoise font-bold">
+                  {(s as any).groups?.length
+                    ? (s as any).groups.map((g: any) => (
+                        <div key={g.teacherId}>{g.classCode || s.classCode || "—"}</div>
+                      ))
+                    : (s.classCode || "—")}
+                </td>
+                <td className="p-3 font-bold text-primary">{s.titleFa}<div className="text-[11px] font-normal text-muted-foreground">{levelLabel(s.level)}</div></td>
+                <td className="p-3 text-muted-foreground">
+                  {(s as any).groups?.length
+                    ? (s as any).groups.map((g: any) => (
+                        <div key={g.teacherId}>{teachers.find(t => t.id === g.teacherId)?.nameFa ?? "—"}</div>
+                      ))
+                    : (teacherNames || "—")}
+                </td>
                 <td className="p-3">{formatJalali(s.startsOn)}</td>
                 <td className="p-3">{formatToman(s.priceToman ?? 0)}</td>
-                <td className="p-3">{(s.seatsTaken ?? 0).toLocaleString("fa-IR")}/{(s.capacity ?? 0).toLocaleString("fa-IR")}</td>
+                <td className="p-3">
+                  {(s as any).groups?.length
+                    ? (s as any).groups.map((g: any) => (
+                        <div key={g.teacherId}>{(Number(g.capacity) || 0).toLocaleString("fa-IR")} نفر</div>
+                      ))
+                    : `${(s.seatsTaken ?? 0).toLocaleString("fa-IR")}/${(s.capacity ?? 0).toLocaleString("fa-IR")}`}
+                </td>
+
                 <td className="p-3"><span className="chip">{s.status ?? "—"}</span></td>
                 <td className="p-3 text-left">
                   <button onClick={() => openModal(s)} className="p-2 hover:bg-gold/15 rounded-lg text-primary"><Pencil className="h-4 w-4" /></button>
