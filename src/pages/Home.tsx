@@ -50,9 +50,9 @@ export default function Home() {
 
             <div className="mt-12 grid grid-cols-3 gap-6 max-w-lg">
               {[
-                { n: "۱۴+", l: "سال تجربه" },
-                { n: "۲٬۵۰۰+", l: "زبان‌آموز" },
-                { n: "۱۲", l: "استاد متخصص" },
+                { n: "۱۶+", l: "سال تجربه" },
+                { n: "۸٬۰۰۰+", l: "زبان‌آموز" },
+                { n: "۳۵", l: "استاد متخصص" },
               ].map(s => (
                 <div key={s.l} className="text-center border-r border-gold/25 pr-4 first:border-r-0 first:pr-0">
                   <div className="text-3xl md:text-4xl font-black text-gold">{s.n}</div>
