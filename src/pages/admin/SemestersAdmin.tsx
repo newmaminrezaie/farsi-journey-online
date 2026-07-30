@@ -5,7 +5,7 @@ import type { Semester } from "@/lib/types";
 import { formatJalali } from "@/lib/jalali";
 import JalaliDateInput from "@/components/JalaliDateInput";
 import { WEEKDAYS } from "@/lib/terms";
-import { LEVELS } from "@/lib/levels";
+import { LEVELS, levelLabel } from "@/lib/levels";
 
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
