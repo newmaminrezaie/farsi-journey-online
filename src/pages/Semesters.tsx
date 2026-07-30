@@ -6,6 +6,8 @@ import { formatJalali } from "@/lib/jalali";
 import { levelFa, modeFa } from "./Home";
 import { ArrowLeft, Users, Calendar, Clock } from "lucide-react";
 import RelatedLinks from "@/components/RelatedLinks";
+import { LEVELS } from "@/lib/levels";
+
 
 const MODES: Array<{ id: "all" | "in-person" | "online" | "hybrid"; label: string }> = [
   { id: "all", label: "همه" },
