@@ -75,7 +75,12 @@ DC='docker-compose'
 if docker compose version >/dev/null 2>&1; then
   DC='docker compose'
 fi
-`$DC up -d db
+
+# docker-compose v1.29 crashes with KeyError: 'ContainerConfig' whenever it tries
+# to RECREATE a container whose image was built/pulled by a modern Docker daemon.
+# Workaround: never recreate in place. Start with --no-recreate, and if the
+# service config really changed, remove the container first and create it fresh.
+`$DC up -d --no-recreate db || { `$DC rm -sf db >/dev/null 2>&1 || true; `$DC up -d --no-deps db; }
 
 # Stop RAM consumers before Prisma. Do NOT start api before build, because its
 # startup command may run TypeScript compilation at the same time as this deploy.
@@ -83,7 +88,9 @@ fi
 `$DC run --rm --no-deps api sh -lc '$ContainerBuildCommand'
 `$DC rm -sf api >/dev/null 2>&1 || true
 `$DC up -d --no-deps api
-`$DC up -d backup >/dev/null 2>&1 || true
+`$DC rm -sf backup >/dev/null 2>&1 || true
+`$DC up -d --no-deps backup >/dev/null 2>&1 || true
+
 sleep 3
 `$DC logs --tail=20 api
 $FixWebPermissions
