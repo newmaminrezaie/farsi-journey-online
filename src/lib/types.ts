@@ -156,3 +156,29 @@ export interface Announcement {
   linkLabel: string;
   createdAt: string;
 }
+
+// کد تخفیف — managed in the admin panel, applied at payment time.
+export interface Discount {
+  id: ID;
+  code: string;
+  percent: number;                 // درصد تخفیف ۱..۱۰۰
+  scope: "all" | "registration" | "shop";
+  expiresAt: string;               // ISO "yyyy-mm-dd" — خالی یعنی بدون انقضا
+  maxUses: number;                 // ۰ = نامحدود
+  usedCount: number;
+  maxDiscountToman: number;        // ۰ = بدون سقف
+  minAmountToman: number;
+  active: boolean;
+  note: string;
+  createdAt: string;
+}
+
+export interface DiscountCheck {
+  valid: boolean;
+  code?: string;
+  percent?: number;
+  discountToman?: number;
+  finalToman?: number;
+  messageFa?: string;
+  reason?: string;
+}
