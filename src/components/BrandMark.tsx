@@ -1,5 +1,4 @@
-// Custom brand mark for آموزشگاه گویا — an eight-point Persian star
-// enclosing a bold English "G". Fully vector, no external assets, RTL-safe.
+// Brand mark for آموزشگاه گویا — a simple "G" monogram. Vector, no assets, RTL-safe.
 type Props = { className?: string; showWordmark?: boolean };
 
 export default function BrandMark({ className = "", showWordmark = true }: Props) {
@@ -11,43 +10,19 @@ export default function BrandMark({ className = "", showWordmark = true }: Props
         aria-label="نشان گویا"
         role="img"
       >
-        {/* Outer 8-point star (two overlapping squares) — saffron */}
-        <g transform="translate(32 32)">
-          <rect
-            x="-26" y="-26" width="52" height="52" rx="4"
-            fill="hsl(var(--primary))"
-          />
-          <rect
-            x="-26" y="-26" width="52" height="52" rx="4"
-            fill="hsl(var(--gold))"
-            transform="rotate(45)"
-          />
-          {/* Inner medallion */}
-          <circle r="19" fill="hsl(var(--parchment))" />
-          <circle r="19" fill="none" stroke="hsl(var(--primary))" strokeWidth="1.25" />
-          {/* Tiny orbiting dots — 8 cardinal points */}
-          {Array.from({ length: 8 }).map((_, i) => (
-            <circle
-              key={i}
-              r="1.4"
-              cx={Math.cos((i * Math.PI) / 4) * 22}
-              cy={Math.sin((i * Math.PI) / 4) * 22}
-              fill="hsl(var(--primary))"
-            />
-          ))}
-        </g>
-        {/* English letter "G" — bold, centered */}
+        <rect x="2" y="2" width="60" height="60" rx="16" fill="hsl(var(--primary))" />
         <text
-          x="32" y="44"
+          x="32" y="45"
           textAnchor="middle"
           fontFamily="Georgia, 'Times New Roman', serif"
-          fontSize="28"
+          fontSize="36"
           fontWeight="700"
-          fill="hsl(var(--primary))"
+          fill="hsl(var(--gold))"
         >
           G
         </text>
       </svg>
+
 
       {showWordmark && (
         <div className="hidden sm:flex flex-col leading-none">
