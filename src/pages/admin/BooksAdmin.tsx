@@ -5,9 +5,10 @@ import type { Book } from "@/lib/types";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import ImageInput from "@/components/ImageInput";
+import { LEVELS } from "@/lib/levels";
 
 const empty: Omit<Book, "id" | "createdAt"> = {
-  titleFa: "", titleEn: "", author: "", level: "beginner", category: "grammar",
+  titleFa: "", titleEn: "", author: "", level: "pre-a" as any, category: "grammar",
   descriptionFa: "", coverUrl: "", priceToman: 0, stock: 0, active: true,
 };
 
@@ -89,7 +90,7 @@ export default function BooksAdmin() {
               <Field label="مؤلف"><input value={form.author} onChange={e => setForm({ ...form, author: e.target.value })} className={ic} /></Field>
               <Field label="سطح">
                 <select value={form.level} onChange={e => setForm({ ...form, level: e.target.value as any })} className={ic}>
-                  {["beginner","elementary","pre-intermediate","intermediate","upper-intermediate","advanced","ielts"].map(l => <option key={l}>{l}</option>)}
+                  {LEVELS.map(l => <option key={l.value} value={l.value}>{l.label} — {l.books}</option>)}
                 </select>
               </Field>
               <Field label="دسته‌بندی">
