@@ -255,12 +255,9 @@ function SectionHeader({ eyebrow, title, note }: { eyebrow: string; title: strin
 }
 
 export function levelFa(l: string): string {
-  const map: Record<string, string> = {
-    beginner: "مقدماتی", elementary: "پایه", "pre-intermediate": "پیش‌متوسط",
-    intermediate: "متوسط", "upper-intermediate": "فرا‌متوسط", advanced: "پیشرفته", ielts: "آیلتس",
-  };
-  return map[l] ?? l;
+  return levelLabel(l);
 }
+
 export function modeFa(m: string): string {
   return ({ "in-person": "حضوری", online: "آنلاین", hybrid: "ترکیبی" } as any)[m] ?? m;
 }
