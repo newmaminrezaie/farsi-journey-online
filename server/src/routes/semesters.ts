@@ -148,6 +148,26 @@ export async function registerSemestersRoutes(app: FastifyInstance) {
     return serialize(row);
   });
 
+  // Public: how many students already registered per teacher (group) of a class.
+  app.get("/semesters/:id/seats", async (req) => {
+    const id = (req.params as any).id as string;
+    const rows = await prisma.registration.groupBy({
+      by: ["selectedTeacherId"],
+      where: { semesterId: id },
+      _count: { _all: true },
+    });
+    const byTeacher: Record<string, number> = {};
+    let total = 0;
+    for (const r of rows as any[]) {
+      const count = r._count?._all ?? 0;
+      total += count;
+      if (r.selectedTeacherId) byTeacher[r.selectedTeacherId] = count;
+    }
+    return { total, byTeacher };
+  });
+
+
+
   app.post("/semesters", { preHandler: requireStaff }, async (req, reply) => {
     const parsed = Create.safeParse(req.body);
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() });
