@@ -116,7 +116,7 @@ export default function SemestersAdmin() {
               </F>
               <F label="سطح">
                 <select value={form.level} onChange={e => setForm({ ...form, level: e.target.value })} className={ic}>
-                  {["beginner","elementary","pre-intermediate","intermediate","upper-intermediate","advanced","ielts"].map(l => <option key={l}>{l}</option>)}
+                  {LEVELS.map(l => <option key={l.value} value={l.value}>{l.label} — {l.books}</option>)}
                 </select>
               </F>
               <div className="sm:col-span-2">
@@ -131,7 +131,7 @@ export default function SemestersAdmin() {
                             onChange={e => {
                               const cur: string[] = form.teacherIds || [];
                               const next = e.target.checked ? [...cur, t.id] : cur.filter(x => x !== t.id);
-                              setForm({ ...form, teacherIds: next });
+                              setForm({ ...form, teacherIds: next, groups: syncGroups(next, form.groups, form) });
                             }} />
                           <span>{t.nameFa}</span>
                         </label>
@@ -140,6 +140,48 @@ export default function SemestersAdmin() {
                   </div>
                 </F>
               </div>
+              {(form.teacherIds || []).length > 0 && (
+                <div className="sm:col-span-2">
+                  <F label="کد کلاس و ظرفیت به تفکیک هر استاد">
+                    <div className="rounded-lg bg-parchment border border-primary/15 p-3 space-y-2">
+                      <p className="text-[11px] text-muted-foreground leading-5">
+                        هر استاد گروه مستقل خود را دارد؛ ظرفیت هر گروه جداگانه پر می‌شود و کد کلاس مخصوص همان استاد است.
+                      </p>
+                      {(form.teacherIds || []).map((tid: string) => {
+                        const g = (form.groups || []).find((x: any) => x.teacherId === tid) || { teacherId: tid, classCode: "", capacity: 0 };
+                        const name = teachers.find(t => t.id === tid)?.nameFa ?? tid;
+                        const patch = (p: any) => setForm({
+                          ...form,
+                          groups: (form.teacherIds || []).map((id: string) => {
+                            const cur = (form.groups || []).find((x: any) => x.teacherId === id) || { teacherId: id, classCode: "", capacity: 0 };
+                            return id === tid ? { ...cur, ...p } : cur;
+                          }),
+                        });
+                        return (
+                          <div key={tid} className="grid grid-cols-[1fr_1.2fr_auto] gap-2 items-center">
+                            <span className="text-xs font-bold text-primary truncate">{name}</span>
+                            <input
+                              value={g.classCode}
+                              onChange={e => patch({ classCode: e.target.value })}
+                              placeholder="کد کلاس این استاد — مثلاً 100-2"
+                              className={ic + " font-mono text-xs"}
+                            />
+                            <input
+                              type="number"
+                              min={0}
+                              value={g.capacity}
+                              onChange={e => patch({ capacity: Number(e.target.value) || 0 })}
+                              placeholder="ظرفیت"
+                              className={ic + " w-24 text-xs"}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </F>
+                </div>
+              )}
+
               <div className="sm:col-span-2">
                 <F label="کتاب‌های این کلاس (اختیاری — به دانش‌آموز پیشنهاد داده می‌شود)">
                   <div className="rounded-lg bg-parchment border border-primary/15 p-3 grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
