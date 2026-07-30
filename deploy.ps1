@@ -156,7 +156,7 @@ $RemoteScriptPath = Join-Path $env:TEMP "higooya-remote-deploy.sh"
 $Utf8NoBom = New-Object System.Text.UTF8Encoding $false
 [System.IO.File]::WriteAllText($RemoteScriptPath, $RemoteDeployCommand, $Utf8NoBom)
 
-Invoke-Checked "Uploading remote deploy script..." { scp -P $Port $RemoteScriptPath "${User}@${HostName}:/tmp/higooya-remote-deploy.sh" }
-Invoke-Checked "Regenerating Prisma client, syncing database, rebuilding backend, restarting api, and reloading nginx..." { ssh -p $Port "$User@$HostName" 'bash /tmp/higooya-remote-deploy.sh; status=$?; rm -f /tmp/higooya-remote-deploy.sh; exit $status' }
+Invoke-Checked "Uploading remote deploy script..." { scp @ScpOpts $RemoteScriptPath "${User}@${HostName}:/tmp/higooya-remote-deploy.sh" }
+Invoke-Checked "Regenerating Prisma client, syncing database, rebuilding backend, restarting api, and reloading nginx..." { Invoke-Ssh 'bash /tmp/higooya-remote-deploy.sh; status=$?; rm -f /tmp/higooya-remote-deploy.sh; exit $status' } -Retries 0
 
 Write-Host "`nDone. Hard-refresh https://higooya.ir with Ctrl+F5." -ForegroundColor Green
