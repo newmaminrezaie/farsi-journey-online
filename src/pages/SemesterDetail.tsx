@@ -16,6 +16,8 @@ export default function SemesterDetail() {
   const { data: sem } = useQuery({ queryKey: ["semester", id], queryFn: () => semestersApi.get(id!), enabled: !!id });
   const { data: teachers = [] } = useQuery({ queryKey: ["teachers"], queryFn: () => teachersApi.list() });
   const { data: books = [] } = useQuery({ queryKey: ["books"], queryFn: () => booksApi.list() });
+  const { data: seats } = useQuery({ queryKey: ["semester-seats", id], queryFn: () => semestersApi.seats(id!), enabled: !!id });
+
 
   const [form, setForm] = useState({
     fullName: "", fatherName: "", nationalId: "",
