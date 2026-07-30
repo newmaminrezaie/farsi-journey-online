@@ -48,18 +48,32 @@ export default function SemestersAdmin() {
       setEditing(s);
       const legacyTeacherId = (s as any).teacherId;
       const ids = s.teacherIds && s.teacherIds.length ? s.teacherIds : (legacyTeacherId ? [legacyTeacherId] : []);
-      setForm({ ...s, teacherIds: ids, bookIds: s.bookIds ?? [], days: s.days ?? [], startTime: s.startTime ?? "" });
+      setForm({
+        ...s,
+        teacherIds: ids,
+        groups: syncGroups(ids, (s as any).groups ?? [], s),
+        bookIds: s.bookIds ?? [],
+        days: s.days ?? [],
+        startTime: s.startTime ?? "",
+      });
     } else { setEditing(null); setForm(empty); }
     setOpen(true);
   }
   async function save() {
     if (!form.titleFa || !form.startsOn || !form.endsOn) return toast.error("عنوان و تاریخ‌ها الزامی است");
     const { id, createdAt, seatsTaken, jalaliYear, season, teacherId, ...rest } = form as any;
+    const groups = syncGroups(form.teacherIds || [], form.groups || [], form).map((g: any) => ({
+      teacherId: g.teacherId,
+      classCode: String(g.classCode || "").trim(),
+      capacity: Number(g.capacity) || 0,
+    }));
     const payload = {
       ...rest,
       classCode: (form.classCode || "").trim(),
       teacherIds: form.teacherIds || [],
+      groups,
       bookIds: form.bookIds || [],
+
       capacity: Number(form.capacity) || 0,
       priceToman: Number(form.priceToman) || 0,
     };
