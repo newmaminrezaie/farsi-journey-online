@@ -5,17 +5,34 @@ import type { Semester } from "@/lib/types";
 import { formatJalali } from "@/lib/jalali";
 import JalaliDateInput from "@/components/JalaliDateInput";
 import { WEEKDAYS } from "@/lib/terms";
+import { LEVELS } from "@/lib/levels";
 
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 const empty = {
   classCode: "",
-  titleFa: "", level: "beginner" as any, teacherIds: [] as string[],
+  titleFa: "", level: "pre-a" as any, teacherIds: [] as string[],
+  groups: [] as Array<{ teacherId: string; classCode: string; capacity: number }>,
   bookIds: [] as string[],
   scheduleFa: "", days: [] as string[], startTime: "", startsOn: "", endsOn: "",
   capacity: 12, priceToman: 0, mode: "in-person" as any, status: "open" as any,
 };
+
+// Keep one group (class code + capacity) per selected teacher.
+function syncGroups(teacherIds: string[], groups: any[] = [], form: any) {
+  const base = (form?.classCode || "").trim();
+  return teacherIds.map((tid, i) => {
+    const cur = (groups || []).find((g: any) => g.teacherId === tid);
+    if (cur) return cur;
+    return {
+      teacherId: tid,
+      classCode: base ? `${base}-${i + 1}` : "",
+      capacity: Number(form?.capacity) || 0,
+    };
+  });
+}
+
 
 export default function SemestersAdmin() {
   const qc = useQueryClient();
