@@ -18,7 +18,10 @@ export default function Semesters() {
   const { data: semesters = [] } = useQuery({ queryKey: ["semesters"], queryFn: () => semestersApi.list() });
   const { data: teachers = [] } = useQuery({ queryKey: ["teachers"], queryFn: () => teachersApi.list() });
   const [mode, setMode] = useState<"all" | "in-person" | "online" | "hybrid">("all");
-  const filtered = mode === "all" ? semesters : semesters.filter(s => s.mode === mode);
+  const [level, setLevel] = useState<string>("all");
+  const filtered = semesters
+    .filter(s => mode === "all" || s.mode === mode)
+    .filter(s => level === "all" || s.level === level);
 
   return (
     <>
@@ -36,7 +39,7 @@ export default function Semesters() {
       </section>
 
       <section className="container py-16">
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
           {MODES.map(m => (
             <button
               key={m.id}
@@ -51,6 +54,30 @@ export default function Semesters() {
             </button>
           ))}
         </div>
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+          <button
+            onClick={() => setLevel("all")}
+            className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-colors ${
+              level === "all" ? "bg-gold text-gold-foreground border-gold" : "bg-card text-primary border-primary/15 hover:border-gold/60"
+            }`}
+          >
+            همه سطوح
+          </button>
+          {LEVELS.map(l => (
+            <button
+              key={l.value}
+              onClick={() => setLevel(l.value)}
+              title={l.books}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-colors ${
+                level === l.value ? "bg-gold text-gold-foreground border-gold" : "bg-card text-primary border-primary/15 hover:border-gold/60"
+              }`}
+            >
+              {l.label}
+              <span className="font-normal opacity-70"> — {l.books}</span>
+            </button>
+          ))}
+        </div>
+
         <div className="grid gap-6">
         {filtered.map(s => {
           const ids = (s.teacherIds && s.teacherIds.length ? s.teacherIds : (s.teacherId ? [s.teacherId] : []));
