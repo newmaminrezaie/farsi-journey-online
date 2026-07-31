@@ -465,7 +465,7 @@ function renderPrintHTML(rows: Registration[], semById: Map<string, Semester>, t
           <div class="logo">${LOGO_SVG}</div>
           <div class="org">
             <h1>آموزشگاه زبان گویا</h1>
-            <div class="sub">گناباد، خراسان رضوی — غفاری ۳ &nbsp;|&nbsp; ۰۵۱-۵۷۲۲۳۷۷۲ &nbsp;|&nbsp; higooya.ir</div>
+            <div class="sub">گناباد، خراسان رضوی — غفاری ۶ &nbsp;|&nbsp; ۰۵۱-۵۷۲۲۳۷۷۲ &nbsp;|&nbsp; higooya.ir</div>
           </div>
           <div class="meta">
             <div>کد کلاس: ${esc(codeFor(s, r.selectedTeacherId) || "—")}</div>
