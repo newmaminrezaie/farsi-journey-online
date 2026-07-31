@@ -60,22 +60,16 @@ export default function SiteFooter() {
       <div className="border-t border-primary-foreground/10 relative">
         <div className="container py-5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-primary-foreground/60">
           <div>© {new Intl.DateTimeFormat("fa-IR-u-ca-persian", { year: "numeric" }).format(new Date()).replace(/[^\u06F0-\u06F9]/g, "")} آموزشگاه زبان‌های گویا — تمامی حقوق محفوظ است.</div>
-          <div className="bg-parchment rounded-lg p-2">
-            <a
-              referrerPolicy="origin"
-              target="_blank"
-              rel="noreferrer"
-              href="https://trustseal.enamad.ir/?id=6822574&Code=HjavLZ2pFAUYOmsGJfEyaiPL5Nun4GzK"
-            >
-              <img
-                referrerPolicy="origin"
-                src="https://trustseal.enamad.ir/logo.aspx?id=6822574&Code=HjavLZ2pFAUYOmsGJfEyaiPL5Nun4GzK"
-                alt="نماد اعتماد الکترونیکی"
-                style={{ cursor: "pointer" }}
-                {...({ code: "HjavLZ2pFAUYOmsGJfEyaiPL5Nun4GzK" } as any)}
-              />
-            </a>
-          </div>
+          <div
+            className="bg-parchment rounded-lg p-2 min-h-[64px] flex items-center justify-center"
+            dangerouslySetInnerHTML={{
+              __html:
+                "<a referrerpolicy='origin' target='_blank' rel='noreferrer' href='https://trustseal.enamad.ir/?id=6822574&Code=HjavLZ2pFAUYOmsGJfEyaiPL5Nun4GzK'>" +
+                "<img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=6822574&Code=HjavLZ2pFAUYOmsGJfEyaiPL5Nun4GzK' " +
+                "alt='نماد اعتماد الکترونیکی' style='cursor:pointer;max-height:90px;width:auto' code='HjavLZ2pFAUYOmsGJfEyaiPL5Nun4GzK' /></a>",
+            }}
+          />
+
         </div>
       </div>
     </footer>
