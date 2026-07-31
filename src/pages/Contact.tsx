@@ -47,7 +47,7 @@ export default function Contact() {
 
       <section className="container py-16 grid lg:grid-cols-2 gap-10">
         <div className="space-y-4">
-          <Item icon={<MapPin />} title="نشانی">گناباد، خراسان رضوی، غفاری ۳ — آموزشگاه زبان‌های گویا</Item>
+          <Item icon={<MapPin />} title="نشانی">گناباد، خراسان رضوی، غفاری ۶ — آموزشگاه زبان‌های گویا</Item>
           <Item icon={<Phone />} title="تلفن‌های ثابت">
             <div dir="ltr" className="space-y-0.5">
               <div>۰۵۱ ۵۷۲۲ ۳۷۷۲</div>
