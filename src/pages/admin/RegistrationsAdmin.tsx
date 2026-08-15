@@ -473,7 +473,7 @@ function renderPrintHTML(rows: Registration[], semById: Map<string, Semester>, t
           </div>
         </div>
 
-        <div class="doc-title">فرم ثبت‌نام دانش‌پژوه</div>
+        <div class="doc-title">فرم ثبت‌نام دانش‌آموز</div>
 
         <h3>مشخصات فردی</h3>
         <div class="grid">
@@ -519,7 +519,7 @@ function renderPrintHTML(rows: Registration[], semById: Map<string, Semester>, t
         <div class="agree"><span class="box">${r.agreedToTerms ? "✓" : ""}</span> مقررات فوق را مطالعه کرده و می‌پذیرم.</div>
 
         <div class="sign">
-          <div class="slot">امضای دانش‌پژوه / ولی:</div>
+          <div class="slot">امضای دانش‌آموز / ولی:</div>
           <div class="slot">مهر و امضای آموزشگاه:</div>
         </div>
 
