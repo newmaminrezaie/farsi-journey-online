@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet, NavLink, Navigate, useNavigate } from "react-router-dom";
 import { authApi } from "@/lib/api";
-import { LayoutDashboard, BookOpen, GraduationCap, Users, UserCog, ShoppingBag, ClipboardList, Megaphone, Bell, Images, BadgePercent, LogOut, AlertTriangle } from "lucide-react";
+import { LayoutDashboard, BookOpen, GraduationCap, Users, UserCog, ShoppingBag, ClipboardList, Megaphone, Bell, Images, BadgePercent, KeyRound, LogOut, AlertTriangle } from "lucide-react";
 import logo from "@/assets/logo-fa.png";
 
 const links = [
@@ -16,6 +16,7 @@ const links = [
   { to: "/admin/announcements", label: "اطلاعیه‌ها", icon: Bell },
   { to: "/admin/discounts", label: "کدهای تخفیف", icon: BadgePercent },
   { to: "/admin/promo", label: "بنر تبلیغاتی", icon: Megaphone },
+  { to: "/admin/account", label: "تغییر رمز عبور", icon: KeyRound },
 ];
 
 export default function AdminLayout() {

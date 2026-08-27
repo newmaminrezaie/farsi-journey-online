@@ -201,6 +201,26 @@ export const authApi = {
     try { await fetch("/api/admin/auth/logout", { method: "POST", credentials: "include" }); } catch {}
     storage.remove(KEYS.adminSession);
   },
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const res = await fetch("/api/admin/auth/change-password", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+    if (!res.ok) {
+      let code = "";
+      try { code = (await res.json())?.error || ""; } catch {}
+      const map: Record<string, string> = {
+        wrong_current_password: "رمز عبور فعلی نادرست است.",
+        same_password: "رمز جدید باید با رمز فعلی متفاوت باشد.",
+        invalid_body: "رمز جدید باید حداقل ۸ نویسه باشد.",
+        unauthorized: "نشست شما منقضی شده است. دوباره وارد شوید.",
+      };
+      throw new Error(map[code] || "تغییر رمز عبور انجام نشد.");
+    }
+    storage.remove(KEYS.adminSession);
+  },
   async verify(): Promise<boolean> {
     try {
       const res = await fetch("/api/admin/auth/me", { credentials: "include" });

@@ -30,6 +30,7 @@ import PromoAdmin from "@/pages/admin/PromoAdmin";
 import AnnouncementsAdmin from "@/pages/admin/AnnouncementsAdmin";
 import HeroAdmin from "@/pages/admin/HeroAdmin";
 import DiscountsAdmin from "@/pages/admin/DiscountsAdmin";
+import AccountAdmin from "@/pages/admin/AccountAdmin";
 
 export default function App() {
   return (
@@ -68,6 +69,7 @@ export default function App() {
         <Route path="announcements" element={<AnnouncementsAdmin />} />
         <Route path="discounts" element={<DiscountsAdmin />} />
         <Route path="promo" element={<PromoAdmin />} />
+        <Route path="account" element={<AccountAdmin />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
