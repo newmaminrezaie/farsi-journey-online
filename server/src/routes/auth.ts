@@ -9,6 +9,11 @@ const LoginBody = z.object({
   password: z.string().min(1).max(200),
 });
 
+const ChangePasswordBody = z.object({
+  currentPassword: z.string().min(1).max(200),
+  newPassword: z.string().min(8, "رمز جدید باید حداقل ۸ نویسه باشد").max(200),
+});
+
 export async function registerAuthRoutes(app: FastifyInstance) {
   app.post("/login", async (req, reply) => {
     const parsed = LoginBody.safeParse(req.body);
@@ -36,6 +41,26 @@ export async function registerAuthRoutes(app: FastifyInstance) {
   });
 
   app.post("/logout", async (_req, reply) => {
+    reply.clearCookie("hg_token", { path: "/" });
+    return { ok: true };
+  });
+
+  app.post("/change-password", { preHandler: requireStaff }, async (req, reply) => {
+    const parsed = ChangePasswordBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid_body" });
+    const { currentPassword, newPassword } = parsed.data;
+    const u = (req as any).staffUser;
+
+    const user = await prisma.staffUser.findUnique({ where: { id: u.id } });
+    if (!user || !user.active) return reply.code(401).send({ error: "unauthorized" });
+
+    const ok = await argon2.verify(user.passwordHash, currentPassword);
+    if (!ok) return reply.code(400).send({ error: "wrong_current_password" });
+    if (currentPassword === newPassword) return reply.code(400).send({ error: "same_password" });
+
+    const passwordHash = await argon2.hash(newPassword);
+    await prisma.staffUser.update({ where: { id: user.id }, data: { passwordHash } });
+
     reply.clearCookie("hg_token", { path: "/" });
     return { ok: true };
   });
