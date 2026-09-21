@@ -14,11 +14,9 @@ const DAY_KEYS: Array<{ key: string; fa: string; match: RegExp }> = [
   { key: "monday", fa: "دوشنبه", match: /^mon/i },
   { key: "tuesday", fa: "سه‌شنبه", match: /^tue/i },
   { key: "wednesday", fa: "چهارشنبه", match: /^wed/i },
-  { key: "thursday", fa: "thu|thur/i".length ? /^thu/i : /^thu/i },
+  { key: "thursday", fa: "پنجشنبه", match: /^thu/i },
   { key: "friday", fa: "جمعه", match: /^fri/i },
 ];
-// The thursday entry above needs its Persian label separately.
-DAY_KEYS[5] = { key: "thursday", fa: "پنجشنبه", match: /^thu/i };
 
 /** Institute code (pre A, A1, Pre B3, F4, B7, C3, D1, E2, T1, Passages1A) -> site level. */
 export function mapLevel(raw: string): string {
