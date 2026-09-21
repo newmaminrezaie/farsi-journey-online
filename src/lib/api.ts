@@ -249,6 +249,72 @@ export const announcementsApi = {
     http(`/admin/announcements/${id}`, { method: "DELETE" }).then(() => undefined),
 };
 
+// ---------- Spreadsheet import (ورود اطلاعات از فایل) ----------
+export interface ImportClassRow {
+  classCode: string;
+  levelRaw: string;
+  level: string;
+  textbook: string;
+  teacherName: string;
+  days: string[];
+  startTime: string;
+  room: string;
+  startsOn: string;
+  endsOn: string;
+  scheduleFa: string;
+  titleFa: string;
+  teacherExists?: boolean;
+  classExists?: boolean;
+}
+
+export interface ImportPreview {
+  rows: ImportClassRow[];
+  skipped: number;
+  newTeachers: string[];
+  existingCount: number;
+}
+
+export interface ImportResult {
+  created: number;
+  updated: number;
+  skipped: number;
+  createdTeachers: number;
+  errors: Array<{ classCode: string; message: string }>;
+}
+
+export const importApi = {
+  async previewClasses(file: File): Promise<ImportPreview> {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/admin/import/classes/preview", { method: "POST", credentials: "include", body: fd });
+    if (!res.ok) {
+      let code = "";
+      try { code = (await res.json())?.error || ""; } catch {}
+      const map: Record<string, string> = {
+        no_file: "فایلی انتخاب نشده است.",
+        bad_type: "فقط فایل‌های xls، xlsx یا csv پذیرفته می‌شود.",
+        header_not_found: "ستون‌های Code و Teacher در فایل پیدا نشد.",
+        parse_failed: "خواندن فایل ممکن نشد.",
+        unauthorized: "نشست شما منقضی شده است. دوباره وارد شوید.",
+      };
+      throw new Error(map[code] || "خواندن فایل ناموفق بود.");
+    }
+    return res.json();
+  },
+  commitClasses: (body: {
+    rows: ImportClassRow[];
+    priceToman: number;
+    capacity: number;
+    mode: Semester["mode"];
+    status: Semester["status"];
+    createTeachers: boolean;
+    updateExisting: boolean;
+    fallbackStartsOn: string;
+    fallbackEndsOn: string;
+  }): Promise<ImportResult> =>
+    http("/admin/import/classes", { method: "POST", body: JSON.stringify(body) }),
+};
+
 // ---------- Discount codes (کدهای تخفیف) ----------
 export const discountsApi = {
   validate: (code: string, scope: "registration" | "shop", amountToman: number): Promise<DiscountCheck> =>
