@@ -63,7 +63,11 @@ export default function ImportAdmin() {
     setCommitting(true);
     try {
       const res = await importApi.commitClasses({
-        rows: preview.rows,
+        rows: preview.rows.map(r => {
+          const t = teacherMap[r.teacherName] ?? "";
+          const bookId = bookMap[r.textbook] ?? "";
+          return { ...r, teacherId: t === "-" ? "" : t, bookIds: bookId ? [bookId] : [] };
+        }),
         priceToman, capacity, mode, status,
         createTeachers, updateExisting,
         fallbackStartsOn, fallbackEndsOn,
