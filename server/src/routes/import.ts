@@ -144,12 +144,41 @@ export function parseClassSheet(buf: Buffer): { rows: ParsedClassRow[]; skipped:
   return { rows, skipped };
 }
 
+/** Loose Persian/Latin normalization for name matching. */
+function norm(s: string): string {
+  return String(s || "")
+    .replace(/[\u200c\u200f\u200e]/g, "")
+    .replace(/ي/g, "ی").replace(/ك/g, "ک").replace(/[ۀة]/g, "ه")
+    .replace(/[^\p{L}\p{N}]/gu, "")
+    .toLowerCase();
+}
+
+/** Returns the id of the best loose match, or "" when nothing is close enough. */
+function bestMatch(needle: string, items: Array<{ id: string; labels: string[] }>): string {
+  const n = norm(needle);
+  if (!n) return "";
+  let exact = "", partial = "";
+  for (const it of items) {
+    for (const raw of it.labels) {
+      const l = norm(raw);
+      if (!l) continue;
+      if (l === n) return it.id;
+      if (!exact && (l.includes(n) || n.includes(l)) && Math.min(l.length, n.length) >= 3) {
+        if (!partial) partial = it.id;
+      }
+    }
+  }
+  return exact || partial;
+}
+
 const CommitBody = z.object({
   rows: z.array(z.object({
     classCode: z.string().min(1).max(60),
     level: z.string().max(40).default("pre-a"),
     titleFa: z.string().min(1).max(200),
     teacherName: z.string().max(120).default(""),
+    teacherId: z.string().max(60).default(""),
+    bookIds: z.array(z.string().max(60)).default([]),
     days: z.array(z.string().max(20)).default([]),
     startTime: z.string().max(10).default(""),
     scheduleFa: z.string().max(500).default(""),
