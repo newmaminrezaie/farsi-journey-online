@@ -265,6 +265,8 @@ export interface ImportClassRow {
   titleFa: string;
   teacherExists?: boolean;
   classExists?: boolean;
+  teacherId?: string;
+  bookIds?: string[];
 }
 
 export interface ImportPreview {
@@ -272,6 +274,12 @@ export interface ImportPreview {
   skipped: number;
   newTeachers: string[];
   existingCount: number;
+  teacherNames: string[];
+  textbooks: string[];
+  teacherSuggest: Record<string, string>;
+  bookSuggest: Record<string, string>;
+  teachers: Array<{ id: string; nameFa: string }>;
+  books: Array<{ id: string; titleFa: string; titleEn: string }>;
 }
 
 export interface ImportResult {
