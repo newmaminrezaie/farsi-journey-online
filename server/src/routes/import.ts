@@ -278,11 +278,12 @@ export async function registerImportRoutes(app: FastifyInstance) {
       const startsOn = r.startsOn || b.fallbackStartsOn;
       const endsOn = r.endsOn || b.fallbackEndsOn;
       if (!startsOn || !endsOn) { skipped++; errors.push({ classCode: r.classCode, message: "تاریخ شروع/پایان نامعتبر است" }); continue; }
-      const teacherId = teacherIdByName.get(r.teacherName.trim());
+      const teacherId = r.teacherId || teacherIdByName.get(r.teacherName.trim());
       const data: any = {
         classCode: r.classCode,
         titleFa: r.titleFa,
         level: r.level,
+        bookIds: r.bookIds ?? [],
         teacherIds: teacherId ? [teacherId] : [],
         groups: teacherId ? [{ teacherId, classCode: r.classCode, capacity: b.capacity }] : [],
         scheduleFa: r.scheduleFa,
