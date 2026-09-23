@@ -129,10 +129,58 @@ export default function ImportAdmin() {
               <Stat label="ردیف‌های نامعتبر" value={preview.skipped} />
             </div>
 
-            {preview.newTeachers.length > 0 && (
-              <p className="text-sm text-foreground/75 leading-relaxed">
-                اساتید تازه در فایل: <strong>{preview.newTeachers.join("، ")}</strong>
+            {/* Teacher matching */}
+            <section className="space-y-3">
+              <h3 className="font-display text-lg font-black text-primary">تطبیق اساتید</h3>
+              <p className="text-xs text-foreground/65 leading-relaxed">
+                نام استاد در فایل معمولاً فقط نام خانوادگی است. برای هر نام، استاد ثبت‌شده در سایت را انتخاب کنید
+                تا استاد تکراری ساخته نشود.
               </p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {preview.teacherNames.map(name => (
+                  <label key={name} className="block">
+                    <span className="block text-xs font-bold text-foreground/70 mb-1.5">{name}</span>
+                    <select
+                      className="hg-input"
+                      value={teacherMap[name] ?? ""}
+                      onChange={e => setTeacherMap(m => ({ ...m, [name]: e.target.value }))}
+                    >
+                      <option value="">ساخت استاد جدید با همین نام</option>
+                      <option value="-">بدون استاد</option>
+                      {preview.teachers.map(t => (
+                        <option key={t.id} value={t.id}>{t.nameFa}</option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+              </div>
+            </section>
+
+            {/* Book matching */}
+            {preview.textbooks.length > 0 && (
+              <section className="space-y-3">
+                <h3 className="font-display text-lg font-black text-primary">تطبیق کتاب‌ها</h3>
+                <p className="text-xs text-foreground/65 leading-relaxed">
+                  هر کتابِ فایل را به کتاب فروشگاه وصل کنید تا در صفحهٔ کلاس نمایش داده شود و تخفیف ۵٪ خرید آنلاین اعمال شود.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {preview.textbooks.map(tb => (
+                    <label key={tb} className="block">
+                      <span className="block text-xs font-bold text-foreground/70 mb-1.5">{tb}</span>
+                      <select
+                        className="hg-input"
+                        value={bookMap[tb] ?? ""}
+                        onChange={e => setBookMap(m => ({ ...m, [tb]: e.target.value }))}
+                      >
+                        <option value="">بدون کتاب</option>
+                        {preview.books.map(b => (
+                          <option key={b.id} value={b.id}>{b.titleFa}{b.titleEn ? ` — ${b.titleEn}` : ""}</option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
+                </div>
+              </section>
             )}
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
