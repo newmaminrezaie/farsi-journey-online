@@ -66,7 +66,12 @@ export default function ImportAdmin() {
         rows: preview.rows.map(r => {
           const t = teacherMap[r.teacherName] ?? "";
           const bookId = bookMap[r.textbook] ?? "";
-          return { ...r, teacherId: t === "-" ? "" : t, bookIds: bookId ? [bookId] : [] };
+          return {
+            ...r,
+            teacherId: t === "-" ? "" : t,
+            teacherName: t === "-" ? "" : r.teacherName,
+            bookIds: bookId ? [bookId] : [],
+          };
         }),
         priceToman, capacity, mode, status,
         createTeachers, updateExisting,
