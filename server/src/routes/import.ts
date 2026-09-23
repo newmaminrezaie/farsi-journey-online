@@ -212,17 +212,38 @@ export async function registerImportRoutes(app: FastifyInstance) {
     }
 
     const teacherNames = Array.from(new Set(parsed.rows.map((r) => r.teacherName).filter(Boolean)));
-    const existingTeachers = await prisma.teacher.findMany({ where: { nameFa: { in: teacherNames } }, select: { nameFa: true } });
-    const known = new Set(existingTeachers.map((t) => t.nameFa));
+    const allTeachers = await prisma.teacher.findMany({ select: { id: true, nameFa: true, nameEn: true } });
+    const allBooks = await prisma.book.findMany({ select: { id: true, titleFa: true, titleEn: true } });
+
+    const teacherCandidates = allTeachers.map((t) => ({ id: t.id, labels: [t.nameFa, (t as any).nameEn || ""] }));
+    const bookCandidates = allBooks.map((b) => ({ id: b.id, labels: [b.titleFa, b.titleEn || ""] }));
+
+    const teacherSuggest: Record<string, string> = {};
+    for (const n of teacherNames) teacherSuggest[n] = bestMatch(n, teacherCandidates);
+
+    const textbooks = Array.from(new Set(parsed.rows.map((r) => r.textbook).filter(Boolean)));
+    const bookSuggest: Record<string, string> = {};
+    for (const t of textbooks) bookSuggest[t] = bestMatch(t, bookCandidates);
+
     const codes = parsed.rows.map((r) => r.classCode);
     const existingSemesters = await prisma.semester.findMany({ where: { classCode: { in: codes } }, select: { classCode: true } });
     const existingCodes = new Set(existingSemesters.map((s) => s.classCode));
 
     return {
-      rows: parsed.rows.map((r) => ({ ...r, teacherExists: known.has(r.teacherName), classExists: existingCodes.has(r.classCode) })),
+      rows: parsed.rows.map((r) => ({
+        ...r,
+        teacherExists: !!teacherSuggest[r.teacherName],
+        classExists: existingCodes.has(r.classCode),
+      })),
       skipped: parsed.skipped,
-      newTeachers: teacherNames.filter((n) => !known.has(n)),
+      newTeachers: teacherNames.filter((n) => !teacherSuggest[n]),
       existingCount: existingCodes.size,
+      teacherNames,
+      textbooks,
+      teacherSuggest,
+      bookSuggest,
+      teachers: allTeachers.map((t) => ({ id: t.id, nameFa: t.nameFa })),
+      books: allBooks.map((b) => ({ id: b.id, titleFa: b.titleFa, titleEn: b.titleEn || "" })),
     };
   });
 
