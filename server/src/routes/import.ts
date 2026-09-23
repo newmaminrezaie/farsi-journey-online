@@ -144,12 +144,41 @@ export function parseClassSheet(buf: Buffer): { rows: ParsedClassRow[]; skipped:
   return { rows, skipped };
 }
 
+/** Loose Persian/Latin normalization for name matching. */
+function norm(s: string): string {
+  return String(s || "")
+    .replace(/[\u200c\u200f\u200e]/g, "")
+    .replace(/ي/g, "ی").replace(/ك/g, "ک").replace(/[ۀة]/g, "ه")
+    .replace(/[^\p{L}\p{N}]/gu, "")
+    .toLowerCase();
+}
+
+/** Returns the id of the best loose match, or "" when nothing is close enough. */
+function bestMatch(needle: string, items: Array<{ id: string; labels: string[] }>): string {
+  const n = norm(needle);
+  if (!n) return "";
+  let exact = "", partial = "";
+  for (const it of items) {
+    for (const raw of it.labels) {
+      const l = norm(raw);
+      if (!l) continue;
+      if (l === n) return it.id;
+      if (!exact && (l.includes(n) || n.includes(l)) && Math.min(l.length, n.length) >= 3) {
+        if (!partial) partial = it.id;
+      }
+    }
+  }
+  return exact || partial;
+}
+
 const CommitBody = z.object({
   rows: z.array(z.object({
     classCode: z.string().min(1).max(60),
     level: z.string().max(40).default("pre-a"),
     titleFa: z.string().min(1).max(200),
     teacherName: z.string().max(120).default(""),
+    teacherId: z.string().max(60).default(""),
+    bookIds: z.array(z.string().max(60)).default([]),
     days: z.array(z.string().max(20)).default([]),
     startTime: z.string().max(10).default(""),
     scheduleFa: z.string().max(500).default(""),
@@ -183,17 +212,38 @@ export async function registerImportRoutes(app: FastifyInstance) {
     }
 
     const teacherNames = Array.from(new Set(parsed.rows.map((r) => r.teacherName).filter(Boolean)));
-    const existingTeachers = await prisma.teacher.findMany({ where: { nameFa: { in: teacherNames } }, select: { nameFa: true } });
-    const known = new Set(existingTeachers.map((t) => t.nameFa));
+    const allTeachers = await prisma.teacher.findMany({ select: { id: true, nameFa: true, nameEn: true } });
+    const allBooks = await prisma.book.findMany({ select: { id: true, titleFa: true, titleEn: true } });
+
+    const teacherCandidates = allTeachers.map((t) => ({ id: t.id, labels: [t.nameFa, (t as any).nameEn || ""] }));
+    const bookCandidates = allBooks.map((b) => ({ id: b.id, labels: [b.titleFa, b.titleEn || ""] }));
+
+    const teacherSuggest: Record<string, string> = {};
+    for (const n of teacherNames) teacherSuggest[n] = bestMatch(n, teacherCandidates);
+
+    const textbooks = Array.from(new Set(parsed.rows.map((r) => r.textbook).filter(Boolean)));
+    const bookSuggest: Record<string, string> = {};
+    for (const t of textbooks) bookSuggest[t] = bestMatch(t, bookCandidates);
+
     const codes = parsed.rows.map((r) => r.classCode);
     const existingSemesters = await prisma.semester.findMany({ where: { classCode: { in: codes } }, select: { classCode: true } });
     const existingCodes = new Set(existingSemesters.map((s) => s.classCode));
 
     return {
-      rows: parsed.rows.map((r) => ({ ...r, teacherExists: known.has(r.teacherName), classExists: existingCodes.has(r.classCode) })),
+      rows: parsed.rows.map((r) => ({
+        ...r,
+        teacherExists: !!teacherSuggest[r.teacherName],
+        classExists: existingCodes.has(r.classCode),
+      })),
       skipped: parsed.skipped,
-      newTeachers: teacherNames.filter((n) => !known.has(n)),
+      newTeachers: teacherNames.filter((n) => !teacherSuggest[n]),
       existingCount: existingCodes.size,
+      teacherNames,
+      textbooks,
+      teacherSuggest,
+      bookSuggest,
+      teachers: allTeachers.map((t) => ({ id: t.id, nameFa: t.nameFa })),
+      books: allBooks.map((b) => ({ id: b.id, titleFa: b.titleFa, titleEn: b.titleEn || "" })),
     };
   });
 
@@ -203,8 +253,11 @@ export async function registerImportRoutes(app: FastifyInstance) {
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() });
     const b = parsed.data;
 
-    // Resolve / create teachers once.
-    const names = Array.from(new Set(b.rows.map((r) => r.teacherName.trim()).filter(Boolean)));
+    // Resolve / create teachers once. Rows that carry an explicit teacherId (chosen
+    // in the preview) skip name matching entirely.
+    const names = Array.from(new Set(
+      b.rows.filter((r) => !r.teacherId).map((r) => r.teacherName.trim()).filter(Boolean),
+    ));
     const teacherIdByName = new Map<string, string>();
     const found = await prisma.teacher.findMany({ where: { nameFa: { in: names } }, select: { id: true, nameFa: true } });
     for (const t of found) teacherIdByName.set(t.nameFa, t.id);
@@ -225,11 +278,12 @@ export async function registerImportRoutes(app: FastifyInstance) {
       const startsOn = r.startsOn || b.fallbackStartsOn;
       const endsOn = r.endsOn || b.fallbackEndsOn;
       if (!startsOn || !endsOn) { skipped++; errors.push({ classCode: r.classCode, message: "تاریخ شروع/پایان نامعتبر است" }); continue; }
-      const teacherId = teacherIdByName.get(r.teacherName.trim());
+      const teacherId = r.teacherId || teacherIdByName.get(r.teacherName.trim());
       const data: any = {
         classCode: r.classCode,
         titleFa: r.titleFa,
         level: r.level,
+        bookIds: r.bookIds ?? [],
         teacherIds: teacherId ? [teacherId] : [],
         groups: teacherId ? [{ teacherId, classCode: r.classCode, capacity: b.capacity }] : [],
         scheduleFa: r.scheduleFa,
