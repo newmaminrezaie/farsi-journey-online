@@ -253,8 +253,11 @@ export async function registerImportRoutes(app: FastifyInstance) {
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() });
     const b = parsed.data;
 
-    // Resolve / create teachers once.
-    const names = Array.from(new Set(b.rows.map((r) => r.teacherName.trim()).filter(Boolean)));
+    // Resolve / create teachers once. Rows that carry an explicit teacherId (chosen
+    // in the preview) skip name matching entirely.
+    const names = Array.from(new Set(
+      b.rows.filter((r) => !r.teacherId).map((r) => r.teacherName.trim()).filter(Boolean),
+    ));
     const teacherIdByName = new Map<string, string>();
     const found = await prisma.teacher.findMany({ where: { nameFa: { in: names } }, select: { id: true, nameFa: true } });
     for (const t of found) teacherIdByName.set(t.nameFa, t.id);
