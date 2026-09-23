@@ -28,6 +28,11 @@ export default function ImportAdmin() {
   const [fallbackStartsOn, setFallbackStartsOn] = useState("");
   const [fallbackEndsOn, setFallbackEndsOn] = useState("");
 
+  // name in the file -> chosen teacher id ("" = create/keep by name, "-" = none)
+  const [teacherMap, setTeacherMap] = useState<Record<string, string>>({});
+  // textbook name in the file -> chosen book id ("" = none)
+  const [bookMap, setBookMap] = useState<Record<string, string>>({});
+
   const missingDates = useMemo(
     () => (preview?.rows ?? []).filter(r => !r.startsOn || !r.endsOn).length,
     [preview],
