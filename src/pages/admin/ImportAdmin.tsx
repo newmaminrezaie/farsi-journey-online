@@ -47,6 +47,8 @@ export default function ImportAdmin() {
     try {
       const p = await importApi.previewClasses(file);
       setPreview(p);
+      setTeacherMap({ ...(p.teacherSuggest ?? {}) });
+      setBookMap({ ...(p.bookSuggest ?? {}) });
       if (!p.rows.length) toast.error("هیچ ردیف معتبری در فایل پیدا نشد.");
       else toast.success(`${p.rows.length.toLocaleString("fa-IR")} کلاس در فایل شناسایی شد.`);
     } catch (e: any) {
