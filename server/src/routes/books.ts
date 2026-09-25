@@ -8,6 +8,7 @@ const Create = z.object({
   author: z.string().max(120).default(""),
   level: z.string().max(60).default(""),
   category: z.string().max(60).default(""),
+  audience: z.string().max(60).default(""),
   descriptionFa: z.string().max(2000).default(""),
   coverUrl: z.string().max(500).default(""),
   priceToman: z.number().int().min(0),

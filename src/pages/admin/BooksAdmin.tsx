@@ -6,9 +6,10 @@ import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import ImageInput from "@/components/ImageInput";
 import { LEVELS } from "@/lib/levels";
+import { AUDIENCES } from "@/lib/audiences";
 
 const empty: Omit<Book, "id" | "createdAt"> = {
-  titleFa: "", titleEn: "", author: "", level: "pre-a" as any, category: "grammar",
+  titleFa: "", titleEn: "", author: "", level: "pre-a" as any, category: "grammar", audience: "",
   descriptionFa: "", coverUrl: "", priceToman: 0, stock: 0, active: true,
 };
 
@@ -96,6 +97,12 @@ export default function BooksAdmin() {
               <Field label="دسته‌بندی">
                 <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value as any })} className={ic}>
                   {["grammar","vocabulary","ielts","story","kids","reference"].map(l => <option key={l}>{l}</option>)}
+                </select>
+              </Field>
+              <Field label="گروه / مقطع">
+                <select value={(form as any).audience ?? ""} onChange={e => setForm({ ...form, audience: e.target.value } as any)} className={ic}>
+                  <option value="">— بدون گروه —</option>
+                  {AUDIENCES.map(g => <optgroup key={g.group} label={g.group}>{g.items.map(a => <option key={a.v} value={a.v}>{a.l}</option>)}</optgroup>)}
                 </select>
               </Field>
               <Field label="قیمت (تومان)"><input type="number" value={form.priceToman} onChange={e => setForm({ ...form, priceToman: +e.target.value })} className={ic} /></Field>

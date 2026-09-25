@@ -109,6 +109,7 @@ export interface Book {
   author: string;
   level: SemesterLevel;
   category: BookCategory;
+  audience?: string;
   descriptionFa: string;
   coverUrl: string;
   priceToman: number;

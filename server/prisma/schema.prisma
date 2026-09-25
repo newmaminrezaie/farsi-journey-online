@@ -126,6 +126,7 @@ model Book {
   author         String   @default("")
   level          String   @default("")
   category       String   @default("")
+  audience       String   @default("")
   descriptionFa  String   @default("")
   coverUrl       String   @default("")
   priceToman     Int
