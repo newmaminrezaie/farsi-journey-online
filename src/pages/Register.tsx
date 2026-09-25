@@ -110,7 +110,7 @@ export default function Register() {
 
         <form onSubmit={submit} className="bg-card p-8 md:p-10 rounded-3xl border border-primary/10 shadow-soft space-y-8">
           <p className="text-primary leading-8 text-sm md:text-base">
-            احتراماً اینجانب <b>(زبان‌آموز)</b> اطلاعات زیر را جهت ثبت‌نام در آموزشگاه زبان گویا اعلام می‌نمایم.
+            احتراماً اینجانب <b>({form.fullName.trim() || "زبان‌آموز"})</b> اطلاعات زیر را جهت ثبت‌نام در آموزشگاه زبان گویا اعلام می‌نمایم.
           </p>
 
           {/* Semester — required */}
