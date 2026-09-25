@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { booksApi, formatToman } from "@/lib/api";
 import { levelFa } from "./Home";
 import { Search } from "lucide-react";
+import { AUDIENCES, audienceFa } from "@/lib/audiences";
 import RelatedLinks from "@/components/RelatedLinks";
 
 const CATS = [
@@ -20,8 +21,10 @@ export default function Shop() {
   const { data: books = [] } = useQuery({ queryKey: ["books", "active"], queryFn: () => booksApi.listActive() });
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("");
+  const [aud, setAud] = useState("");
   const filtered = books.filter(b =>
     (!cat || b.category === cat) &&
+    (!aud || b.audience === aud) &&
     (!q || (b.titleFa + " " + (b.titleEn ?? "") + " " + b.author).toLowerCase().includes(q.toLowerCase()))
   );
 
@@ -56,6 +59,14 @@ export default function Shop() {
           </div>
         </div>
 
+        <div className="flex flex-wrap items-center gap-2 mb-8">
+          <span className="text-sm font-bold text-primary me-1">گروه / مقطع:</span>
+          <button onClick={() => setAud("")} className={`px-3 py-1.5 rounded-full text-xs font-bold ${aud === "" ? "bg-gold text-primary" : "bg-card text-primary border border-primary/10 hover:bg-gold/15"}`}>همه</button>
+          {AUDIENCES.flatMap(g => g.items).map(a => (
+            <button key={a.v} onClick={() => setAud(a.v)} className={`px-3 py-1.5 rounded-full text-xs font-bold ${aud === a.v ? "bg-gold text-primary" : "bg-card text-primary border border-primary/10 hover:bg-gold/15"}`}>{a.l}</button>
+          ))}
+        </div>
+
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filtered.map(b => (
             <Link key={b.id} to={`/shop/${b.id}`} className="group bg-card rounded-3xl overflow-hidden border border-primary/10 hover:border-gold/40 hover:shadow-navy transition-all">
@@ -64,6 +75,7 @@ export default function Shop() {
               </div>
               <div className="p-4">
                 <span className="chip-gold text-[10px] mb-2">{levelFa(b.level)}</span>
+                {b.audience && <span className="chip text-[10px] mb-2 ms-1">{audienceFa(b.audience)}</span>}
                 <h3 className="text-base text-primary line-clamp-2 mb-1">{b.titleFa}</h3>
                 <p className="text-xs text-muted-foreground mb-3">{b.author}</p>
                 <div className="text-lg font-black text-gold">{formatToman(b.priceToman)}</div>
