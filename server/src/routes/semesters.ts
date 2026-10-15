@@ -99,6 +99,15 @@ async function generateClassCode(level: string, startsOn: Date): Promise<string>
 
 async function createSemester(data: z.infer<typeof SemesterShape>) {
   const manual = (data.classCode || "").trim();
+  if (manual) {
+    const dup = await prisma.semester.findUnique({ where: { classCode: manual } }).catch(() => null);
+    if (dup) {
+      const err: any = new Error("duplicate_class_code");
+      err.statusCode = 409;
+      err.code = manual;
+      throw err;
+    }
+  }
   const classCode = manual || await generateClassCode(data.level, data.startsOn);
   const withCode: any = { ...data, classCode };
   try {
@@ -175,7 +184,10 @@ export async function registerSemestersRoutes(app: FastifyInstance) {
       const row = await createSemester(parsed.data);
       return serialize(row);
     } catch (e: any) {
-      if (e?.message === "duplicate_class_code") return reply.code(409).send({ error: "duplicate_class_code", message: "این کد کلاس قبلاً استفاده شده است" });
+      if (e?.message === "duplicate_class_code" || e?.code === "P2002") {
+        const code = (parsed.data.classCode || "").trim();
+        return reply.code(409).send({ error: "duplicate_class_code", message: code ? `کد کلاس «${code}» قبلاً برای کلاس دیگری ثبت شده است.` : "کد کلاس تکراری است." });
+      }
       throw e;
     }
   });
@@ -190,7 +202,10 @@ export async function registerSemestersRoutes(app: FastifyInstance) {
       const row = await prisma.semester.update({ where: { id }, data });
       return serialize(row);
     } catch (e: any) {
-      if (e?.code === "P2002") return reply.code(409).send({ error: "duplicate_class_code", message: "این کد کلاس قبلاً استفاده شده است" });
+      if (e?.code === "P2002") {
+        const code = typeof data.classCode === "string" ? data.classCode : "";
+        return reply.code(409).send({ error: "duplicate_class_code", message: code ? `کد کلاس «${code}» قبلاً برای کلاس دیگری ثبت شده است.` : "کد کلاس تکراری است." });
+      }
       throw e;
     }
   });

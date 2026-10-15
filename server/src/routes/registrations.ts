@@ -33,13 +33,56 @@ const PaymentUpdate = z.object({
   paymentRef: z.string().max(64).default(""),
 });
 
+// Strip C0/C1 controls (keep \t \n \r), BOM and zero-width chars. ZWNJ (\u200C) is kept.
+function cleanString(val: unknown): string {
+  if (typeof val !== "string") return "";
+  return val
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, "")
+    .replace(/[\u200B\u200D\uFEFF]/g, "")
+    .trim();
+}
+function digitsOnly(val: unknown): string {
+  if (typeof val !== "string") return "";
+  return val
+    .replace(/[\u06F0-\u06F9]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
+    .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[^\d]/g, "");
+}
+
 export async function registerRegistrationsRoutes(app: FastifyInstance) {
   // Public: create a registration from the site's forms.
   app.post("/registrations", async (req, reply) => {
     const parsed = Create.safeParse(req.body);
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() });
-    const data = { ...parsed.data, semesterId: parsed.data.semesterId ?? null };
+    const p = parsed.data;
+    const data = {
+      ...p,
+      semesterId: p.semesterId ? cleanString(p.semesterId) || null : null,
+      fullName: cleanString(p.fullName),
+      fatherName: cleanString(p.fatherName),
+      birthCertNo: digitsOnly(p.birthCertNo),
+      nationalId: digitsOnly(p.nationalId),
+      issuedFrom: cleanString(p.issuedFrom),
+      birthPlace: cleanString(p.birthPlace),
+      schoolDegree: cleanString(p.schoolDegree),
+      universityDegree: cleanString(p.universityDegree),
+      address: cleanString(p.address),
+      phone: digitsOnly(p.phone),
+      landline: digitsOnly(p.landline),
+      termInterest: cleanString(p.termInterest),
+      levelInterest: cleanString(p.levelInterest),
+      selectedTeacherId: cleanString(p.selectedTeacherId),
+      selectedBookId: cleanString(p.selectedBookId),
+      note: cleanString(p.note),
+    };
+    if (!data.fullName) {
+      return reply.code(400).send({ error: "invalid_input", field: "fullName", message: "نام و نام خانوادگی معتبر وارد کنید." });
+    }
+    if (data.phone.length < 3) {
+      return reply.code(400).send({ error: "invalid_input", field: "phone", message: "شماره تماس معتبر وارد کنید." });
+    }
 
+    try {
     const reg = await prisma.$transaction(async (tx) => {
       const created = await tx.registration.create({ data });
       if (created.semesterId) {
@@ -51,11 +94,18 @@ export async function registerRegistrationsRoutes(app: FastifyInstance) {
       return created;
     });
     return reg;
+    } catch (err: any) {
+      const m = String(err?.message || "");
+      if (err?.code === "22021" || m.includes("22021") || m.includes("invalid byte sequence")) {
+        return reply.code(400).send({ error: "invalid_characters", message: "کاراکترهای نامعتبر در اطلاعات ارسالی وجود دارد." });
+      }
+      throw err;
+    }
   });
 
   // Staff-only management endpoints below.
   app.get("/registrations", { preHandler: requireStaff }, async () => {
-    return prisma.registration.findMany({ orderBy: { createdAt: "desc" }, take: 500 });
+    return prisma.registration.findMany({ orderBy: { createdAt: "desc" } });
   });
 
   app.patch("/registrations/:id", { preHandler: requireStaff }, async (req, reply) => {

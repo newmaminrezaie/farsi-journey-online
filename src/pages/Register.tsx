@@ -5,6 +5,7 @@ import { registrationsApi, semestersApi, teachersApi, booksApi, formatToman } fr
 import type { Book, Semester, Teacher } from "@/lib/types";
 import { GraduationCap, ScrollText, BadgePercent, BookOpen } from "lucide-react";
 
+import { sanitizeText, normalizeDigits } from "@/lib/sanitize";
 import { TERMS } from "@/lib/terms";
 
 
@@ -60,22 +61,22 @@ export default function Register() {
     try {
       const created = await registrationsApi.create({
         semesterId: sem!.id,
-        fullName: form.fullName,
-        fatherName: form.fatherName,
+        fullName: sanitizeText(form.fullName),
+        fatherName: sanitizeText(form.fatherName),
         birthCertNo: "",
-        nationalId: form.nationalId,
-        issuedFrom: yr,   // repurposed: سال تولد
-        birthPlace: form.birthPlace,
-        schoolDegree: form.eduLevel,
+        nationalId: normalizeDigits(form.nationalId),
+        issuedFrom: normalizeDigits(yr).slice(0, 4),   // repurposed: سال تولد
+        birthPlace: sanitizeText(form.birthPlace),
+        schoolDegree: sanitizeText(form.eduLevel),
         universityDegree: "",
-        address: form.address,
-        phone: form.phone,
-        landline: form.landline,
+        address: sanitizeText(form.address),
+        phone: normalizeDigits(form.phone),
+        landline: normalizeDigits(form.landline),
         termInterest: sem!.titleFa,
         levelInterest: sem!.level,
         selectedTeacherId: form.selectedTeacherId || undefined,
         selectedBookId: form.selectedBookId || undefined,
-        note: form.note,
+        note: sanitizeText(form.note),
         agreedToTerms: form.agreedToTerms,
       });
       setSubmitting(false);

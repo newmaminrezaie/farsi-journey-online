@@ -25,7 +25,13 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
       try { window.dispatchEvent(new CustomEvent("hg:session-expired")); } catch {}
     }
     let msg = res.statusText;
-    try { const j = await res.json(); msg = (j as any)?.error?.formErrors?.join?.(", ") || JSON.stringify(j); } catch {}
+    try {
+      const j: any = await res.json();
+      if (res.status === 409 || (res.status === 400 && typeof j?.error === "string" && j?.message)) {
+        throw Object.assign(new Error(j?.message || j?.error || msg), { status: res.status });
+      }
+      msg = j?.error?.formErrors?.join?.(", ") || JSON.stringify(j);
+    } catch (e: any) { if (e?.status) throw e; }
     throw new Error(`API ${res.status}: ${msg}`);
   }
   if (res.status === 204) return undefined as T;

@@ -85,7 +85,8 @@ export default function SemestersAdmin() {
       toast.success("ذخیره شد");
     } catch (e: any) {
       console.error("save semester failed", e);
-      toast.error(e?.message || "ذخیره ناموفق بود");
+      if (e?.status === 409) toast.error(e?.message || "کد کلاس وارد شده تکراری است");
+      else toast.error(e?.message || "ذخیره ناموفق بود");
     }
   }
   async function del(id: string) {
