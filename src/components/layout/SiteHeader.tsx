@@ -1,6 +1,6 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Menu, X, ShoppingBag, Phone, ArrowUpRight } from "lucide-react";
+import { Menu, X, ShoppingBag, Phone, ArrowUpRight, LogIn } from "lucide-react";
 import BrandMark from "@/components/BrandMark";
 import { cartApi } from "@/lib/api";
 
@@ -47,6 +47,12 @@ export default function SiteHeader() {
           </Link>
 
           <div className="flex items-center gap-2">
+            <a href="https://portal.higooya.ir" target="_blank" rel="noreferrer"
+              className="lg:hidden inline-flex items-center gap-1.5 rounded-full bg-gold px-3 py-2 text-[11px] font-bold text-gold-foreground whitespace-nowrap hover:brightness-105 transition-shadow shadow-gold">
+              <LogIn className="h-3.5 w-3.5" />
+              <span className="hidden min-[372px]:inline">ورود زبان آموز</span>
+              <span className="min-[372px]:hidden">ورود</span>
+            </a>
             <a href="tel:+985157223772" dir="ltr" className="hidden lg:inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-gold transition-colors">
               <Phone className="h-4 w-4" /> 051-57223772
             </a>
