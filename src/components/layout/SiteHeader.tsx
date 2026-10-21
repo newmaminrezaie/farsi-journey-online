@@ -4,10 +4,13 @@ import { Menu, X, ShoppingBag, Phone } from "lucide-react";
 import BrandMark from "@/components/BrandMark";
 import { cartApi } from "@/lib/api";
 
-const nav = [
+type NavItem = { label: string; to: string } | { label: string; href: string };
+
+const nav: NavItem[] = [
   { to: "/", label: "خانه" },
   { to: "/semesters", label: "کلاس‌ها" },
   { to: "/assessment", label: "تعیین سطح" },
+  { href: "https://level.higooya.ir", label: "تعیین سطح با هوش مصنوعی" },
   { to: "/teachers", label: "اساتید و کارکنان" },
   { to: "/shop", label: "فروشگاه کتاب" },
   { to: "/about", label: "درباره" },
@@ -36,16 +39,24 @@ export default function SiteHeader() {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1">
-          {nav.map(n => (
-            <NavLink key={n.to} to={n.to}
-              className={({ isActive }) =>
-                `px-4 py-2 rounded-full text-sm font-bold transition-colors ${
-                  isActive ? "bg-primary text-primary-foreground" : "text-primary hover:bg-gold/15"
-                }`
-              }>
-              {n.label}
-            </NavLink>
-          ))}
+          {nav.map(n =>
+            "href" in n ? (
+              <a key={n.href} href={n.href} target="_blank" rel="noreferrer"
+                title="تعیین سطح زبان انگلیسی با هوش مصنوعی"
+                className="px-4 py-2 rounded-full text-sm font-bold text-primary hover:bg-gold/15 transition-colors whitespace-nowrap">
+                {n.label}
+              </a>
+            ) : (
+              <NavLink key={n.to} to={n.to}
+                className={({ isActive }) =>
+                  `px-4 py-2 rounded-full text-sm font-bold transition-colors ${
+                    isActive ? "bg-primary text-primary-foreground" : "text-primary hover:bg-gold/15"
+                  }`
+                }>
+                {n.label}
+              </NavLink>
+            )
+          )}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -69,14 +80,22 @@ export default function SiteHeader() {
       {open && (
         <div className="lg:hidden border-t border-primary/10 bg-parchment">
           <nav className="container py-4 grid gap-1">
-            {nav.map(n => (
-              <NavLink key={n.to} to={n.to}
-                className={({ isActive }) =>
-                  `px-4 py-3 rounded-lg font-bold ${isActive ? "bg-primary text-primary-foreground" : "text-primary"}`
-                }>
-                {n.label}
-              </NavLink>
-            ))}
+            {nav.map(n =>
+              "href" in n ? (
+                <a key={n.href} href={n.href} target="_blank" rel="noreferrer"
+                  title="تعیین سطح زبان انگلیسی با هوش مصنوعی"
+                  className="px-4 py-3 rounded-lg font-bold text-primary">
+                  {n.label}
+                </a>
+              ) : (
+                <NavLink key={n.to} to={n.to}
+                  className={({ isActive }) =>
+                    `px-4 py-3 rounded-lg font-bold ${isActive ? "bg-primary text-primary-foreground" : "text-primary"}`
+                  }>
+                  {n.label}
+                </NavLink>
+              )
+            )}
           </nav>
         </div>
       )}
