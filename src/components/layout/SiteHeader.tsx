@@ -43,13 +43,13 @@ export default function SiteHeader() {
             "href" in n ? (
               <a key={n.href} href={n.href} target="_blank" rel="noreferrer"
                 title="تعیین سطح زبان انگلیسی با هوش مصنوعی"
-                className="px-4 py-2 rounded-full text-sm font-bold text-primary hover:bg-gold/15 transition-colors whitespace-nowrap">
+                className="px-3 xl:px-4 py-2 rounded-full text-[13px] xl:text-sm font-bold text-primary hover:bg-gold/15 transition-colors whitespace-nowrap">
                 {n.label}
               </a>
             ) : (
               <NavLink key={n.to} to={n.to}
                 className={({ isActive }) =>
-                  `px-4 py-2 rounded-full text-sm font-bold transition-colors ${
+                  `px-3 xl:px-4 py-2 rounded-full text-[13px] xl:text-sm font-bold transition-colors whitespace-nowrap ${
                     isActive ? "bg-primary text-primary-foreground" : "text-primary hover:bg-gold/15"
                   }`
                 }>
@@ -60,7 +60,7 @@ export default function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <a href="tel:+985157223772" dir="ltr" className="hidden md:inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-gold transition-colors">
+          <a href="tel:+985157223772" dir="ltr" className="hidden xl:inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-gold transition-colors">
             <Phone className="h-4 w-4" /> 051-57223772
           </a>
           <Link to="/cart" className="relative p-2.5 rounded-full bg-primary text-primary-foreground hover:bg-primary-soft transition-colors">
