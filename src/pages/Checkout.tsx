@@ -99,7 +99,7 @@ export default function Checkout() {
         </button>
       </form>
 
-      <aside className="bg-primary text-primary-foreground rounded-3xl p-6 h-fit sticky top-24 relative overflow-hidden">
+      <aside className="bg-primary text-primary-foreground rounded-3xl p-6 h-fit sticky top-24 lg:top-32 relative overflow-hidden">
         <div className="absolute inset-0 tile-bg-navy opacity-40" />
         <div className="relative">
           <h4 className="text-lg mb-4">خلاصه سفارش</h4>
