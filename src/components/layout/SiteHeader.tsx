@@ -11,6 +11,7 @@ const nav: NavItem[] = [
   { to: "/semesters", label: "کلاس‌ها" },
   { to: "/assessment", label: "تعیین سطح" },
   { href: "https://level.higooya.ir", label: "تعیین سطح با هوش مصنوعی" },
+  { href: "https://portal.higooya.ir", label: "ورود زبان آموز" },
   { to: "/teachers", label: "اساتید و کارکنان" },
   { to: "/shop", label: "فروشگاه کتاب" },
   { to: "/about", label: "درباره" },
