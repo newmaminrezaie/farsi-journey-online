@@ -45,7 +45,7 @@ export default function Cart() {
               </div>
             ))}
           </div>
-          <aside className="bg-primary text-primary-foreground rounded-3xl p-6 h-fit sticky top-24 relative overflow-hidden">
+          <aside className="bg-primary text-primary-foreground rounded-3xl p-6 h-fit sticky top-24 lg:top-32 relative overflow-hidden">
             <div className="absolute inset-0 tile-bg-navy opacity-40" />
             <div className="relative">
               <div className="text-sm text-primary-foreground/70 mb-1">مبلغ نهایی</div>
