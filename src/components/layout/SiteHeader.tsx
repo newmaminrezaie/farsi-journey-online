@@ -11,6 +11,7 @@ const nav: NavItem[] = [
   { to: "/semesters", label: "کلاس‌ها" },
   { to: "/assessment", label: "تعیین سطح" },
   { href: "https://level.higooya.ir", label: "تعیین سطح با هوش مصنوعی" },
+  { href: "https://portal.higooya.ir", label: "ورود زبان آموز" },
   { to: "/teachers", label: "اساتید و کارکنان" },
   { to: "/shop", label: "فروشگاه کتاب" },
   { to: "/about", label: "درباره" },
@@ -43,13 +44,13 @@ export default function SiteHeader() {
             "href" in n ? (
               <a key={n.href} href={n.href} target="_blank" rel="noreferrer"
                 title="تعیین سطح زبان انگلیسی با هوش مصنوعی"
-                className="px-3 xl:px-4 py-2 rounded-full text-[13px] xl:text-sm font-bold text-primary hover:bg-gold/15 transition-colors whitespace-nowrap">
+                className="px-2 xl:px-4 py-2 rounded-full text-[13px] xl:text-sm font-bold text-primary hover:bg-gold/15 transition-colors whitespace-nowrap">
                 {n.label}
               </a>
             ) : (
               <NavLink key={n.to} to={n.to}
                 className={({ isActive }) =>
-                  `px-3 xl:px-4 py-2 rounded-full text-[13px] xl:text-sm font-bold transition-colors whitespace-nowrap ${
+                  `px-2 xl:px-4 py-2 rounded-full text-[13px] xl:text-sm font-bold transition-colors whitespace-nowrap ${
                     isActive ? "bg-primary text-primary-foreground" : "text-primary hover:bg-gold/15"
                   }`
                 }>
